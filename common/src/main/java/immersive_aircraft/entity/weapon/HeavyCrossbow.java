@@ -69,10 +69,8 @@ public class HeavyCrossbow extends BulletWeapon {
     protected Entity getBullet(Vector4f position, Vector3f direction) {
         Arrow arrow = new Arrow(getEntity().level(), position.x(), position.y(), position.z(), new ItemStack(net.minecraft.world.item.Items.ARROW), null);
         arrow.pickup = AbstractArrow.Pickup.DISALLOWED;
-        // Use the pilot as owner so arrows can still collide with the vehicle
-        Entity owner = getEntity().getControllingPassenger();
-        if (owner == null) owner = getEntity();
-        arrow.setOwner(owner);
+        // Set owner to the vehicle itself so arrows don't collide with it
+        arrow.setOwner(getEntity());
         // Random velocity spread (75%–125% of base velocity with 0.25 spread)
         float spread = Config.getInstance().heavyCrossBowVelocitySpread;
         float speed = getVelocity() * (1.0f + (getEntity().getRandom().nextFloat() - 0.5f) * 2.0f * spread);
@@ -100,8 +98,8 @@ public class HeavyCrossbow extends BulletWeapon {
             rotationalManager.yaw = (float) Math.toRadians(Math.max(mount.minYaw(), Math.min(mount.maxYaw(), yawDeg)));
             rotationalManager.pitch = (float) Math.toRadians(Math.max(mount.minPitch(), Math.min(mount.maxPitch(), pitchDeg)));
 
-            mount.transform().rotateX(rotationalManager.pitch);
             mount.transform().rotateY(-rotationalManager.yaw);
+            mount.transform().rotateX(rotationalManager.pitch);
         }
     }
 

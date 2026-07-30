@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "S  ",
+    "   ",
+    "  H"
+  ],
+  "key": {
+    "S": "immersive_aircraft:industrial_gears",
+    "H": "immersive_aircraft:sturdy_pipes"
+  },
+  "result": {
+    "id": "immersive_aircraft:basic_kit"
+  }
+}

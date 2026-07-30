@@ -106,7 +106,7 @@ public abstract class BulletWeapon extends Weapon {
             }
         }
 
-        if (ammo <= 0) {
+        if (ammo < amount) {
             if (getEntity().getControllingPassenger() instanceof Player player) {
                 player.displayClientMessage(Component.translatable("immersive_aircraft.out_of_ammo"), true);
             }

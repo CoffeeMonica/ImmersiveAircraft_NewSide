@@ -69,24 +69,31 @@ public class RotationalManager {
     }
 
     public void pointTo(VehicleEntity vehicle) {
-        pointTo(vehicle, new Vector3f(0.0f, 0.0f, -1.0f));
-    }
+        Entity pilot = vehicle.getGunner(weapon.getGunnerOffset());
+        if (pilot != null && pilot.getVehicle() == vehicle) {
+            // Convert screen direction to global using the pilot's camera
+            Vector3f normal = new Vector3f(0.0f, 0.0f, -1.0f);
+            Matrix3f camera = getCamera(vehicle, pilot);
+            camera.invert();
+            normal.mul(camera);
 
-    public void pointTo(VehicleEntity vehicle, Vector3f normal) {
-        screenToGlobal(vehicle, normal);
+            // Convert into vehicle space
+            Matrix3f vehicleTransform = new Matrix3f(vehicle.getVehicleNormalTransform());
+            vehicleTransform.invert();
+            normal.mul(vehicleTransform);
 
-        // Convert into vehicle space
-        Matrix3f vehicleTransform = new Matrix3f(vehicle.getVehicleNormalTransform());
-        vehicleTransform.invert();
-        normal.mul(vehicleTransform);
+            // Convert into weapon space
+            Matrix3f weaponTransform = new Matrix3f(weapon.getMount().transform());
+            weaponTransform.invert();
+            normal.mul(weaponTransform);
 
-        // Convert into weapon space
-        Matrix3f weaponTransform = new Matrix3f(weapon.getMount().transform());
-        weaponTransform.invert();
-        normal.mul(weaponTransform);
-
-        yaw = (float) -Math.atan2(normal.x(), normal.z());
-        pitch = (float) -Math.atan2(normal.y(), Math.sqrt(normal.x() * normal.x() + normal.z() * normal.z()));
+            yaw = (float) -Math.atan2(normal.x(), normal.z());
+            pitch = (float) -Math.atan2(normal.y(), Math.sqrt(normal.x() * normal.x() + normal.z() * normal.z()));
+        } else {
+            // No pilot - point forward in the weapon's default direction
+            yaw = 0.0f;
+            pitch = 0.0f;
+        }
     }
 
     public Vector3f screenToGlobal(VehicleEntity vehicle) {
@@ -96,7 +103,7 @@ public class RotationalManager {
     public Vector3f screenToGlobal(VehicleEntity vehicle, Vector3f normal) {
         Entity pilot = vehicle.getGunner(weapon.getGunnerOffset());
 
-        if (pilot != null) {
+        if (pilot != null && pilot.getVehicle() == vehicle) {
             Matrix3f camera = getCamera(vehicle, pilot);
             camera.invert();
             normal.mul(camera);

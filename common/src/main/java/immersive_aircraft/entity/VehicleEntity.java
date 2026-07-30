@@ -254,12 +254,9 @@ public abstract class VehicleEntity extends Entity {
             amount = Math.max(5.0f, amount);
         }
 
-        // Prevent self-damage from projectiles fired by this vehicle,
-        // but allow arrows to deal damage even if their owner is the vehicle itself
+        // Prevent self-damage from projectiles fired by this vehicle
         if (source.getDirectEntity() instanceof Projectile projectile && projectile.getOwner() == this) {
-            if (!(projectile instanceof net.minecraft.world.entity.projectile.arrow.AbstractArrow)) {
-                return false;
-            }
+            return false;
         }
 
         setDamageWobbleSide(-getDamageWobbleSide());
