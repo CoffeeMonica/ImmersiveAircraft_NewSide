@@ -31,10 +31,9 @@ public abstract class AirplaneEntity extends AircraftEntity {
 
     @Override
     protected void updateController() {
-        if (!isVehicle()) {
-            return;
-        }
-
+        // Keep aircraft physics running after the pilot ejects.
+        // The vehicle should preserve its last engine state and drift direction
+        // instead of stopping all flight logic as soon as the passenger leaves.
         super.updateController();
 
         // engine control

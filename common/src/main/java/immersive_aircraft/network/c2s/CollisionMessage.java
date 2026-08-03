@@ -38,7 +38,7 @@ public class CollisionMessage extends Message {
         if (e.getRootVehicle() instanceof VehicleEntity vehicle && Config.getInstance().collisionDamage) {
             // Speed damage is 1.5x stronger, mass multiplies the final damage
             float mass = vehicle.getVehicleData().getProperties().getOrDefault(VehicleStat.MASS, 1.0f);
-            float appliedDamage = damage * 1.5f * Config.getInstance().collisionDamageMultiplier * mass;
+            float appliedDamage = damage * 1.5f * Config.getInstance().collisionDamageMultiplier * Math.max(1, mass / 2);
             vehicle.hurt(e.level().damageSources().fall(), appliedDamage);
             if (vehicle.isRemoved()) {
                 float crashDamage = appliedDamage * Config.getInstance().crashDamage;

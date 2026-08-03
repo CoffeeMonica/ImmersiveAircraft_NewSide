@@ -70,8 +70,8 @@ public final class Config extends JsonConfig {
     public float fuelConsumption;
 
     // Engine acceleration multiplier (1.0 = normal, 2.0 = twice as fast spin-up, 0.5 = twice as slow)
-    // Engine spin-down is always 3x slower than spin-up
-    @FloatConfigEntry(0.8f)
+    // When the target power is lower than or equal to the current power, spin-down happens 3x faster.
+    @FloatConfigEntry(0.2f)
     public float engineAccelerationMultiplier;
 
     @FloatConfigEntry(3.0f)
@@ -155,7 +155,7 @@ public final class Config extends JsonConfig {
     @FloatConfigEntry(0.75f)
     public float multiHeavyCrossBowCooldown;
 
-    @IntegerConfigEntry(7)
+    @IntegerConfigEntry(8)
     public int multiHeavyCrossBowBulletCount;
 
     @FloatConfigEntry(1.0f)

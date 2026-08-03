@@ -815,7 +815,14 @@ public abstract class VehicleEntity extends Entity {
 
     @Override
     protected void checkFallDamage(double heightDifference, boolean onGround, @NotNull BlockState landedState, @NotNull BlockPos landedPosition) {
+        if (level().isClientSide() || !onGround || heightDifference <= 0.0) {
+            return;
+        }
 
+        float damage = (float) Math.max(0.0, heightDifference - 1.5);
+        if (damage > 0.0f) {
+            hurt(level().damageSources().fall(), damage * 0.5f);
+        }
     }
 
     public void setDamageWobbleStrength(float wobbleStrength) {

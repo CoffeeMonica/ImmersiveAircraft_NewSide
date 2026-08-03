@@ -2,6 +2,7 @@ package immersive_aircraft.mixin;
 
 import immersive_aircraft.entity.VehicleEntity;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -43,13 +44,20 @@ public class ProjectileUtilMixin {
         // Without this, the mixin would find hits on the shooter's own vehicle,
         // which are then blocked by BulletEntity.canHitEntity(), resulting in
         // no damage being applied at all.
-        Predicate<Entity> combinedFilter = e -> VehicleEntity.class.isInstance(e) && (filter == null || filter.test(e));
+        Predicate<Entity> combinedFilter = e -> e != source && VehicleEntity.class.isInstance(e) && (filter == null || filter.test(e));
 
         for (Entity e : level.getEntities(source, boundingBox.inflate(16.0), combinedFilter)) {
             if (e instanceof VehicleEntity vehicle && vehicle.isPickable() && !vehicle.isRemoved()) {
-                // Check both main bounding box and additional shapes
-                List<AABB> allShapes = new ArrayList<>(vehicle.getAdditionalShapes());
-                allShapes.add(vehicle.getBoundingBox());
+                if (source instanceof Projectile projectile) {
+                    Entity owner = projectile.getOwner();
+                    if (owner != null && (owner == vehicle || owner == vehicle.getVehicle() || owner.isPassengerOfSameVehicle(vehicle))) {
+                        continue;
+                    }
+                }
+
+                // Check both main bounding box and additional shapes.
+                // This keeps projectile damage and arrow damage aligned with the vehicle's full shape map.
+                List<AABB> allShapes = new ArrayList<>(vehicle.getShapes());
                 for (AABB aabb : allShapes) {
                     Optional<Vec3> optionalCollision = aabb.inflate(inflationAmount).clip(startVec, endVec);
                     if (optionalCollision.isPresent()) {

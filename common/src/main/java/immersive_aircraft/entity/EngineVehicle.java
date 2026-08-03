@@ -125,14 +125,11 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
     @Override
     public void tick() {
         super.tick();
-
-        // adapt engine reaction time
         float acceleration = Math.max(0.001f, getProperties().get(VehicleStat.ACCELERATION));
         float base = getEngineReactionSpeed() / acceleration;
         float steps = base / Config.getInstance().engineAccelerationMultiplier;
-        // Engine spin-down is 3x faster than spin-up
         if (getEngineTarget() <= enginePower.getValue()) {
-            steps /= 3;
+            steps /= 5;
         }
         enginePower.setSteps(Math.max(1, steps));
 
@@ -144,13 +141,14 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
 
         // rotate propeller
         if (level().isClientSide()) {
-            float rotationSteps = Math.max(1.0f, enginePower.getSmooth() * 20.0f);
-            engineRotation.setSteps(rotationSteps);
-            engineRotation.update(getPropellerSpeed() * 1000.0f);
+            // float rotationSteps = Math.max(1.0f, enginePower.getSmooth() * 20.0f);
+            // engineRotation.setSteps(rotationSteps);
+            engineRotation.update((engineRotation.getValue() + getPropellerSpeed()) % 1000);
         }
 
-        // shutdown
-        if (!isVehicle() && getEngineTarget() > 0) {
+        // Keep the last engine setting while the vehicle is airborne after the pilot ejects.
+        // Only shut the engine down once the empty craft has actually landed.
+        if (getPassengers().isEmpty() && onGround() && getEngineTarget() > 0.0f) {
             setEngineTarget(0.0f);
         }
 

@@ -52,6 +52,7 @@ public class CommandMessage extends Message {
                 e.stopRiding();
                 e.setJumping(false);
                 vehicle.chill();
+                vehicle.setInputs(0.0f, 0.0f, 0.0f);
                 vehicle.setDeltaMovement(fx, fy, fz);
             } else if (key == Key.BOOST) {
                 if (vehicle.canBoost()) {

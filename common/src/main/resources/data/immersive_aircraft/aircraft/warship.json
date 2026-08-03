@@ -60,8 +60,8 @@
         {"x": 2.375, "y": 4.625, "z": 4.625, "yaw": 0, "pitch": 90}
       ],
       "FRONT": [
-        {"x": -2.375, "y": 4.875, "z": 4.375, "yaw": 0, "pitch": 0},
-        {"x": 2.375, "y": 4.875, "z": 4.375, "yaw": 0, "pitch": 0}
+        {"x": -2.375, "y": 4.875, "z": 4.375, "yaw": 0, "pitch": 0, "enableRotation": true, "minYaw": -30, "maxYaw": 30, "minPitch": -30, "maxPitch": 30},
+        {"x": 2.375, "y": 4.875, "z": 4.375, "yaw": 0, "pitch": 0, "enableRotation": true, "minYaw": -30, "maxYaw": 30, "minPitch": -30, "maxPitch": 30}
       ],
       "DROP": [
         {"x": -2.375, "y": 4.25, "z": 4.25, "yaw": 0, "pitch": 0},

@@ -86,20 +86,31 @@ public class HeavyCrossbow extends BulletWeapon {
             // Restore base transform
             getMount().transform().set(baseTransform);
 
-            rotationalManager.tick();
-            rotationalManager.pointTo(getEntity());
+            Entity controllingPassenger = getEntity().getControllingPassenger();
+            Entity gunner = getEntity().getGunner(getGunnerOffset());
+            boolean hasValidGunner = gunner != null && gunner.isAlive() && gunner.getVehicle() == getEntity() && gunner == controllingPassenger;
+            if (hasValidGunner) {
+                rotationalManager.tick();
+                rotationalManager.pointTo(getEntity());
 
-            // Clamp angles to mount limits so the crossbow points to the closest
-            // valid position when the camera exceeds the reachable range
-            WeaponMount mount = getMount();
-            float yawDeg = (float) Math.toDegrees(rotationalManager.yaw);
-            float pitchDeg = (float) Math.toDegrees(rotationalManager.pitch);
+                // Clamp angles to mount limits so the crossbow points to the closest
+                // valid position when the camera exceeds the reachable range
+                WeaponMount mount = getMount();
+                float yawDeg = (float) Math.toDegrees(rotationalManager.yaw);
+                float pitchDeg = (float) Math.toDegrees(rotationalManager.pitch);
 
-            rotationalManager.yaw = (float) Math.toRadians(Math.max(mount.minYaw(), Math.min(mount.maxYaw(), yawDeg)));
-            rotationalManager.pitch = (float) Math.toRadians(Math.max(mount.minPitch(), Math.min(mount.maxPitch(), pitchDeg)));
+                rotationalManager.yaw = (float) Math.toRadians(Math.max(mount.minYaw(), Math.min(mount.maxYaw(), yawDeg)));
+                rotationalManager.pitch = (float) Math.toRadians(Math.max(mount.minPitch(), Math.min(mount.maxPitch(), pitchDeg)));
 
-            mount.transform().rotateY(-rotationalManager.yaw);
-            mount.transform().rotateX(rotationalManager.pitch);
+                mount.transform().rotateY(-rotationalManager.yaw);
+                mount.transform().rotateX(rotationalManager.pitch);
+            } else {
+                // Keep the mount in its default orientation when there is no valid controlling pilot
+                // riding this vehicle. This prevents passive vehicles from following unrelated camera motion.
+                rotationalManager.tick();
+                rotationalManager.yaw = 0.0f;
+                rotationalManager.pitch = 0.0f;
+            }
         }
     }
 
