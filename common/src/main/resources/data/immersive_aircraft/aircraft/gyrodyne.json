@@ -1,6 +1,7 @@
 {
   "properties": {
     "stabilizer": 0.3,
+    "durability": 1.0,
     "yawSpeed": 5.0,
     "pitchSpeed": 5.0,
     "engineSpeed": 0.3,

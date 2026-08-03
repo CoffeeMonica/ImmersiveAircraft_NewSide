@@ -52,7 +52,7 @@ public final class Config extends JsonConfig {
     @IntegerConfigEntry(0)
     public int healthBarRow;
 
-    @IntegerConfigEntry(30)
+    @IntegerConfigEntry(20)
     public int damagePerHealthPoint;
 
     @BooleanConfigEntry(true)
@@ -72,7 +72,7 @@ public final class Config extends JsonConfig {
 
     // Engine acceleration multiplier (1.0 = normal, 2.0 = twice as fast spin-up, 0.5 = twice as slow)
     // Engine spin-down is always 3x slower than spin-up
-    @FloatConfigEntry(1.0f)
+    @FloatConfigEntry(0.5f)
     public float engineAccelerationMultiplier;
 
     @FloatConfigEntry(3.0f)
@@ -132,11 +132,9 @@ public final class Config extends JsonConfig {
             "minecraft:egg", "minecraft:chicken"
     );
 
-    // Weapon settings
     @FloatConfigEntry(4.0f)
     public float rotaryCannonDamage;
 
-    // The velocity also determines the arrow's damage
     @FloatConfigEntry(3.75f)
     public float heavyCrossBowVelocity;
 
@@ -146,11 +144,9 @@ public final class Config extends JsonConfig {
     @FloatConfigEntry(0.1875f)
     public float heavyCrossBowCooldown;
 
-    // Spread of arrow velocity (0.25 = ±25%)
     @FloatConfigEntry(0.375f)
     public float heavyCrossBowVelocitySpread;
 
-    // Multi-heavy crossbow settings
     @FloatConfigEntry(2.5f)
     public float multiHeavyCrossBowVelocity;
 
@@ -163,22 +159,18 @@ public final class Config extends JsonConfig {
     @IntegerConfigEntry(7)
     public int multiHeavyCrossBowBulletCount;
 
-    // Global vehicle speed multiplier (1.0 = normal, 2.0 = double speed)
     @FloatConfigEntry(1.0f)
     public float globalEngineSpeedMultiplier;
 
-    // Durability multiplier (0.5 = twice as fragile)
-    @FloatConfigEntry(0.5f)
+    @FloatConfigEntry(1.0f)
     public float durabilityMultiplier;
 
-    // Gravity multiplier (1.0 = normal gravity)
     @FloatConfigEntry(1.0f)
     public float gravityMultiplier;
 
     @FloatConfigEntry(1.0f)
     public float engineOffDrag;
 
-    // Hide vehicle model when scoping with telescope
     @BooleanConfigEntry(true)
     public boolean hideVehicleWhileScoping;
 

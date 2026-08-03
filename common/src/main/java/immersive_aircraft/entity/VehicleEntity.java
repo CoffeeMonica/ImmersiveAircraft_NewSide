@@ -115,6 +115,11 @@ public abstract class VehicleEntity extends Entity {
     public boolean adaptPlayerRotation = true;
     private int drowning;
 
+    // Collision damage state tracking
+    private boolean wasOnGround = false;
+    private int groundTicks = 0;
+    private int airTicks = 0;
+
     public float getRoll() {
         return roll;
     }
@@ -409,6 +414,24 @@ public abstract class VehicleEntity extends Entity {
                 secondLastY = lastY;
                 secondLastZ = lastZ;
             }
+        }
+
+        // Track ground/air state for collision damage
+        boolean isOnGround = onGround();
+        if (isOnGround && !wasOnGround) {
+            // Just landed - treat as in air for 10 more ticks
+            airTicks = 10;
+        }
+        if (!isOnGround && wasOnGround) {
+            // Just took off - treat as on ground for 5 more ticks
+            groundTicks = 5;
+        }
+        wasOnGround = isOnGround;
+        if (groundTicks > 0) {
+            groundTicks--;
+        }
+        if (airTicks > 0) {
+            airTicks--;
         }
 
         // pilot
@@ -768,6 +791,14 @@ public abstract class VehicleEntity extends Entity {
             if (error <= maxPossibleError) {
                 float collision = (float) (error - (verticalCollision ? Math.abs(getGravity()) : 0.0)) - 0.05f;
                 if (collision > 0) {
+                    // If on ground (or just took off), only apply damage if speed > 5.6 m/s (0.28 blocks/tick)
+                    boolean treatAsGround = airTicks <= 0 && (onGround() || groundTicks > 0);
+                    if (treatAsGround) {
+                        double speed = getDeltaMovement().length();
+                        if (speed <= 0.28) {
+                            return;
+                        }
+                    }
                     float repeat = 1.0f - (getDamageWobbleTicks() + 1) / 10.0f;
                     if (repeat > 0.0001f) {
                         NetworkHandler.sendToServer(new CollisionMessage(collision * repeat * repeat));

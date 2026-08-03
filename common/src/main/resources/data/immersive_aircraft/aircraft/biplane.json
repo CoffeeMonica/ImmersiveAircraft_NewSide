@@ -1,13 +1,14 @@
 {
   "properties": {
     "fuel": 1.25,
+    "durability": 1.0,
     "yawSpeed": 5.0,
     "pitchSpeed": 4.0,
     "engineSpeed": 0.03,
     "pushSpeed": 0.025,
     "glideFactor": 0.1,
     "driftDrag": 0.005,
-    "lift": 0.25,
+    "lift": 0.15,
     "rollFactor": 60.0,
     "groundPitch": 4.0,
     "wind": 0.025,
