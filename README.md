@@ -1,33 +1,25 @@
-# Immersive Aircraft
+# Immersive Aircraft: New Side
 
-This mod adds bunch of rustic aircraft to travel, transport, and explore! The aircraft have a strong focus on being
-vanilla-faithful and many details and functionalities, without being overly complicated.
+Данный мод - это моё виденье мода Immersive Aircraft.
+Мод полностью пересматривает оригинальный баланс, добавляет новые пушки и исправляет известные баги.
 
-[![Crowdin](https://badges.crowdin.net/immersive-collection/localized.svg)](https://crowdin.com/project/immersive-collection)
+# Изменение самолётов
+*Теперь летать станет дороже, труднее и опаснее.*
 
-Hosted on
-[CurseForge](https://www.curseforge.com/minecraft/mc-mods/immersive-aircraft) and
-[Modrinth](https://modrinth.com/mod/immersive-aircraft)
+Общие изменения самолётов:
+- Потребление топлива увеличено с _ до _
+- Разгон всех двигателей увеличен с _ до _, сброс мощности двигателя при этом всегда в 3 раза быстрее, чем его разгон
+- Урон от крушения увеличен с _ до _, а сила взрыва увеличена с _ до _
+- Эффекты ветра увеличены с _-_-_ до _-_-_
 
-# Contributors
+# Изменение модификаторов
+*Цена модификации прямо пропорциональна её силе*
 
-* Favouriteless (Added datapack support and exploding vehicle config)
-* stohun (Reworked entity textures)
-* 김작업 (Reworked icon textures)
-* Everyone who helped [to translate](https://crowdin.com/project/immersive-collection)
+# Изменения пушек
+*Они для вас как на ладони... Да вот только и вы для них тоже*
 
-# Addons
+# Общие улучшения
+Добавлены новые параметры в конфиге
 
-Many helpful registries and generic functions are available to quickstart an addon.
-
-* `InventoryVehicleEntity` provides an abstract vehicle with inventory and datapack configuration.
-* `VehicleStat` provides a way to add custom stats to vehicles.
-* `VehicleInventoryDescription` provides a way to register custom slots.
-* `SlotRenderer` provides a way to render custom slots.
-* `JsonConfig` can be extended to have an own config options.
-* `NetworkHandler` and `Registration` can be used instead of e.g., Architectury to stay launcher independent.
-
-Check out existing addons for references:
-
-* [Man of Many Planes](https://github.com/Luke100000/Man-of-Many-Planes)
-* [Immersive Machinery](https://github.com/Luke100000/ImmersiveMachinery)
+# Послесловие
+Мне безумно нравится оригинальный мод, но этот мод слишком... Скучный? Пустой? Для полёта не нужно ничего особенного, сел и полетел. Более того, в моде есть откровенно бесполезные вещи, ну например, кому вообще сдался модификатор для взлёта, если двигатель и так реагирует почти мгновенно? В моде 4 пушки, но только 2 из них имеют смысл (роторная и для сброса тнт), подзорная труба ничем не лучше ручной, более того, углы обзора зачастую становятся только хуже, ну а арбалет... Он просто бесполезный, урона нет, а попасть сложно. Я хочу, чтобы полёт, стрельба и модификаторы имели вес, самолёт - это большая и дорогая игрушка, это не должно быть из разряда "скрафтил, сел и полетел", нет, в самолёте должны быть компромиссы. И да, в моде сделан упор именно на воздушные сражения и на поражение наземных целей. 
