@@ -35,7 +35,7 @@ public class CollisionMessage extends Message {
 
     @Override
     public void receiveServer(ServerPlayer e) {
-        if (e.getRootVehicle() instanceof VehicleEntity vehicle && Config.getInstance().collisionDamage) {
+        if (e.getRootVehicle() instanceof VehicleEntity vehicle && vehicle.hasPassenger(e) && Config.getInstance().collisionDamage) {
             // Speed damage is 1.5x stronger, mass multiplies the final damage
             float mass = vehicle.getVehicleData().getProperties().getOrDefault(VehicleStat.MASS, 1.0f);
             float appliedDamage = damage * 1.5f * Config.getInstance().collisionDamageMultiplier * Math.max(1, mass / 2);

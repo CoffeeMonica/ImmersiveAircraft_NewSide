@@ -13,6 +13,7 @@ import immersive_aircraft.data.VehicleDataLoader;
 import immersive_aircraft.entity.misc.BoundingBoxDescriptor;
 import immersive_aircraft.entity.misc.PositionDescriptor;
 import immersive_aircraft.entity.misc.VehicleData;
+import immersive_aircraft.item.upgrade.VehicleStat;
 import immersive_aircraft.network.c2s.CollisionMessage;
 import immersive_aircraft.network.c2s.CommandMessage;
 import immersive_aircraft.resources.bbmodel.BBAnimationVariables;
@@ -785,7 +786,7 @@ public abstract class VehicleEntity extends Entity {
         super.move(movementType, movement);
 
         // Collision damage
-        if ((verticalCollision || horizontalCollision) && level().isClientSide()) {
+        if (verticalCollision || horizontalCollision) {
             double maxPossibleError = movement.length();
             double error = prediction.distanceTo(position());
             if (error <= maxPossibleError) {
@@ -801,7 +802,14 @@ public abstract class VehicleEntity extends Entity {
                     }
                     float repeat = 1.0f - (getDamageWobbleTicks() + 1) / 10.0f;
                     if (repeat > 0.0001f) {
-                        NetworkHandler.sendToServer(new CollisionMessage(collision * repeat * repeat));
+                        float finalCollision = collision * repeat * repeat;
+                        if (level().isClientSide()) {
+                            NetworkHandler.sendToServer(new CollisionMessage(finalCollision));
+                        } else if (getPassengers().isEmpty()) {
+                            float mass = getVehicleData().getProperties().getOrDefault(VehicleStat.MASS, 1.0f);
+                            float appliedDamage = finalCollision * 1.5f * Config.getInstance().collisionDamageMultiplier * Math.max(1, mass / 2);
+                            hurt(level().damageSources().fall(), appliedDamage);
+                        }
                     }
                 }
             }

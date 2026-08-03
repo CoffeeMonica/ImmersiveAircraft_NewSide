@@ -49,6 +49,7 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
     public int mainWarning = 0;
     public int mslWarning = 0;
     public final EnumMap<Cautions, Integer> cautions = new EnumMap<>(Cautions.class);
+    private int highAltitudeWarningCooldown = 0;
 
     protected enum FuelState {
         NEVER,
@@ -60,7 +61,8 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
     public enum Cautions {
         PULL_UP,
         VOID,
-        DAMAGED
+        DAMAGED,
+        TOO_HIGH
     }
 
     FuelState lastFuelState = FuelState.NEVER;
@@ -133,8 +135,24 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
         }
         enginePower.setSteps(Math.max(1, steps));
 
+        float altitudePenalty = getAltitudePowerPenalty();
+        float targetPower = getEngineTarget() * altitudePenalty * (isInWater() && !worksUnderWater() ? 0.1f : 1.0f);
+
+        if (!level().isClientSide() && getControllingPassenger() instanceof ServerPlayer player) {
+            if (altitudePenalty < 1.0f) {
+                if (highAltitudeWarningCooldown <= 0) {
+                    player.displayClientMessage(Component.translatable("immersive_aircraft.too_high_to_fly"), true);
+                    highAltitudeWarningCooldown = 40;
+                }
+            } else {
+                highAltitudeWarningCooldown = 0;
+            }
+        }
+
+        highAltitudeWarningCooldown = Math.max(0, highAltitudeWarningCooldown - 1);
+
         // spin up the engine
-        enginePower.update(getEngineTarget() * (isInWater() && !worksUnderWater() ? 0.1f : 1.0f));
+        enginePower.update(targetPower);
 
         // simulate spin up
         engineSpinUpStrength = Math.max(0.0f, engineSpinUpStrength + enginePower.getDiff() - 0.01f);
@@ -146,9 +164,9 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
             engineRotation.update((engineRotation.getValue() + getPropellerSpeed()) % 1000);
         }
 
-        // Keep the last engine setting while the vehicle is airborne after the pilot ejects.
-        // Only shut the engine down once the empty craft has actually landed.
-        if (getPassengers().isEmpty() && onGround() && getEngineTarget() > 0.0f) {
+        // Keep the last engine setting after the pilot ejects.
+        // Only shut the engine down once the empty craft is effectively resting on the ground.
+        if (getPassengers().isEmpty() && onGround() && getDeltaMovement().length() < 0.01f && getEngineTarget() > 0.0f) {
             setEngineTarget(0.0f);
         }
 
@@ -227,6 +245,28 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
             cautions.put(Cautions.DAMAGED, 10);
             mainWarning = 6;
         }
+
+        if (getAltitudePowerPenalty() < 1.0f) {
+            cautions.put(Cautions.TOO_HIGH, 40);
+            mainWarning = 6;
+        }
+    }
+
+    private float getAltitudePowerPenalty() {
+        if (getEngineTarget() <= 0.0f) {
+            return 1.0f;
+        }
+
+        int maxHeight = level().getHeight() - 120;
+        int startPenaltyY = maxHeight - 10;
+        double altitudeAboveThreshold = Math.max(0.0, getY() - startPenaltyY);
+        if (altitudeAboveThreshold <= 0.0) {
+            return 1.0f;
+        }
+
+        // Мощность падает на 20% каждые 10 блоков выше границы
+        float penalty = 1.0f - 0.2f * (float)(altitudeAboveThreshold / 10.0d);
+        return Math.max(0.0f, penalty);
     }
 
     public float consumeFuel(float consumption) {
