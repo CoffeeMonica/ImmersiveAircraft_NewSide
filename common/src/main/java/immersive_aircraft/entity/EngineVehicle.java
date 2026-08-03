@@ -130,9 +130,9 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
         float acceleration = Math.max(0.001f, getProperties().get(VehicleStat.ACCELERATION));
         float base = getEngineReactionSpeed() / acceleration;
         float steps = base / Config.getInstance().engineAccelerationMultiplier;
-        // Engine spin-down is 3x slower than spin-up
+        // Engine spin-down is 3x faster than spin-up
         if (getEngineTarget() <= enginePower.getValue()) {
-            steps *= 3;
+            steps /= 3;
         }
         enginePower.setSteps(Math.max(1, steps));
 
@@ -144,7 +144,9 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
 
         // rotate propeller
         if (level().isClientSide()) {
-            engineRotation.update((engineRotation.getValue() + getPropellerSpeed()) % 1000);
+            float rotationSteps = Math.max(1.0f, enginePower.getSmooth() * 20.0f);
+            engineRotation.setSteps(rotationSteps);
+            engineRotation.update(getPropellerSpeed() * 1000.0f);
         }
 
         // shutdown

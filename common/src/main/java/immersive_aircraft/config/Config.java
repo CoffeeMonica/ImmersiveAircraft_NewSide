@@ -27,7 +27,6 @@ public final class Config extends JsonConfig {
         return 3;
     }
 
-    // Crash configs
     @BooleanConfigEntry(true)
     public boolean enableDropsForNonPlayer = true;
 
@@ -72,7 +71,7 @@ public final class Config extends JsonConfig {
 
     // Engine acceleration multiplier (1.0 = normal, 2.0 = twice as fast spin-up, 0.5 = twice as slow)
     // Engine spin-down is always 3x slower than spin-up
-    @FloatConfigEntry(0.5f)
+    @FloatConfigEntry(0.8f)
     public float engineAccelerationMultiplier;
 
     @FloatConfigEntry(3.0f)
@@ -135,7 +134,7 @@ public final class Config extends JsonConfig {
     @FloatConfigEntry(4.0f)
     public float rotaryCannonDamage;
 
-    @FloatConfigEntry(3.75f)
+    @FloatConfigEntry(4.0f)
     public float heavyCrossBowVelocity;
 
     @FloatConfigEntry(0.3f)
@@ -147,7 +146,7 @@ public final class Config extends JsonConfig {
     @FloatConfigEntry(0.375f)
     public float heavyCrossBowVelocitySpread;
 
-    @FloatConfigEntry(2.5f)
+    @FloatConfigEntry(3.0f)
     public float multiHeavyCrossBowVelocity;
 
     @FloatConfigEntry(1.0f)

@@ -14,7 +14,7 @@
   "enableTrails": true,
   "renderDistance": 320.0,
   "fuelConsumption": 30.0,
-  "engineAccelerationMultiplier": 0.5,
+  "engineAccelerationMultiplier": 0.8,
   "windClearWeather": 3.0,
   "windRainWeather": 10.0,
   "windThunderWeather": 20.0,
