@@ -312,9 +312,13 @@ public abstract class InventoryVehicleEntity extends DyeableVehicleEntity implem
         setDeltaMovement(velocity.x * decay * hd, velocity.y * decay * vd - gravity, velocity.z * decay * hd);
 
         // Rotation decay
-        float rf = decay * getProperties().get(VehicleStat.ROTATION_DECAY);
-        pressingInterpolatedX.decay(0.0f, 1.0f - rf);
-        pressingInterpolatedZ.decay(0.0f, 1.0f - rf);
+        // Skip decay when there are no passengers so the craft keeps
+        // its last control input and continues moving after the pilot ejects.
+        if (!getPassengers().isEmpty()) {
+            float rf = decay * getProperties().get(VehicleStat.ROTATION_DECAY);
+            pressingInterpolatedX.decay(0.0f, 1.0f - rf);
+            pressingInterpolatedZ.decay(0.0f, 1.0f - rf);
+        }
     }
 
     @Override

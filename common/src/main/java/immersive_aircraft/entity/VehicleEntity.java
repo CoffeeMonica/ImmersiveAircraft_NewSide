@@ -474,7 +474,9 @@ public abstract class VehicleEntity extends Entity {
 
 
         // interpolate keys for visual feedback
-        if (isLocalInstanceAuthoritative()) {
+        // Freeze control inputs when the pilot ejects so the craft keeps
+        // moving with the last engine setting instead of immediately stopping.
+        if (isLocalInstanceAuthoritative() && !getPassengers().isEmpty()) {
             pressingInterpolatedX.update(movementX);
             pressingInterpolatedY.update(movementY);
             pressingInterpolatedZ.update(movementZ);
