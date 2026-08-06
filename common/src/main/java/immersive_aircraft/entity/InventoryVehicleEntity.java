@@ -33,6 +33,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.Fireworks;
 import net.minecraft.world.item.component.ItemContainerContents;
@@ -333,6 +334,16 @@ public abstract class InventoryVehicleEntity extends DyeableVehicleEntity implem
     @Override
     public float getDurability() {
         return getProperties().get(VehicleStat.DURABILITY);
+    }
+
+    @Override
+    public boolean hasUpgrade(Item item) {
+        return getSlots(VehicleInventoryDescription.UPGRADE).stream().anyMatch(s -> s.getItem() == item);
+    }
+
+    @Override
+    public float getCrashExplosionMultiplier() {
+        return getProperties().get(VehicleStat.CRASH_EXPLOSION);
     }
 
     public boolean isScoping() {
