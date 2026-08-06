@@ -38,6 +38,8 @@ public record VehicleStat(String name, boolean positive, float defaultValue) {
     public static final VehicleStat HORIZONTAL_DECAY = register("horizontalDecay", false, 0.97f);
     public static final VehicleStat VERTICAL_DECAY = register("verticalDecay", false, 0.97f);
 
+    public static final VehicleStat CRASH_EXPLOSION = register("crashExplosion", true, 1.0f);
+
     public static VehicleStat register(String name, boolean positive) {
         return register(name, positive, 0.0f);
     }

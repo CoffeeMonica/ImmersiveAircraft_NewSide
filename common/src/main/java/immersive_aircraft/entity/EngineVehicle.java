@@ -67,6 +67,10 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
 
     FuelState lastFuelState = FuelState.NEVER;
 
+    // Tracks the last tick the pilot dismounted, so the engine keeps
+    // burning fuel and preserving its load until the craft actually lands.
+    protected int lastDismountTick = -100;
+
     public static final int TARGET_FUEL = 1000;
     public static final int LOW_FUEL = 900;
 
@@ -164,9 +168,20 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
             engineRotation.update((engineRotation.getValue() + getPropellerSpeed()) % 1000);
         }
 
+        // Track when the pilot dismounted so the engine keeps its load
+        // until the craft actually lands and settles.
+        if (getPassengers().isEmpty()) {
+            if (lastDismountTick < 0) {
+                lastDismountTick = tickCount;
+            }
+        } else {
+            lastDismountTick = -100;
+        }
+
         // Keep the last engine setting after the pilot ejects.
-        // Only shut the engine down once the empty craft is effectively resting on the ground.
-        if (getPassengers().isEmpty() && onGround() && getDeltaMovement().length() < 0.01f && getEngineTarget() > 0.0f) {
+        // Only shut the engine down once the empty craft is effectively resting on the ground
+        // and a short grace period has passed since the pilot left.
+        if (getPassengers().isEmpty() && onGround() && getDeltaMovement().length() < 0.01f && getEngineTarget() > 0.0f && tickCount - lastDismountTick > 20) {
             setEngineTarget(0.0f);
         }
 
@@ -352,7 +367,9 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
     }
 
     public void setEngineTarget(float engineTarget) {
-        if (getFuelUtilization() > 0 || engineTarget == 0) {
+        // Allow setting the target even when the craft is empty (pilot ejects),
+        // so the engine keeps its load and keeps burning fuel until it lands.
+        if (getFuelUtilization() > 0 || engineTarget == 0 || getPassengers().isEmpty()) {
             if (level().isClientSide()) {
                 if (getEngineTarget() != engineTarget) {
                     NetworkHandler.sendToServer(new EnginePowerMessage(engineTarget));

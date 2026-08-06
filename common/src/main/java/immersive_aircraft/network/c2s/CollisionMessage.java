@@ -42,7 +42,8 @@ public class CollisionMessage extends Message {
             vehicle.hurt(e.level().damageSources().fall(), appliedDamage);
             if (vehicle.isRemoved()) {
                 float crashDamage = appliedDamage * Config.getInstance().crashDamage;
-                if (Config.getInstance().preventKillThroughCrash) {
+                boolean hasTntBundle = vehicle.hasUpgrade(immersive_aircraft.Items.TNT_BUNDLE.get());
+                if (Config.getInstance().preventKillThroughCrash && !hasTntBundle) {
                     crashDamage = Math.min(crashDamage, e.getHealth() - 1.0f);
                 }
                 e.hurt(e.level().damageSources().fall(), crashDamage);

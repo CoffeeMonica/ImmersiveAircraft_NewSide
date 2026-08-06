@@ -302,13 +302,14 @@ public abstract class VehicleEntity extends Entity {
             discard();
 
             // Explode if destroyed by force
-            if (force && canExplodeOnCrash && Config.getInstance().enableCrashExplosion) {
-                // TNT_bundle upgrade: always destroy blocks and deal damage
-                boolean tntBundle = hasUpgrade(Items.TNT_BUNDLE.get());
-                boolean destroyBlocks = tntBundle || Config.getInstance().enableCrashBlockDestruction;
-                
+            boolean hasTntBundle = hasUpgrade(immersive_aircraft.Items.TNT_BUNDLE.get());
+            if (force && canExplodeOnCrash && (Config.getInstance().enableCrashExplosion || hasTntBundle)) {
+                float explosionRadius = Config.getInstance().crashExplosionRadius;
+                if (hasTntBundle) {
+                    explosionRadius *= getCrashExplosionMultiplier();
+                }
                 level().explode(this, x, y, z,
-                        Config.getInstance().crashExplosionRadius,
+                        explosionRadius,
                         Config.getInstance().enableCrashFire,
                         destroyBlocks ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
             }
@@ -1038,6 +1039,14 @@ public abstract class VehicleEntity extends Entity {
 
     public boolean isPilotCreative() {
         return getControllingPassenger() instanceof Player player && player.isCreative();
+    }
+
+    public boolean hasUpgrade(Item item) {
+        return false;
+    }
+
+    public float getCrashExplosionMultiplier() {
+        return 1.0f;
     }
 
     public double getZoom() {
