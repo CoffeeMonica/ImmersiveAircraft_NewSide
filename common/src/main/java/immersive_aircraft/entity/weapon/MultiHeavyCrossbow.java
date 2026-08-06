@@ -61,8 +61,9 @@ public class MultiHeavyCrossbow extends HeavyCrossbow {
 
     @Override
     public void fire(Vector3f direction) {
-        // Consume one actual arrow per spawned projectile.
-        if (spentAmmoItems(Config.getInstance().arrowAmmunition, getBulletCount())) {
+        // Consume half as many arrows as projectiles spawned (e.g., 8 arrows
+        // fly out but only 4 are consumed from the inventory).
+        if (spentAmmoItems(Config.getInstance().arrowAmmunition, getBulletCount() / 4)) {
             super.fire(direction);
         }
     }

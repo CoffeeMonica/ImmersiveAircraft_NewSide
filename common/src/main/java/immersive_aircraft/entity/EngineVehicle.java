@@ -34,9 +34,7 @@ import org.joml.Vector4f;
 import java.util.EnumMap;
 import java.util.List;
 
-/**
- * Simulated engine behavior
- */
+
 public abstract class EngineVehicle extends InventoryVehicleEntity {
     protected static final EntityDataAccessor<Float> ENGINE = SynchedEntityData.defineId(EngineVehicle.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Float> UTILIZATION = SynchedEntityData.defineId(EngineVehicle.class, EntityDataSerializers.FLOAT);
@@ -67,9 +65,9 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
 
     FuelState lastFuelState = FuelState.NEVER;
 
-    // Tracks the last tick the pilot dismounted, so the engine keeps
-    // burning fuel and preserving its load until the craft actually lands.
     protected int lastDismountTick = -100;
+    
+    protected float engineTargetAtDismount = 0.0f;
 
     public static final int TARGET_FUEL = 1000;
     public static final int LOW_FUEL = 900;
@@ -130,7 +128,18 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
 
     @Override
     public void tick() {
+        if (getPassengers().isEmpty()) {
+            if (lastDismountTick < 0) {
+                lastDismountTick = tickCount;
+                engineTargetAtDismount = getEngineTarget();
+            }
+        } else {
+            lastDismountTick = -100;
+            engineTargetAtDismount = 0.0f;
+        }
+        
         super.tick();
+        
         float acceleration = Math.max(0.001f, getProperties().get(VehicleStat.ACCELERATION));
         float base = getEngineReactionSpeed() / acceleration;
         float steps = base / Config.getInstance().engineAccelerationMultiplier;
@@ -155,37 +164,17 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
 
         highAltitudeWarningCooldown = Math.max(0, highAltitudeWarningCooldown - 1);
 
-        // spin up the engine
         enginePower.update(targetPower);
 
-        // simulate spin up
         engineSpinUpStrength = Math.max(0.0f, engineSpinUpStrength + enginePower.getDiff() - 0.01f);
 
-        // rotate propeller
         if (level().isClientSide()) {
-            // float rotationSteps = Math.max(1.0f, enginePower.getSmooth() * 20.0f);
-            // engineRotation.setSteps(rotationSteps);
             engineRotation.update((engineRotation.getValue() + getPropellerSpeed()) % 1000);
         }
-
-        // Track when the pilot dismounted so the engine keeps its load
-        // until the craft actually lands and settles.
-        if (getPassengers().isEmpty()) {
-            if (lastDismountTick < 0) {
-                lastDismountTick = tickCount;
-            }
-        } else {
-            lastDismountTick = -100;
+        if (getPassengers().isEmpty() && onGround() && tickCount - lastDismountTick > 20) {
+            setEngineTarget(0.0f, true);
         }
 
-        // Keep the last engine setting after the pilot ejects.
-        // Only shut the engine down once the empty craft is effectively resting on the ground
-        // and a short grace period has passed since the pilot left.
-        if (getPassengers().isEmpty() && onGround() && getDeltaMovement().length() < 0.01f && getEngineTarget() > 0.0f && tickCount - lastDismountTick > 20) {
-            setEngineTarget(0.0f);
-        }
-
-        // Engine sounds
         if (level().isClientSide()) {
             engineSound += getEnginePower() * 0.25f;
             if (engineSound > 1.0f) {
@@ -202,31 +191,27 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
             consumeFuel(getFuelConsumption());
         }
 
-        // Refuel
-        if (isVehicle()) {
-            if (!level().isClientSide()) {
-                refuel();
+        // Refuel - remove isVehicle() check to allow refueling without pilot
+        if (!level().isClientSide()) {
+            refuel();
+        }
 
-                // Fuel notification
-                if (getControllingPassenger() instanceof ServerPlayer player) {
-                    float utilization = getFuelUtilization();
-                    if (utilization > 0 && isFuelLow()) {
-                        if (lastFuelState != FuelState.LOW) {
-                            player.displayClientMessage(Component.translatable("immersive_aircraft." + getFuelType() + ".low"), true);
-                            lastFuelState = FuelState.LOW;
-                        }
-                    } else if (utilization > 0) {
-                        lastFuelState = FuelState.FUELED;
-                    } else {
-                        if (lastFuelState != FuelState.EMPTY) {
-                            player.displayClientMessage(Component.translatable("immersive_aircraft." + getFuelType() + "." + (lastFuelState == FuelState.FUELED ? "out" : "none")), true);
-                            lastFuelState = FuelState.EMPTY;
-                        }
-                    }
+        // Fuel notification
+        if (getControllingPassenger() instanceof ServerPlayer player) {
+            float utilization = getFuelUtilization();
+            if (utilization > 0 && isFuelLow()) {
+                if (lastFuelState != FuelState.LOW) {
+                    player.displayClientMessage(Component.translatable("immersive_aircraft." + getFuelType() + ".low"), true);
+                    lastFuelState = FuelState.LOW;
+                }
+            } else if (utilization > 0) {
+                lastFuelState = FuelState.FUELED;
+            } else {
+                if (lastFuelState != FuelState.EMPTY) {
+                    player.displayClientMessage(Component.translatable("immersive_aircraft." + getFuelType() + "." + (lastFuelState == FuelState.FUELED ? "out" : "none")), true);
+                    lastFuelState = FuelState.EMPTY;
                 }
             }
-        } else {
-            lastFuelState = FuelState.NEVER;
         }
 
         mainWarning = Math.max(0, mainWarning - 1);
@@ -239,9 +224,6 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
     }
 
     private void handleWarnings() {
-        // Detects sea level.
-        // Further updates may introduce GPWS that detects actual ground, which needs a radar upgrade.
-        // It is Y-speed relative.
         double altRate = getSpeedVector().y * 10.0d;
 
         // pull-up caution
@@ -367,8 +349,17 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
     }
 
     public void setEngineTarget(float engineTarget) {
-        // Allow setting the target even when the craft is empty (pilot ejects),
-        // so the engine keeps its load and keeps burning fuel until it lands.
+        setEngineTarget(engineTarget, false);
+    }
+
+    private void setEngineTarget(float engineTarget, boolean force) {
+        // If pilot has dismounted, restore and lock the engine target to preserve RPM
+        if (!force && lastDismountTick >= 0 && getPassengers().isEmpty()) {
+            // Restore the saved engine target to prevent it from being reduced
+            entityData.set(ENGINE, engineTargetAtDismount);
+            return;
+        }
+
         if (getFuelUtilization() > 0 || engineTarget == 0 || getPassengers().isEmpty()) {
             if (level().isClientSide()) {
                 if (getEngineTarget() != engineTarget) {
@@ -398,17 +389,16 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
         if (level().isClientSide()) {
             return entityData.get(UTILIZATION);
         } else {
-            // When there is no pilot, freeze UTILIZATION at its last value
-            // so the engine keeps running with the same fuel level after
-            // the pilot dismounts.
-            if (getControllingPassenger() == null) {
-                return entityData.get(UTILIZATION);
-            }
+
             int running = 0;
             for (int i : fuel) {
                 if (i > 0) {
                     running++;
                 }
+            }
+            if (running == 0) {
+                entityData.set(UTILIZATION, 0.0f);
+                return 0.0f;
             }
             float utilization = (float) running / fuel.length * (isFuelLow() ? 0.75f : 1.0f);
             entityData.set(UTILIZATION, utilization);

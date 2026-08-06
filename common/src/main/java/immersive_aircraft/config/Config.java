@@ -33,11 +33,11 @@ public final class Config extends JsonConfig {
     @BooleanConfigEntry(true)
     public boolean enableCrashExplosion;
 
-    @BooleanConfigEntry(false)
-    public boolean enableCrashBlockDestruction = false;
+    @BooleanConfigEntry(true)
+    public boolean enableCrashBlockDestruction = true;
 
-    @BooleanConfigEntry(false)
-    public boolean enableCrashFire = false;
+    @BooleanConfigEntry(true)
+    public boolean enableCrashFire = true;
 
     @FloatConfigEntry(7.0F)
     public float crashExplosionRadius;
@@ -107,7 +107,7 @@ public final class Config extends JsonConfig {
     @BooleanConfigEntry(true)
     public boolean showHotbarEngineGauge;
 
-    @BooleanConfigEntry(false)
+    @BooleanConfigEntry(true)
     public boolean weaponsAreDestructive;
 
     @BooleanConfigEntry(true)

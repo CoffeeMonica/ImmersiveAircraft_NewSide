@@ -36,11 +36,13 @@ public abstract class AirplaneEntity extends AircraftEntity {
         // instead of stopping all flight logic as soon as the passenger leaves.
         super.updateController();
 
-        // engine control
-        if (movementY != 0) {
-            setEngineTarget(Math.max(0.0f, Math.min(1.0f, getEngineTarget() + 0.1f * movementY)));
-            if (movementY < 0) {
-                setDeltaMovement(getDeltaMovement().scale(getBrakeFactor()));
+        // engine control - only when pilot is present
+        if (!getPassengers().isEmpty()) {
+            if (movementY != 0) {
+                setEngineTarget(Math.max(0.0f, Math.min(1.0f, getEngineTarget() + 0.1f * movementY)));
+                if (movementY < 0) {
+                    setDeltaMovement(getDeltaMovement().scale(getBrakeFactor()));
+                }
             }
         }
 

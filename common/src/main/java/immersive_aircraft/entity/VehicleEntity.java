@@ -311,7 +311,7 @@ public abstract class VehicleEntity extends Entity {
                 level().explode(this, x, y, z,
                         explosionRadius,
                         Config.getInstance().enableCrashFire,
-                        destroyBlocks ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
+                        Config.getInstance().enableCrashBlockDestruction ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
             }
 
             // Drop stuff if enabled
@@ -444,6 +444,9 @@ public abstract class VehicleEntity extends Entity {
         // pilot
         if (!getPassengers().isEmpty()) {
             tickPilot();
+        } else {
+            // Reset inputs when there's no pilot to prevent control drift
+            setInputs(0, 0, 0);
         }
 
         // wobble
@@ -480,9 +483,8 @@ public abstract class VehicleEntity extends Entity {
 
 
         // interpolate keys for visual feedback
-        // Freeze control inputs when the pilot ejects so the craft keeps
-        // moving with the last engine setting instead of immediately stopping.
-        if (isLocalInstanceAuthoritative() && !getPassengers().isEmpty()) {
+        // Continue updating inputs even without pilot to prevent unwanted control drift
+        if (isLocalInstanceAuthoritative()) {
             pressingInterpolatedX.update(movementX);
             pressingInterpolatedY.update(movementY);
             pressingInterpolatedZ.update(movementZ);
@@ -1039,10 +1041,6 @@ public abstract class VehicleEntity extends Entity {
 
     public boolean isPilotCreative() {
         return getControllingPassenger() instanceof Player player && player.isCreative();
-    }
-
-    public boolean hasUpgrade(Item item) {
-        return false;
     }
 
     public float getCrashExplosionMultiplier() {

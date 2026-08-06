@@ -70,6 +70,13 @@ public abstract class AircraftEntity extends EngineVehicle {
 
     @Override
     public void tick() {
+        // Reset interpolated inputs when there's no pilot to prevent control drift
+        if (getPassengers().isEmpty()) {
+            pressingInterpolatedX.reset();
+            pressingInterpolatedY.reset();
+            pressingInterpolatedZ.reset();
+        }
+
         // rolling interpolation
         prevRoll = roll;
         if (onGround()) {

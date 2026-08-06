@@ -28,6 +28,13 @@ public class InterpolatedFloat {
         valueSmooth = valueSmooth * (1.0f - decay) + towards * decay;
     }
 
+    public void reset() {
+        value = 0;
+        last = 0;
+        valueSmooth = 0;
+        lastSmooth = 0;
+    }
+
     public void setSteps(float steps) {
         this.steps = 1.0f / steps;
     }
