@@ -49,6 +49,8 @@
   "item.immersive_aircraft.gyroscope_hud": "Electronic Gyroscope",
   "item.immersive_aircraft.hull_reinforcement": "Hull Reinforcement",
   "item.immersive_aircraft.improved_landing_gear": "Improved Landing Gear",
+  "item.immersive_aircraft.tnt_bundle": "TNT Bundle",
+  "item.immersive_aircraft.tnt_bundle.description": "Halves durability, doubles crash explosion, always destroys blocks and deals damage on crash.",
 
   "item.immersive_aircraft.rotary_cannon": "Rotary Cannon",
   "item.immersive_aircraft.bomb_bay": "Bomb Bay",
@@ -141,6 +143,7 @@
   "immersive_aircraft.upgrade.friction": "%s%% air friction",
   "immersive_aircraft.upgrade.acceleration": "%s%% takeoff speed",
   "immersive_aircraft.upgrade.durability": "%s%% durability",
+  "immersive_aircraft.upgrade.crashexplosion": "%s%% crash explosion",
   "immersive_aircraft.upgrade.fuel": "%s%% fuel requirement",
   "immersive_aircraft.upgrade.wind": "%s%% wind effect",
   "immersive_aircraft.upgrade.stabilizer": "%s%% stabilizing",

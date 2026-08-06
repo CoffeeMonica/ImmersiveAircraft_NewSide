@@ -52,6 +52,7 @@ public interface Items {
     Supplier<Item> HULL_REINFORCEMENT = register("hull_reinforcement", (name) -> new Item(baseProps(name).stacksTo(8)));
     Supplier<Item> IMPROVED_LANDING_GEAR = register("improved_landing_gear", (name) -> new Item(baseProps(name).stacksTo(8)));
     Supplier<Item> BASIC_KIT = register("basic_kit", (name) -> new Item(baseProps(name).stacksTo(8)));
+    Supplier<Item> TNT_BUNDLE = register("tnt_bundle", (name) -> new Item(baseProps(name).stacksTo(8)));
 
     static Supplier<Item> register(String name, java.util.function.Function<String, Item> factory) {
         Identifier id = Main.locate(name);

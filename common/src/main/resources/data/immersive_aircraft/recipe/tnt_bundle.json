@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "TTT",
+    "TST",
+    "TTT"
+  ],
+  "key": {
+    "T": "minecraft:tnt",
+    "S": "minecraft:slime_ball"
+  },
+  "result": {
+    "id": "immersive_aircraft:tnt_bundle"
+  }
+}

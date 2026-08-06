@@ -370,6 +370,9 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
             return 1.0f;
         }
         if (!Config.getInstance().burnFuelInCreative && isPilotCreative()) {
+            if (!level().isClientSide()) {
+                entityData.set(UTILIZATION, 1.0f);
+            }
             return 1.0f;
         }
         if (fuel.length == 0) {
@@ -378,6 +381,12 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
         if (level().isClientSide()) {
             return entityData.get(UTILIZATION);
         } else {
+            // When there is no pilot, freeze UTILIZATION at its last value
+            // so the engine keeps running with the same fuel level after
+            // the pilot dismounts.
+            if (getControllingPassenger() == null) {
+                return entityData.get(UTILIZATION);
+            }
             int running = 0;
             for (int i : fuel) {
                 if (i > 0) {

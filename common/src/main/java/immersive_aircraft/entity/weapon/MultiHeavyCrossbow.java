@@ -41,7 +41,6 @@ public class MultiHeavyCrossbow extends HeavyCrossbow {
         // Speed is 1.5x less than heavy crossbow
         float speed = getVelocity();
 
-        // Add random velocity spread (±25%)
         float spread = Config.getInstance().heavyCrossBowVelocitySpread;
         speed *= (1.0f + (getEntity().getRandom().nextFloat() - 0.5f) * 2.0f * spread);
 

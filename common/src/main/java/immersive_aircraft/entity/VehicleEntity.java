@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.mojang.math.Axis;
 import immersive_aircraft.AircraftStats;
 import immersive_aircraft.CompatUtil;
+import immersive_aircraft.Items;
 import immersive_aircraft.Main;
 import immersive_aircraft.Sounds;
 import immersive_aircraft.client.KeyBindings;
@@ -18,6 +19,7 @@ import immersive_aircraft.network.c2s.CollisionMessage;
 import immersive_aircraft.network.c2s.CommandMessage;
 import immersive_aircraft.resources.bbmodel.BBAnimationVariables;
 import immersive_aircraft.util.InterpolatedFloat;
+import immersive_aircraft.entity.inventory.VehicleInventoryDescription;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -48,7 +50,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.DismountHelper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -302,10 +303,14 @@ public abstract class VehicleEntity extends Entity {
 
             // Explode if destroyed by force
             if (force && canExplodeOnCrash && Config.getInstance().enableCrashExplosion) {
+                // TNT_bundle upgrade: always destroy blocks and deal damage
+                boolean tntBundle = hasUpgrade(Items.TNT_BUNDLE.get());
+                boolean destroyBlocks = tntBundle || Config.getInstance().enableCrashBlockDestruction;
+                
                 level().explode(this, x, y, z,
                         Config.getInstance().crashExplosionRadius,
                         Config.getInstance().enableCrashFire,
-                        Config.getInstance().enableCrashBlockDestruction ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
+                        destroyBlocks ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
             }
 
             // Drop stuff if enabled
@@ -353,7 +358,7 @@ public abstract class VehicleEntity extends Entity {
     }
 
     public Item asItem() {
-        return Items.STICK;
+        return net.minecraft.world.item.Items.STICK;
     }
 
     @Override
@@ -801,6 +806,12 @@ public abstract class VehicleEntity extends Entity {
                         if (speed <= 0.28) {
                             return;
                         }
+                    } else {
+                        // In air, skip collision damage if speed < 1 m/s (0.05 blocks/tick)
+                        double speed = getDeltaMovement().length();
+                        if (speed < 0.05) {
+                            return;
+                        }
                     }
                     float repeat = 1.0f - (getDamageWobbleTicks() + 1) / 10.0f;
                     if (repeat > 0.0001f) {
@@ -905,6 +916,18 @@ public abstract class VehicleEntity extends Entity {
 
     public boolean isWithinParticleRange() {
         return Main.cameraGetter.getPosition().distanceToSqr(position()) < 1024;
+    }
+
+    public boolean hasUpgrade(Item item) {
+        if (this instanceof InventoryVehicleEntity vehicle) {
+            List<ItemStack> upgrades = vehicle.getSlots(VehicleInventoryDescription.UPGRADE);
+            for (ItemStack stack : upgrades) {
+                if (stack.getItem() == item) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     protected Vector4f transformPosition(Matrix4f transform, float x, float y, float z) {
