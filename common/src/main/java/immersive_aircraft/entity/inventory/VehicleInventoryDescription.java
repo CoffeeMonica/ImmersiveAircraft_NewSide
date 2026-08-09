@@ -92,6 +92,7 @@ public class VehicleInventoryDescription {
             (type, index, x, y, json) -> new TypedSlotDescription(type, index, x, y, json, WeaponItem.class, 1),
             (type, buffer) -> new TypedSlotDescription(type, buffer, WeaponItem.class));
     public static final String UPGRADE = registerSlotType("upgrade", UpgradeSlotDescription::new, UpgradeSlotDescription::new);
+    public static final String ENGINE_UPGRADE = registerSlotType("engineUpgrade", EngineUpgradeSlotDescription::new, EngineUpgradeSlotDescription::new);
     public static final String BOOSTER = registerSlotType("booster",
             (type, index, x, y, json) -> new TypedSlotDescription(type, index, x, y, json, FireworkRocketItem.class, 64),
             (type, buffer) -> new TypedSlotDescription(type, buffer, FireworkRocketItem.class));

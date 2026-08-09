@@ -1,5 +1,6 @@
 package immersive_aircraft.screen.slot;
 
+import immersive_aircraft.Items;
 import immersive_aircraft.entity.InventoryVehicleEntity;
 import immersive_aircraft.entity.inventory.VehicleInventoryDescription;
 import immersive_aircraft.item.upgrade.VehicleUpgradeRegistry;
@@ -21,8 +22,18 @@ public class UpgradeSlot extends Slot {
 
     @Override
     public boolean mayPlace(ItemStack stack) {
+        // Engines can only be placed in the dedicated engine upgrade slot
+        if (isEngineItem(stack)) {
+            return false;
+        }
         return VehicleUpgradeRegistry.INSTANCE.hasUpgrade(stack.getItem())
                 && vehicle.getSlots(VehicleInventoryDescription.UPGRADE).stream().noneMatch(s -> s.getItem() == stack.getItem());
+    }
+
+    private static boolean isEngineItem(ItemStack stack) {
+        return stack.getItem() == Items.ECO_ENGINE.get()
+                || stack.getItem() == Items.NETHER_ENGINE.get()
+                || stack.getItem() == Items.ENGINEER_ENGINE.get();
     }
 
     @Override

@@ -1,4 +1,5 @@
 {
+  "fuel": -0.5,
   "engineSpeed": -0.2,
-  "fuel": -0.7
+  "acceleration": -0.5
 }

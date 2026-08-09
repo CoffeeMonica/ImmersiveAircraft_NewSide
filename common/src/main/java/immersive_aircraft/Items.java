@@ -43,6 +43,7 @@ public interface Items {
     Supplier<Item> ENHANCED_PROPELLER = register("enhanced_propeller", (name) -> new Item(baseProps(name).stacksTo(8)));
     Supplier<Item> ECO_ENGINE = register("eco_engine", (name) -> new Item(baseProps(name).stacksTo(8)));
     Supplier<Item> NETHER_ENGINE = register("nether_engine", (name) -> new Item(baseProps(name).stacksTo(8)));
+    Supplier<Item> ENGINEER_ENGINE = register("engineer_engine", (name) -> new Item(baseProps(name).stacksTo(8)));
     Supplier<Item> STEEL_BOILER = register("steel_boiler", (name) -> new Item(baseProps(name).stacksTo(8)));
     Supplier<Item> INDUSTRIAL_GEARS = register("industrial_gears", (name) -> new Item(baseProps(name).stacksTo(8)));
     Supplier<Item> STURDY_PIPES = register("sturdy_pipes", (name) -> new Item(baseProps(name).stacksTo(8)));

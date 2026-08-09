@@ -14,7 +14,7 @@
     "mass": 8.0
   },
   "inventorySlots": [
-    {"type": "upgrade", "x": 50, "y": 24},
+    {"type": "engineUpgrade", "x": 50, "y": 24},
     {"type": "upgrade", "x": 72, "y": 24},
     {"type": "upgrade", "x": 50, "y": 46},
     {"type": "upgrade", "x": 72, "y": 46},

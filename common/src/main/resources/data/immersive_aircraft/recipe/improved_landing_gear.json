@@ -1,13 +1,14 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
+    " IA",
     " II",
-    "CCI",
-    "CC "
+    "C  "
   ],
   "key": {
-    "C": "minecraft:coal",
-    "I": "minecraft:iron_ingot"
+    "C": "minecraft:coal_block",
+    "I": "minecraft:iron_ingot",
+    "A": "minecraft:iron_block"
   },
   "result": {
     "id": "immersive_aircraft:improved_landing_gear"

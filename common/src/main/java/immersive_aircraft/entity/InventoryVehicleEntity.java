@@ -89,7 +89,9 @@ public abstract class InventoryVehicleEntity extends DyeableVehicleEntity implem
     //todo cache?
     public float getTotalUpgrade(VehicleStat stat) {
         float value = 1.0f;
-        List<ItemStack> upgrades = getSlots(VehicleInventoryDescription.UPGRADE);
+        List<ItemStack> upgrades = new ArrayList<>();
+        upgrades.addAll(getSlots(VehicleInventoryDescription.UPGRADE));
+        upgrades.addAll(getSlots(VehicleInventoryDescription.ENGINE_UPGRADE));
         for (int step = 0; step < 2; step++) {
             for (ItemStack stack : upgrades) {
                 VehicleUpgrade upgrade = VehicleUpgradeRegistry.INSTANCE.getUpgrade(stack.getItem());
@@ -338,7 +340,8 @@ public abstract class InventoryVehicleEntity extends DyeableVehicleEntity implem
 
     @Override
     public boolean hasUpgrade(Item item) {
-        return getSlots(VehicleInventoryDescription.UPGRADE).stream().anyMatch(s -> s.getItem() == item);
+        return getSlots(VehicleInventoryDescription.UPGRADE).stream().anyMatch(s -> s.getItem() == item)
+                || getSlots(VehicleInventoryDescription.ENGINE_UPGRADE).stream().anyMatch(s -> s.getItem() == item);
     }
 
     @Override

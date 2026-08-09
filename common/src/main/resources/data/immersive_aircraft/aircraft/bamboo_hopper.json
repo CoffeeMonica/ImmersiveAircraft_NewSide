@@ -22,7 +22,7 @@
     {"type": "booster", "x": 80, "y": 70},
     {"type": "weapon", "x": 48, "y": 21},
     {"type": "weapon", "x": 112, "y": 21},
-    {"type": "upgrade", "x": 48, "y": 44},
+    {"type": "engineUpgrade", "x": 48, "y": 44},
     {"type": "upgrade", "x": 112, "y": 44},
     {"type": "upgrade", "x": 48, "y": 67},
     {"type": "upgrade", "x": 112, "y": 67},

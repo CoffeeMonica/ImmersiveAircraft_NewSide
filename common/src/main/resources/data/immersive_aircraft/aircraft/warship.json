@@ -17,7 +17,7 @@
     "verticalDecay": 0.925
   },
   "inventorySlots": [
-    {"type": "upgrade", "x": 32, "y": 70},
+    {"type": "engineUpgrade", "x": 32, "y": 70},
     {"type": "upgrade", "x": 54, "y": 70},
     {"type": "upgrade", "x": 76, "y": 70},
     {"type": "weapon", "x": 102, "y": 70},

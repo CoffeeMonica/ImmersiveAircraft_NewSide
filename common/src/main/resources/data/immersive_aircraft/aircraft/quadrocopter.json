@@ -20,7 +20,7 @@
   "inventorySlots": [
     {"type": "boiler", "x": 17, "y": 32},
     {"type": "weapon", "x": 50, "y": 24},
-    {"type": "upgrade", "x": 72, "y": 24},
+    {"type": "engineUpgrade", "x": 72, "y": 24},
     {"type": "inventory", "x": 98, "y": 18, "cols": 3, "rows": 2}
   ],
   "weaponMounts": [

@@ -28,6 +28,7 @@ public class SlotRenderer {
         });
         register("weapon", new BasicRenderer(262, 22));
         register("upgrade", new BasicRenderer(262, 22 * 2));
+        register("engineUpgrade", new BasicRenderer(262, 22 * 6));
         register("banner", new BasicRenderer(262, 22 * 3));
         register("dye", new BasicRenderer(262, 22 * 4));
         register("booster", new BasicRenderer(262, 22 * 5));

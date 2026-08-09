@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ACA",
+    "PFP",
+    "BIB"
+  ],
+  "key": {
+    "A": "immersive_aircraft:industrial_gears",
+    "C": "minecraft:copper_block",
+    "P": "minecraft:piston",
+    "F": "immersive_aircraft:engine",
+    "B": "immersive_aircraft:sturdy_pipes",
+    "I": "immersive_aircraft:steel_boiler"
+  },
+  "result": {
+    "id": "immersive_aircraft:engineer_engine"
+  }
+}

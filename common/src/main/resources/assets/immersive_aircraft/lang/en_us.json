@@ -41,6 +41,7 @@
   "item.immersive_aircraft.enhanced_propeller": "Enhanced Propeller",
   "item.immersive_aircraft.eco_engine": "Eco Engine",
   "item.immersive_aircraft.nether_engine": "Nether Engine",
+  "item.immersive_aircraft.engineer_engine": "Engineer Engine",
   "item.immersive_aircraft.steel_boiler": "Steel Boiler",
   "item.immersive_aircraft.industrial_gears": "Industrial Gears",
   "item.immersive_aircraft.sturdy_pipes": "Sturdy Pipes",
@@ -139,6 +140,7 @@
   "immersive_aircraft.slot.banner": "Banner slot",
   "immersive_aircraft.slot.dye": "Dye slot",
   "immersive_aircraft.slot.upgrade": "Upgrade slot",
+  "immersive_aircraft.slot.engineUpgrade": "Engine slot",
 
   "immersive_aircraft.upgrade.enginespeed": "%s%% engine power",
   "immersive_aircraft.upgrade.friction": "%s%% air friction",

@@ -18,9 +18,9 @@
   },
   "inventorySlots": [
     {"type": "weapon", "x": 14, "y": 24},
-    {"type": "upgrade", "x": 36, "y": 24},
-    {"type": "upgrade", "x": 14, "y": 46},
-    {"type": "upgrade", "x": 36, "y": 46},
+    // {"type": "upgrade", "x": 36, "y": 24},
+    // {"type": "upgrade", "x": 14, "y": 46},
+    // {"type": "upgrade", "x": 36, "y": 46},
     {"type": "inventory", "x": 62, "y": 18, "cols": 6, "rows": 3}
   ],
   "weaponMounts": [

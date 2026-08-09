@@ -1,9 +1,9 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "CC ",
-    " P ",
-    " CC"
+    "CCC",
+    "CPC",
+    "CCC"
   ],
   "key": {
     "C": "minecraft:copper_ingot",

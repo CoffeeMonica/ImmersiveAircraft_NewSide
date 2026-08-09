@@ -923,7 +923,9 @@ public abstract class VehicleEntity extends Entity {
 
     public boolean hasUpgrade(Item item) {
         if (this instanceof InventoryVehicleEntity vehicle) {
-            List<ItemStack> upgrades = vehicle.getSlots(VehicleInventoryDescription.UPGRADE);
+            List<ItemStack> upgrades = new ArrayList<>();
+            upgrades.addAll(vehicle.getSlots(VehicleInventoryDescription.UPGRADE));
+            upgrades.addAll(vehicle.getSlots(VehicleInventoryDescription.ENGINE_UPGRADE));
             for (ItemStack stack : upgrades) {
                 if (stack.getItem() == item) {
                     return true;

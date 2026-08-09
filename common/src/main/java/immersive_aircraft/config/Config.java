@@ -39,7 +39,7 @@ public final class Config extends JsonConfig {
     @BooleanConfigEntry(true)
     public boolean enableCrashFire = true;
 
-    @FloatConfigEntry(7.0F)
+    @FloatConfigEntry(2.0F)
     public float crashExplosionRadius;
 
     @FloatConfigEntry(20.0f)

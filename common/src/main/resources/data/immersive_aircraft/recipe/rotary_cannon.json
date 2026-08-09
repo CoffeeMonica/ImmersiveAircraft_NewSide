@@ -8,7 +8,7 @@
   "key": {
     "D": "minecraft:dispenser",
     "G": "immersive_aircraft:industrial_gears",
-    "C": "minecraft:copper_ingot"
+    "C": "minecraft:copper_block"
   },
   "result": {
     "id": "immersive_aircraft:rotary_cannon"
