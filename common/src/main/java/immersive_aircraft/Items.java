@@ -5,6 +5,7 @@ import immersive_aircraft.entity.*;
 import immersive_aircraft.entity.misc.WeaponMount;
 import immersive_aircraft.item.AircraftItem;
 import immersive_aircraft.item.DyeableAircraftItem;
+import immersive_aircraft.item.UavItem;
 import immersive_aircraft.item.WeaponItem;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -33,6 +34,8 @@ public interface Items {
     Supplier<Item> GYRODYNE = register("gyrodyne", (name) -> new AircraftItem(baseProps(name).stacksTo(1), world -> new GyrodyneEntity(Entities.GYRODYNE.get(), world)));
     Supplier<Item> QUADROCOPTER = register("quadrocopter", (name) -> new AircraftItem(baseProps(name).stacksTo(1), world -> new QuadrocopterEntity(Entities.QUADROCOPTER.get(), world)));
     Supplier<Item> BAMBOO_HOPPER = register("bamboo_hopper", (name) -> new AircraftItem(baseProps(name).stacksTo(1), world -> new BambooHopperEntity(Entities.BAMBOO_HOPPER.get(), world)));
+
+    Supplier<Item> UAV = register("uav", (name) -> new UavItem(baseProps(name).stacksTo(16)));
 
     Supplier<Item> ROTARY_CANNON = register("rotary_cannon", (name) -> new WeaponItem(baseProps(name).stacksTo(1), WeaponMount.Type.ROTATING));
     Supplier<Item> HEAVY_CROSSBOW = register("heavy_crossbow", (name) -> new WeaponItem(baseProps(name).stacksTo(1), WeaponMount.Type.FRONT));
