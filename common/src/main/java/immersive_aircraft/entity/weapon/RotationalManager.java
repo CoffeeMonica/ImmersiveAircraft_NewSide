@@ -5,6 +5,7 @@ import immersive_aircraft.Main;
 import immersive_aircraft.entity.VehicleEntity;
 import net.minecraft.world.entity.Entity;
 import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 public class RotationalManager {
@@ -82,8 +83,11 @@ public class RotationalManager {
             vehicleTransform.invert();
             normal.mul(vehicleTransform);
 
-            // Convert into weapon space
-            Matrix3f weaponTransform = new Matrix3f(weapon.getMount().transform());
+            // Convert into weapon space using the base (unrotated) mount transform
+            // to avoid feedback from the previous tick's rotation.
+            // Fall back to the current transform if no base transform was set.
+            Matrix4f base = weapon.getBaseTransform();
+            Matrix3f weaponTransform = new Matrix3f(base != null ? base : weapon.getMount().transform());
             weaponTransform.invert();
             normal.mul(weaponTransform);
 

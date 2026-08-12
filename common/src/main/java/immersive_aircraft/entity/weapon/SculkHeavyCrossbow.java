@@ -58,7 +58,7 @@ public class SculkHeavyCrossbow extends HeavyCrossbow {
     private Vec3 getMountWorldPos() {
         // Calculate the beam start position from the MOUNT position (barrel tip), not entity center
         Vector4f mountPos = new Vector4f(getBarrelOffset());
-        mountPos.mul(getMount().transform());
+        mountPos.mul(getTransform());
 
         Vector3f localPos = new Vector3f(mountPos.x, mountPos.y, mountPos.z);
         localPos.mul(getEntity().getVehicleNormalTransform());
@@ -176,7 +176,7 @@ public class SculkHeavyCrossbow extends HeavyCrossbow {
 
     protected Vector3f getDirection() {
         Vector3f direction = new Vector3f(0, 0, 1.0f);
-        direction.mul(new Matrix3f(getMount().transform()));
+        direction.mul(new Matrix3f(getTransform()));
         direction.mul(getEntity().getVehicleNormalTransform());
         return direction;
     }

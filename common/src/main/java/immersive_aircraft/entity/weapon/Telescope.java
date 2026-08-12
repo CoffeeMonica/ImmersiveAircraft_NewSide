@@ -6,6 +6,7 @@ import immersive_aircraft.resources.bbmodel.BBAnimationVariables;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 public class Telescope extends Weapon {
@@ -15,6 +16,7 @@ public class Telescope extends Weapon {
 
     public Telescope(VehicleEntity entity, ItemStack stack, WeaponMount mount, int slot) {
         super(entity, stack, mount, slot);
+        setBaseTransform(new Matrix4f(mount.transform()));
     }
 
     @Override

@@ -21,8 +21,8 @@ public class HeavyCrossbow extends BulletWeapon {
     private final float velocity;
     private final float inaccuracy;
 
-    // Original mount transform from JSON, saved to restore each tick
-    private final Matrix4f baseTransform;
+    // Per-instance transform matrix, so we never mutate the shared WeaponMount
+    private final Matrix4f localTransform = new Matrix4f();
 
     public HeavyCrossbow(VehicleEntity entity, ItemStack stack, WeaponMount mount, int slot) {
         this(entity, stack, mount, slot, Config.getInstance().heavyCrossBowVelocity, Config.getInstance().heavyCrossBowInaccuracy);
@@ -37,9 +37,7 @@ public class HeavyCrossbow extends BulletWeapon {
         // Create RotationalManager if this mount has rotation enabled
         if (mount.enableRotation()) {
             rotationalManager = new RotationalManager(this);
-            baseTransform = new Matrix4f(mount.transform());
-        } else {
-            baseTransform = null;
+            setBaseTransform(new Matrix4f(mount.transform()));
         }
     }
 
@@ -82,10 +80,7 @@ public class HeavyCrossbow extends BulletWeapon {
     public void tick() {
         cooldown -= 1.0f / 20.0f;
 
-        if (rotationalManager != null && baseTransform != null) {
-            // Restore base transform
-            getMount().transform().set(baseTransform);
-
+        if (rotationalManager != null && getBaseTransform() != null) {
             Entity controllingPassenger = getEntity().getControllingPassenger();
             Entity gunner = getEntity().getGunner(getGunnerOffset());
             boolean hasValidGunner = gunner != null && gunner.isAlive() && gunner.getVehicle() == getEntity() && gunner == controllingPassenger;
@@ -102,11 +97,13 @@ public class HeavyCrossbow extends BulletWeapon {
                 rotationalManager.yaw = (float) Math.toRadians(Math.max(mount.minYaw(), Math.min(mount.maxYaw(), yawDeg)));
                 rotationalManager.pitch = (float) Math.toRadians(Math.max(mount.minPitch(), Math.min(mount.maxPitch(), pitchDeg)));
 
-                mount.transform().rotateY(-rotationalManager.yaw);
-                mount.transform().rotateX(rotationalManager.pitch);
+                // Write the rotation into the LOCAL matrix instead of the shared mount
+                localTransform.set(getBaseTransform());
+                localTransform.rotateY(-rotationalManager.yaw);
+                localTransform.rotateX(rotationalManager.pitch);
             } else {
-                // Keep the mount in its default orientation when there is no valid controlling pilot
-                // riding this vehicle. This prevents passive vehicles from following unrelated camera motion.
+                // No valid pilot - reset the local matrix and rotation
+                localTransform.set(getBaseTransform());
                 rotationalManager.tick();
                 rotationalManager.yaw = 0.0f;
                 rotationalManager.pitch = 0.0f;
@@ -138,17 +135,25 @@ public class HeavyCrossbow extends BulletWeapon {
     }
 
     protected Vector3f getDirection() {
-        // mount.transform() already includes clamped rotation (applied in tick())
+        // localTransform already includes clamped rotation (applied in tick())
         Vector3f direction = new Vector3f(0, 0, 1.0f);
-        direction.mul(new Matrix3f(getMount().transform()));
+        direction.mul(new Matrix3f(localTransform));
         direction.mul(getEntity().getVehicleNormalTransform());
         return direction;
+    }
+
+    @Override
+    public Matrix4f getTransform() {
+        return localTransform;
     }
 
     @Override
     public <T extends VehicleEntity> void setAnimationVariables(T entity, float time) {
         super.setAnimationVariables(entity, time);
 
+        // Each crossbow unconditionally overwrites the global animation registry
+        // with its own values (including zero for pilotless vehicles) right before
+        // rendering, so no crossbow picks up stale values from another vehicle.
         if (rotationalManager != null) {
             float tickDelta = time % 1.0f;
             BBAnimationVariables.set("pitch", (float) (rotationalManager.getPitch(tickDelta) / Math.PI * 180.0f));
