@@ -116,9 +116,17 @@ public class HeavyCrossbow extends BulletWeapon {
 
     @Override
     public void fire(Vector3f direction) {
-        if (spentAmmo(Config.getInstance().arrowAmmunition, 50)) {
-            super.fire(direction);
+        if (spentAmmoItems(Config.getInstance().arrowAmmunition, 1)) {
+            fireBullets(direction);
         }
+    }
+
+    /**
+     * Fires bullets without consuming ammunition.
+     * Used by subclasses that handle their own ammunition consumption.
+     */
+    protected void fireBullets(Vector3f direction) {
+        super.fire(direction);
     }
 
     @Override

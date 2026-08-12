@@ -18,14 +18,11 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
-import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 public abstract class BulletWeapon extends Weapon {
     private final Random random = new Random();
-
-    private ItemStack ammoStack = ItemStack.EMPTY;
-    private int ammo;
 
     public BulletWeapon(VehicleEntity entity, ItemStack stack, WeaponMount mount, int slot) {
         super(entity, stack, mount, slot);
@@ -81,43 +78,7 @@ public abstract class BulletWeapon extends Weapon {
         return SoundEvents.CROSSBOW_SHOOT;
     }
 
-    protected boolean spentAmmo(Map<String, Integer> ammunition, int amount) {
-        if (getEntity().isPilotCreative()) {
-            return true;
-        }
-
-        while (ammo < amount && getEntity() instanceof InventoryVehicleEntity vehicle) {
-            boolean foundAmmo = false;
-            for (int i = 0; i < vehicle.getInventory().getContainerSize(); i++) {
-                ItemStack stack = vehicle.getInventory().getItem(i);
-                String key = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
-
-                if (ammunition.containsKey(key) && !stack.isEmpty()) {
-                    ammoStack = stack.copyWithCount(1);
-                    ammo += ammunition.get(key);
-                    stack.shrink(1);
-                    foundAmmo = true;
-                    break;
-                }
-            }
-
-            if (!foundAmmo) {
-                break;
-            }
-        }
-
-        if (ammo < amount) {
-            if (getEntity().getControllingPassenger() instanceof Player player) {
-                player.displayClientMessage(Component.translatable("immersive_aircraft.out_of_ammo"), true);
-            }
-            return false;
-        }
-
-        ammo -= amount;
-        return true;
-    }
-
-    protected boolean spentAmmoItems(Map<String, Integer> ammunition, int itemCount) {
+    protected boolean spentAmmoItems(Set<String> ammunition, int itemCount) {
         if (getEntity().isPilotCreative()) {
             return true;
         }
@@ -129,8 +90,7 @@ public abstract class BulletWeapon extends Weapon {
                     ItemStack stack = vehicle.getInventory().getItem(i);
                     String key = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
 
-                    if (ammunition.containsKey(key) && !stack.isEmpty()) {
-                        ammoStack = stack.copyWithCount(1);
+                    if (ammunition.contains(key) && !stack.isEmpty()) {
                         stack.shrink(1);
                         foundAmmo = true;
                         break;
@@ -152,13 +112,5 @@ public abstract class BulletWeapon extends Weapon {
         }
 
         return true;
-    }
-
-    public ItemStack getAmmoStack() {
-        return ammoStack;
-    }
-
-    public int getAmmo() {
-        return ammo;
     }
 }

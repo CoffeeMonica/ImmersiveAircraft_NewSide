@@ -48,6 +48,8 @@
   "item.immersive_aircraft.bomb_bay": "Бомбовый отсек",
   "item.immersive_aircraft.telescope": "Телескоп",
   "item.immersive_aircraft.heavy_crossbow": "Тяжёлый арбалет",
+  "item.immersive_aircraft.sculk_heavy_crossbow": "Тяжёлый скульк-арбалет",
+  "item.immersive_aircraft.sculk_heavy_crossbow.description": "Стреляет лучом звука, наносит урон по всей линии огня.",
   "item.immersive_aircraft.rotary_cannon.description": "Скорострельная пушка, работающая на порохе.",
   "item.immersive_aircraft.bomb_bay.description": "Сбрасывает динамит, не разрушает блоки, но наносит большой урон.",
   "item.immersive_aircraft.telescope.description": "Более громоздкая версия подзорной трубы.",

@@ -122,6 +122,7 @@ public class UavEntity extends AirplaneEntity {
         // Reset damage wobble to prevent visual effects
         setDamageWobbleTicks(0);
         setDamageWobbleStrength(0.0f);
+        setDamageWobbleSide(1);
 
         // Consume fuel
         if (!level().isClientSide() && fuelTicks > 0) {
@@ -169,12 +170,18 @@ public class UavEntity extends AirplaneEntity {
 
     @Override
     public boolean isPickable() {
-        return false;
+        return true;
     }
 
     @Override
     public void animateHurt(float yaw) {
         // Disable damage wobble visual effects for UAV
+    }
+
+    @Override
+    public float[] getRenderColor() {
+        // UAV always renders with full color, ignoring health
+        return new float[] {1.0f, 1.0f, 1.0f};
     }
 
     @Override

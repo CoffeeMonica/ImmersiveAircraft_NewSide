@@ -41,13 +41,14 @@ public class MultiHeavyCrossbow extends HeavyCrossbow {
         // Speed is 1.5x less than heavy crossbow
         float speed = getVelocity();
 
-        float spread = Config.getInstance().heavyCrossBowVelocitySpread;
-        speed *= (1.0f + (getEntity().getRandom().nextFloat() - 0.5f) * 2.0f * spread);
+        float velocitySpread = Config.getInstance().heavyCrossBowVelocitySpread;
+        speed *= (1.0f + (getEntity().getRandom().nextFloat() - 0.5f) * 2.0f * velocitySpread);
 
-        // Add random direction deviation for the "fan" effect (huge spread)
+        // Add random direction deviation for the "fan" effect
         Vector3f spreadDirection = new Vector3f(direction);
-        spreadDirection.rotateY((getEntity().getRandom().nextFloat() - 0.5f) * 0.5f); // yaw spread
-        spreadDirection.rotateX((getEntity().getRandom().nextFloat() - 0.5f) * 0.3f); // pitch spread
+        float directionalSpread = Config.getInstance().multiHeavyCrossBowSpread;
+        spreadDirection.rotateY((getEntity().getRandom().nextFloat() - 0.5f) * directionalSpread); // yaw spread
+        spreadDirection.rotateX((getEntity().getRandom().nextFloat() - 0.5f) * directionalSpread * 0.6f); // pitch spread
 
         arrow.shoot(spreadDirection.x(), spreadDirection.y() + 0.1f, spreadDirection.z(), speed, getInaccuracy());
         return arrow;
@@ -61,8 +62,8 @@ public class MultiHeavyCrossbow extends HeavyCrossbow {
 
     @Override
     public void fire(Vector3f direction) {
-        if (spentAmmoItems(Config.getInstance().arrowAmmunition, getBulletCount() / 4)) {
-            super.fire(direction);
+        if (spentAmmoItems(Config.getInstance().arrowAmmunition, Config.getInstance().multiHeavyCrossBowAmmoPerShot)) {
+            fireBullets(direction);
         }
     }
 

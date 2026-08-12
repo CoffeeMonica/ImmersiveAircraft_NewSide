@@ -92,11 +92,8 @@ public abstract class VehicleEntityRenderer<T extends VehicleEntity> extends Ent
         // Render model
         BBModel bbModel = BBModelLoader.MODELS.get(getModelId());
         if (bbModel != null) {
-            float health = entity.getHealth();
-            float r = health * 0.6f + 0.4f;
-            float g = health * 0.4f + 0.6f;
-            float b = health * 0.4f + 0.6f;
-            BBModelRenderer.renderModel(bbModel, matrixStack, vertexConsumerProvider, light, time, entity, getModel(entity), r, g, b, 1.0f);
+            float[] color = entity.getRenderColor();
+            BBModelRenderer.renderModel(bbModel, matrixStack, vertexConsumerProvider, light, time, entity, getModel(entity), color[0], color[1], color[2], 1.0f);
         }
     }
 

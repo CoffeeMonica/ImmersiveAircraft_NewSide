@@ -19,10 +19,7 @@ import org.joml.Matrix3f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
-import java.util.Map;
-
 public class BombBay extends BulletWeapon {
-    private static final float MAX_COOLDOWN = 1.0f;
     private float cooldown = 0.0f;
     private boolean spawnUav = false;
 
@@ -74,6 +71,57 @@ public class BombBay extends BulletWeapon {
         return false;
     }
 
+    private boolean hasTntInInventory() {
+        if (!(getEntity() instanceof InventoryVehicleEntity vehicle)) {
+            return false;
+        }
+        for (int i = 0; i < vehicle.getInventory().getContainerSize(); i++) {
+            ItemStack stack = vehicle.getInventory().getItem(i);
+            String key = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
+            if (Config.getInstance().bombBayAmmunition.contains(key) && !stack.isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean spentTnt() {
+        if (getEntity().isPilotCreative()) {
+            return true;
+        }
+        if (!(getEntity() instanceof InventoryVehicleEntity vehicle)) {
+            return false;
+        }
+        for (int i = 0; i < vehicle.getInventory().getContainerSize(); i++) {
+            ItemStack stack = vehicle.getInventory().getItem(i);
+            String key = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
+            if (Config.getInstance().bombBayAmmunition.contains(key) && !stack.isEmpty()) {
+                stack.shrink(1);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Returns true if the first valid ammo in inventory is UAV, false if it's TNT
+    private boolean isFirstAmmoUav() {
+        if (!(getEntity() instanceof InventoryVehicleEntity vehicle)) {
+            return false;
+        }
+        for (int i = 0; i < vehicle.getInventory().getContainerSize(); i++) {
+            ItemStack stack = vehicle.getInventory().getItem(i);
+            if (stack.isEmpty()) continue;
+            if (stack.getItem() == Items.UAV.get()) {
+                return true;
+            }
+            String key = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
+            if (Config.getInstance().bombBayAmmunition.contains(key)) {
+                return false;
+            }
+        }
+        return false;
+    }
+
     @Override
     protected Entity getBullet(Vector4f position, Vector3f direction) {
         VehicleEntity entity = getEntity();
@@ -108,16 +156,22 @@ public class BombBay extends BulletWeapon {
             return;
         }
 
-        if (hasUavInInventory()) {
+        // Use the first valid ammunition found in inventory (UAV or TNT)
+        if (isFirstAmmoUav()) {
             if (!spentUav()) {
                 spawnUav = false;
                 return;
             }
             spawnUav = true;
             super.fire(direction);
+        } else if (hasTntInInventory()) {
+            spawnUav = false;
+            if (spentTnt()) {
+                super.fire(direction);
+            }
         } else {
             spawnUav = false;
-            if (spentAmmo(Config.getInstance().bombBayAmmunition, 20)) {
+            if (spentAmmoItems(Config.getInstance().bombBayAmmunition, 1)) {
                 super.fire(direction);
             }
         }
@@ -131,7 +185,7 @@ public class BombBay extends BulletWeapon {
     @Override
     public void clientFire(int index) {
         if (cooldown <= 0.0f) {
-            cooldown = MAX_COOLDOWN;
+            cooldown = Config.getInstance().bombBayCooldown;
             NetworkHandler.sendToServer(new FireMessage(getSlot(), index, getDirection()));
         }
     }

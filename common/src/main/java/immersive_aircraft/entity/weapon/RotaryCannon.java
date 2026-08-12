@@ -59,8 +59,7 @@ public class RotaryCannon extends BulletWeapon {
 
     @Override
     public void fire(Vector3f direction) {
-        // Consume exactly one copper nugget per shot
-        if (spentAmmoItems(Config.getInstance().copperAmmunition, 1)) {
+        if (spentAmmoItems(Config.getInstance().rotaryCannonAmmunition, 1)) {
             super.fire(direction);
         }
     }

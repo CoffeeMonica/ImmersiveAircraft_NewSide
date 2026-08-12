@@ -21,6 +21,7 @@ public class WeaponRegistry {
         register(Main.locate("rotary_cannon"), RotaryCannon::new);
         register(Main.locate("heavy_crossbow"), HeavyCrossbow::new);
         register(Main.locate("multi_heavy_crossbow"), MultiHeavyCrossbow::new);
+        register(Main.locate("sculk_heavy_crossbow"), SculkHeavyCrossbow::new);
         register(Main.locate("telescope"), Telescope::new);
         register(Main.locate("bomb_bay"), BombBay::new);
     }

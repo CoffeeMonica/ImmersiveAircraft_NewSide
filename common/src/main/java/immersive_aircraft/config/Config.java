@@ -6,6 +6,7 @@ import immersive_aircraft.config.configEntries.FloatConfigEntry;
 import immersive_aircraft.config.configEntries.IntegerConfigEntry;
 
 import java.util.Map;
+import java.util.Set;
 
 public final class Config extends JsonConfig {
     private static final Config INSTANCE = loadOrCreate(new Config(Main.MOD_ID), Config.class);
@@ -27,6 +28,9 @@ public final class Config extends JsonConfig {
         return 3;
     }
 
+    // ========================
+    // General
+    // ========================
     @BooleanConfigEntry(true)
     public boolean enableDropsForNonPlayer = true;
 
@@ -125,6 +129,30 @@ public final class Config extends JsonConfig {
     @BooleanConfigEntry(false)
     public boolean requireShiftForRepair;
 
+    @BooleanConfigEntry(true)
+    public boolean hideVehicleWhileScoping;
+
+    // ========================
+    // Flight
+    // ========================
+    @FloatConfigEntry(1.0f)
+    public float globalEngineSpeedMultiplier;
+
+    // Engine power multiplier (1.0 = normal, 2.0 = twice as powerful, 0.5 = half as powerful)
+    @FloatConfigEntry(1.0f)
+    public float durabilityMultiplier;
+
+    // Gravity multiplier (1.0 = normal gravity, 0.5 = half gravity, 2.0 = double gravity)
+    @FloatConfigEntry(1.0f)
+    public float gravityMultiplier;
+
+    // Engine drag when engines are off (1.0 = normal drag)
+    @FloatConfigEntry(1.0f)
+    public float engineOffDrag;
+
+    // ========================
+    // Weapons
+    // ========================
     // The entity to spawn when triggering the bomb bay
     // The item also needs to be valid ammunition (e.g., set to 100)
     public Map<String, String> bombBayEntity = Map.of(
@@ -143,9 +171,6 @@ public final class Config extends JsonConfig {
     @FloatConfigEntry(0.1875f)
     public float heavyCrossBowCooldown;
 
-    @FloatConfigEntry(0.375f)
-    public float heavyCrossBowVelocitySpread;
-
     @FloatConfigEntry(3.0f)
     public float multiHeavyCrossBowVelocity;
 
@@ -158,21 +183,39 @@ public final class Config extends JsonConfig {
     @IntegerConfigEntry(8)
     public int multiHeavyCrossBowBulletCount;
 
+    // Количество стрел для расхода за выстрел (по умолчанию 2, чтобы тратить в 4 раза меньше чем стреляем)
+    @IntegerConfigEntry(2)
+    public int multiHeavyCrossBowAmmoPerShot;
+
+    // Sculk Heavy Crossbow settings
+    // Radius of the sonic beam (damage area)
+    @FloatConfigEntry(2.0f)
+    public float sculkHeavyCrossBowRadius;
+
+    // Maximum range of the sonic beam
+    @FloatConfigEntry(320.0f)
+    public float sculkHeavyCrossBowRange;
+
+    // Cooldown between shots (in seconds, 1.0f = 1 second)
     @FloatConfigEntry(1.0f)
-    public float globalEngineSpeedMultiplier;
+    public float sculkHeavyCrossBowCooldown;
 
-    @FloatConfigEntry(1.0f)
-    public float durabilityMultiplier;
+    // Sonic beam damage per hit
+    @FloatConfigEntry(10.0f)
+    public float sculkHeavyCrossBowDamage;
 
-    @FloatConfigEntry(1.0f)
-    public float gravityMultiplier;
+    // Multi Heavy Crossbow spread settings
+    // Velocity spread multiplier (1.0 = 75%-125% of base velocity)
+    @FloatConfigEntry(0.25f)
+    public float heavyCrossBowVelocitySpread;
 
-    @FloatConfigEntry(1.0f)
-    public float engineOffDrag;
+    // Directional spread for arrows (in radians, 0.0 = no spread)
+    @FloatConfigEntry(0.5f)
+    public float multiHeavyCrossBowSpread;
 
-    @BooleanConfigEntry(true)
-    public boolean hideVehicleWhileScoping;
-
+    // ========================
+    // Ammunition
+    // ========================
     public Map<String, Integer> fuelList = Map.of(
             "minecraft:blaze_powder", 1200
     );
@@ -183,17 +226,24 @@ public final class Config extends JsonConfig {
             "minecraft:the_end", true
     );
 
-    public Map<String, Integer> copperAmmunition = Map.of(
-            "minecraft:copper_nugget", 100
+    // rotaryCannonAmmunition - items that act as ammo for the rotary cannon, 1 consumed per shot
+    public Set<String> rotaryCannonAmmunition = Set.of(
+            "minecraft:copper_nugget"
     );
 
-    public Map<String, Integer> arrowAmmunition = Map.of(
-            "minecraft:arrow", 100,
-            "minecraft:tipped_arrow", 100,
-            "minecraft:spectral_arrow", 100
+    // arrowAmmunition - items that act as arrows, 1 consumed per shot
+    public Set<String> arrowAmmunition = Set.of(
+            "minecraft:arrow",
+            "minecraft:tipped_arrow",
+            "minecraft:spectral_arrow"
     );
 
-    public Map<String, Integer> bombBayAmmunition = Map.of(
-            "minecraft:tnt", 100
+    // tnt - 1 per shot with spentAmmoItems system  
+    public Set<String> bombBayAmmunition = Set.of(
+            "minecraft:tnt"
     );
+
+    // Bomb Bay cooldown in seconds
+    @FloatConfigEntry(1.5f)
+    public float bombBayCooldown;
 }

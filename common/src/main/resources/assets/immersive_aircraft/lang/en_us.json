@@ -59,6 +59,7 @@
   "item.immersive_aircraft.telescope": "Telescope",
   "item.immersive_aircraft.heavy_crossbow": "Heavy Crossbow",
   "item.immersive_aircraft.multi_heavy_crossbow": "Multi Heavy Crossbow",
+  "item.immersive_aircraft.sculk_heavy_crossbow": "Sculk Heavy Crossbow",
   "item.immersive_aircraft.basic_kit": "Basic Kit",
   "item.immersive_aircraft.tnt_bundle": "TNT Bundle",
 
@@ -66,6 +67,7 @@
   "item.immersive_aircraft.bomb_bay.description": "Drops TNT, does not destroy blocks but deals heavy damage.",
   "item.immersive_aircraft.telescope.description": "A bulkier version of the spyglass.",
   "item.immersive_aircraft.heavy_crossbow.description": "A heavy crossbow with a powerful punch, requires arrows.",
+  "item.immersive_aircraft.sculk_heavy_crossbow.description": "Fires a sonic beam, dealing damage along the entire line of fire.",
   "item.immersive_aircraft.multi_heavy_crossbow.description": "A heavy crossbow that fires a fan of arrows at once, but has limited range.",
 
   "item.immersive_aircraft.item.upgrade": "Aircraft Upgrade",

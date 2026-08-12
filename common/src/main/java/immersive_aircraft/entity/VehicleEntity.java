@@ -881,6 +881,15 @@ public abstract class VehicleEntity extends Entity {
         entityData.set(DATA_HEALTH, damage);
     }
 
+    public float[] getRenderColor() {
+        float health = getHealth();
+        return new float[] {
+                health * 0.6f + 0.4f,
+                health * 0.4f + 0.6f,
+                health * 0.4f + 0.6f
+        };
+    }
+
     @Override
     protected boolean canAddPassenger(@NotNull Entity passenger) {
         return getPassengers().size() < getPassengerSpace() && !isEyeInFluid(FluidTags.WATER);
