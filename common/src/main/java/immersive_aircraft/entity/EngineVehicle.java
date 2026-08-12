@@ -182,7 +182,7 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
                 if (isFuelLow()) {
                     engineSound -= random.nextInt(2);
                 }
-                level().playLocalSound(getX(), getY() + getBbHeight() * 0.5, getZ(), getEngineSound(), getSoundSource(), Math.min(1.0f, getEngineVolume() + engineSpinUpStrength), (random.nextFloat() * 0.1f + 0.95f) * getEnginePitch(), false);
+                level().playLocalSound(getX(), getY() + getBbHeight() * 0.5, getZ(), getEngineSound(), getSoundSource(), (getEngineVolume() + engineSpinUpStrength) * 5.0f, (random.nextFloat() * 0.1f + 0.95f) * getEnginePitch(), false);
             }
         }
 

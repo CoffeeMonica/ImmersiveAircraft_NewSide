@@ -29,8 +29,8 @@ public class UavEntity extends AirplaneEntity {
     private static final int STOP_EXPLODE_DELAY = 20;
     // Initial HP buffer, drops to 1 after 2 seconds
     private static final float INITIAL_HP_BUFFER = 1000.0f;
-    // Time after spawn when HP drops (2 seconds = 40 ticks)
-    private static final int HP_DROP_DELAY = 40;
+    // Time after spawn when HP drops (3 seconds = 60 ticks)
+    private static final int HP_DROP_DELAY = 60;
 
     private int fuelTicks = FUEL_TICKS;
     private int stoppedTicks = 0;
