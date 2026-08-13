@@ -17,6 +17,7 @@ public class WeaponRendererRegistry {
 
     static {
         register(Main.locate("rotary_cannon"), new SimpleWeaponRenderer("rotary_cannon"));
+        register(Main.locate("reinforced_rotary_cannon"), new SimpleWeaponRenderer("reinforced_rotary_cannon"));
         register(Main.locate("heavy_crossbow"), new SimpleWeaponRenderer("heavy_crossbow"));
         register(Main.locate("multi_heavy_crossbow"), new SimpleWeaponRenderer("multi_heavy_crossbow"));
         register(Main.locate("sculk_heavy_crossbow"), new SimpleWeaponRenderer("sculk_heavy_crossbow"));

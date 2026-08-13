@@ -38,6 +38,7 @@ public interface Items {
     Supplier<Item> UAV = register("uav", (name) -> new UavItem(baseProps(name).stacksTo(16)));
 
     Supplier<Item> ROTARY_CANNON = register("rotary_cannon", (name) -> new WeaponItem(baseProps(name).stacksTo(1), WeaponMount.Type.ROTATING));
+    Supplier<Item> REINFORCED_ROTARY_CANNON = register("reinforced_rotary_cannon", (name) -> new WeaponItem(baseProps(name).stacksTo(1), WeaponMount.Type.ROTATING));
     Supplier<Item> HEAVY_CROSSBOW = register("heavy_crossbow", (name) -> new WeaponItem(baseProps(name).stacksTo(1), WeaponMount.Type.FRONT));
     Supplier<Item> MULTI_HEAVY_CROSSBOW = register("multi_heavy_crossbow", (name) -> new WeaponItem(baseProps(name).stacksTo(1), WeaponMount.Type.FRONT));
     Supplier<Item> SCULK_HEAVY_CROSSBOW = register("sculk_heavy_crossbow", (name) -> new WeaponItem(baseProps(name).stacksTo(1), WeaponMount.Type.FRONT));
@@ -56,8 +57,8 @@ public interface Items {
     Supplier<Item> GYROSCOPE_DIALS = register("gyroscope_dials", (name) -> new Item(baseProps(name).stacksTo(8)));
     Supplier<Item> HULL_REINFORCEMENT = register("hull_reinforcement", (name) -> new Item(baseProps(name).stacksTo(8)));
     Supplier<Item> IMPROVED_LANDING_GEAR = register("improved_landing_gear", (name) -> new Item(baseProps(name).stacksTo(8)));
-    Supplier<Item> BASIC_KIT = register("basic_kit", (name) -> new Item(baseProps(name).stacksTo(8)));
     Supplier<Item> TNT_BUNDLE = register("tnt_bundle", (name) -> new Item(baseProps(name).stacksTo(8)));
+    Supplier<Item> AVIATION_FUEL = register("aviation_fuel", (name) -> new Item(baseProps(name).stacksTo(64)));
 
     static Supplier<Item> register(String name, java.util.function.Function<String, Item> factory) {
         Identifier id = Main.locate(name);

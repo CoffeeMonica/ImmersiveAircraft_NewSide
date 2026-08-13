@@ -94,35 +94,38 @@ public class SculkHeavyCrossbow extends HeavyCrossbow {
                     beamPos.x + radius, beamPos.y + radius, beamPos.z + radius);
 
             // Damage all entities (including vehicles) whose bounding boxes intersect the beam
-            List<Entity> entities = world.getEntitiesOfClass(Entity.class, box, entity -> {
-                return entity != shooter
-                        && entity.isAlive()
-                        && entity.isPickable()
-                        && !damagedEntities.contains(entity);
-            });
+            // Skip the first 2 blocks to avoid hitting the pilot
+            if (totalDistance >= 2.0) {
+                List<Entity> entities = world.getEntitiesOfClass(Entity.class, box, entity -> {
+                    return entity != shooter
+                            && entity.isAlive()
+                            && entity.isPickable()
+                            && !damagedEntities.contains(entity);
+                });
 
-            for (Entity target : entities) {
-                // Check if the entity's main bounding box or any additional bounding boxes intersect the beam
-                boolean hit = target.getBoundingBox().intersects(box);
-                if (!hit && target instanceof VehicleEntity vehicle) {
-                    for (AABB shape : vehicle.getShapes()) {
-                        if (shape.intersects(box)) {
-                            hit = true;
-                            break;
+                for (Entity target : entities) {
+                    // Check if the entity's main bounding box or any additional bounding boxes intersect the beam
+                    boolean hit = target.getBoundingBox().intersects(box);
+                    if (!hit && target instanceof VehicleEntity vehicle) {
+                        for (AABB shape : vehicle.getShapes()) {
+                            if (shape.intersects(box)) {
+                                hit = true;
+                                break;
+                            }
                         }
                     }
-                }
 
-                if (hit) {
-                    damagedEntities.add(target);
+                    if (hit) {
+                        damagedEntities.add(target);
 
-                    DamageSource damageSource = world.damageSources().sonicBoom(shooter);
-                    target.hurt(damageSource, Config.getInstance().sculkHeavyCrossBowDamage);
+                        DamageSource damageSource = world.damageSources().sonicBoom(shooter);
+                        target.hurt(damageSource, Config.getInstance().sculkHeavyCrossBowDamage);
 
-                    if (target instanceof LivingEntity living) {
-                        double dx = target.getX() - shooter.getX();
-                        double dz = target.getZ() - shooter.getZ();
-                        living.knockback(1.5F, dx, dz);
+                        if (target instanceof LivingEntity living) {
+                            double dx = target.getX() - shooter.getX();
+                            double dz = target.getZ() - shooter.getZ();
+                            living.knockback(1.5F, dx, dz);
+                        }
                     }
                 }
             }

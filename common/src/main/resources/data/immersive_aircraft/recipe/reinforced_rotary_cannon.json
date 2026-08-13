@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "III",
+    "III",
+    "III"
+  ],
+  "key": {
+    "I": "minecraft:iron_block"
+  },
+  "result": {
+    "id": "immersive_aircraft:reinforced_rotary_cannon"
+  }
+}

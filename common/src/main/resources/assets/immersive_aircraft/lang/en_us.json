@@ -52,18 +52,22 @@
   "item.immersive_aircraft.hull_reinforcement": "Hull Reinforcement",
   "item.immersive_aircraft.improved_landing_gear": "Improved Landing Gear",
   "item.immersive_aircraft.tnt_bundle": "TNT Bundle",
+
+  "item.immersive_aircraft.aviation_fuel": "Aviation Fuel",
+  "item.immersive_aircraft.aviation_fuel.description": "Cool aviation fuel that provides the energy of 1.5 coal blocks! Only usable in aircraft engines.",
   "item.immersive_aircraft.tnt_bundle.description": "Halves durability, doubles crash explosion, always destroys blocks and deals damage on crash.",
 
   "item.immersive_aircraft.rotary_cannon": "Rotary Cannon",
+  "item.immersive_aircraft.reinforced_rotary_cannon": "Reinforced Rotary Cannon",
   "item.immersive_aircraft.bomb_bay": "Bomb Bay",
   "item.immersive_aircraft.telescope": "Telescope",
   "item.immersive_aircraft.heavy_crossbow": "Heavy Crossbow",
   "item.immersive_aircraft.multi_heavy_crossbow": "Multi Heavy Crossbow",
   "item.immersive_aircraft.sculk_heavy_crossbow": "Sculk Heavy Crossbow",
-  "item.immersive_aircraft.basic_kit": "Basic Kit",
   "item.immersive_aircraft.tnt_bundle": "TNT Bundle",
 
   "item.immersive_aircraft.rotary_cannon.description": "Fast-firing cannon running with gunpowder.",
+  "item.immersive_aircraft.reinforced_rotary_cannon.description": "A reinforced rotary cannon that fires iron nuggets at incredible speed.",
   "item.immersive_aircraft.bomb_bay.description": "Drops TNT, does not destroy blocks but deals heavy damage.",
   "item.immersive_aircraft.telescope.description": "A bulkier version of the spyglass.",
   "item.immersive_aircraft.heavy_crossbow.description": "A heavy crossbow with a powerful punch, requires arrows.",

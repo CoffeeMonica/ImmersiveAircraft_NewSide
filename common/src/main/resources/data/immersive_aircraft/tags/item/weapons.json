@@ -2,8 +2,10 @@
   "replace": false,
   "values": [
     "immersive_aircraft:rotary_cannon",
+    "immersive_aircraft:reinforced_rotary_cannon",
     "immersive_aircraft:heavy_crossbow",
     "immersive_aircraft:multi_heavy_crossbow",
+    "immersive_aircraft:sculk_heavy_crossbow",
     "immersive_aircraft:telescope",
     "immersive_aircraft:bomb_bay"
   ]

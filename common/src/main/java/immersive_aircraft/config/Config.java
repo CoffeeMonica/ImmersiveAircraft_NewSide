@@ -162,6 +162,9 @@ public final class Config extends JsonConfig {
     @FloatConfigEntry(4.0f)
     public float rotaryCannonDamage;
 
+    @FloatConfigEntry(8.0f)
+    public float reinforcedRotaryCannonDamage;
+
     @FloatConfigEntry(5.0f)
     public float heavyCrossBowVelocity;
 
@@ -217,7 +220,8 @@ public final class Config extends JsonConfig {
     // Ammunition
     // ========================
     public Map<String, Integer> fuelList = Map.of(
-            "minecraft:blaze_powder", 1200
+            "minecraft:blaze_powder", 1200,
+            "immersive_aircraft:aviation_fuel", 16200
     );
 
     public Map<String, Boolean> validDimensions = Map.of(
@@ -229,6 +233,11 @@ public final class Config extends JsonConfig {
     // rotaryCannonAmmunition - items that act as ammo for the rotary cannon, 1 consumed per shot
     public Set<String> rotaryCannonAmmunition = Set.of(
             "minecraft:copper_nugget"
+    );
+
+    // reinforcedRotaryCannonAmmunition - items that act as ammo for the reinforced rotary cannon, 1 consumed per shot
+    public Set<String> reinforcedRotaryCannonAmmunition = Set.of(
+            "minecraft:iron_nugget"
     );
 
     // arrowAmmunition - items that act as arrows, 1 consumed per shot
