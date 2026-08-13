@@ -34,6 +34,9 @@ public class HeavyCrossbow extends BulletWeapon {
         this.velocity = velocity;
         this.inaccuracy = inaccuracy;
 
+        // Always initialize localTransform from the mount transform
+        localTransform.set(mount.transform());
+
         // Create RotationalManager if this mount has rotation enabled
         if (mount.enableRotation()) {
             rotationalManager = new RotationalManager(this);

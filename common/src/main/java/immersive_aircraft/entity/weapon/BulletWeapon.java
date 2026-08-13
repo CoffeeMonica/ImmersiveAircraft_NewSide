@@ -84,24 +84,32 @@ public abstract class BulletWeapon extends Weapon {
         }
 
         if (getEntity() instanceof InventoryVehicleEntity vehicle) {
+            // First check if we have enough ammo before consuming any
+            int available = 0;
+            for (int i = 0; i < vehicle.getInventory().getContainerSize(); i++) {
+                ItemStack stack = vehicle.getInventory().getItem(i);
+                String key = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
+                if (ammunition.contains(key) && !stack.isEmpty()) {
+                    available += stack.getCount();
+                }
+            }
+
+            if (available < itemCount) {
+                if (getEntity().getControllingPassenger() instanceof Player player) {
+                    player.displayClientMessage(Component.translatable("immersive_aircraft.out_of_ammo"), true);
+                }
+                return false;
+            }
+
+            // Now consume the ammo
             for (int spent = 0; spent < itemCount; spent++) {
-                boolean foundAmmo = false;
                 for (int i = 0; i < vehicle.getInventory().getContainerSize(); i++) {
                     ItemStack stack = vehicle.getInventory().getItem(i);
                     String key = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
-
                     if (ammunition.contains(key) && !stack.isEmpty()) {
                         stack.shrink(1);
-                        foundAmmo = true;
                         break;
                     }
-                }
-
-                if (!foundAmmo) {
-                    if (getEntity().getControllingPassenger() instanceof Player player) {
-                        player.displayClientMessage(Component.translatable("immersive_aircraft.out_of_ammo"), true);
-                    }
-                    return false;
                 }
             }
         } else {

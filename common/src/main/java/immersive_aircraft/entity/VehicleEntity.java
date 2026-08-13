@@ -699,7 +699,15 @@ public abstract class VehicleEntity extends Entity {
             }
         }
 
-        return super.getDismountLocationForPassenger(passenger);
+        // In air: spawn slightly above the vehicle's hitbox to avoid getting stuck inside it
+        Vec3 fallback = super.getDismountLocationForPassenger(passenger);
+        AABB vehicleBox = getBoundingBoxForCulling();
+        double spawnY = vehicleBox.maxY + passenger.getBbHeight() * 0.5 + 0.5;
+        Vec3 abovePos = new Vec3(fallback.x, spawnY, fallback.z);
+        if (DismountHelper.canDismountTo(level(), abovePos, passenger, passenger.getPose())) {
+            return abovePos;
+        }
+        return fallback;
     }
 
     public void copyEntityData(Entity entity) {

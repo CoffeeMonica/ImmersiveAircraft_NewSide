@@ -254,15 +254,15 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
             return 1.0f;
         }
 
-        int maxHeight = level().getHeight() - 120;
+        int maxHeight = level().getHeight() - 180;
         int startPenaltyY = maxHeight - 10;
         double altitudeAboveThreshold = Math.max(0.0, getY() - startPenaltyY);
         if (altitudeAboveThreshold <= 0.0) {
             return 1.0f;
         }
 
-        // Мощность падает на 20% каждые 10 блоков выше границы
-        float penalty = 1.0f - 0.2f * (float)(altitudeAboveThreshold / 10.0d);
+        // Мощность падает на 10% каждые 10 блоков выше границы
+        float penalty = 1.0f - 0.1f * (float)(altitudeAboveThreshold / 10.0d);
         return Math.max(0.0f, penalty);
     }
 
@@ -352,7 +352,7 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
         setEngineTarget(engineTarget, false);
     }
 
-    private void setEngineTarget(float engineTarget, boolean force) {
+    protected void setEngineTarget(float engineTarget, boolean force) {
         // If pilot has dismounted, restore and lock the engine target to preserve RPM
         if (!force && lastDismountTick >= 0 && getPassengers().isEmpty()) {
             // Restore the saved engine target to prevent it from being reduced

@@ -11,6 +11,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
 public class GyrodyneEntity extends Rotorcraft {
@@ -39,6 +40,38 @@ public class GyrodyneEntity extends Rotorcraft {
     @Override
     protected double getDefaultGravity() {
         return (1.0f - getEnginePower()) * super.getDefaultGravity();
+    }
+
+    @Override
+    protected void applyFriction() {
+        // Decay is the basic factor of friction, basically the density of the material slowing down the vehicle
+        float decay = 1.0f - getProperties().get(VehicleStat.FRICTION);
+        double gravity = getDefaultGravity();
+        if (wasTouchingWater) {
+            gravity *= 0.25f;
+            decay = getWaterDecay();
+        } else if (onGround()) {
+            if (isVehicle()) {
+                decay = getGroundDecay();
+            } else {
+                decay = 0.75f;
+            }
+        }
+
+        // Velocity decay
+        Vec3 velocity = getDeltaMovement();
+        float hd = getProperties().get(VehicleStat.HORIZONTAL_DECAY);
+        float vd = getProperties().get(VehicleStat.VERTICAL_DECAY);
+        setDeltaMovement(velocity.x * decay * hd, velocity.y * decay * vd - gravity, velocity.z * decay * hd);
+
+        // Rotation decay
+        // Skip decay when there are no passengers so the craft keeps
+        // its last control input and continues moving after the pilot ejects.
+        if (!getPassengers().isEmpty()) {
+            float rf = decay * getProperties().get(VehicleStat.ROTATION_DECAY);
+            pressingInterpolatedX.decay(0.0f, 1.0f - rf);
+            pressingInterpolatedZ.decay(0.0f, 1.0f - rf);
+        }
     }
 
     private void updateEnginePowerTooltip() {
@@ -99,6 +132,11 @@ public class GyrodyneEntity extends Rotorcraft {
     @Override
     public void tick() {
         super.tick();
+
+        // If the pilot dismounted, immediately stop the engine
+        if (getPassengers().isEmpty()) {
+            setEngineTarget(0.0f, true);
+        }
 
         if (getControllingPassenger() instanceof ServerPlayer player) {
             float consumption = getFuelConsumption() * 0.01f;

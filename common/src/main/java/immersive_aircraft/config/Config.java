@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 public final class Config extends JsonConfig {
-    private static final Config INSTANCE = loadOrCreate(new Config(Main.MOD_ID), Config.class);
+    private static final Config INSTANCE = loadOrCreate(new Config("immersive_aircraft_new_side"), Config.class);
 
     public Config() {
         super("default");
@@ -43,10 +43,10 @@ public final class Config extends JsonConfig {
     @BooleanConfigEntry(true)
     public boolean enableCrashFire = true;
 
-    @FloatConfigEntry(2.0F)
+    @FloatConfigEntry(3.0F)
     public float crashExplosionRadius;
 
-    @FloatConfigEntry(20.0f)
+    @FloatConfigEntry(15.0f)
     public float crashDamage;
 
     @BooleanConfigEntry(true)
@@ -162,7 +162,7 @@ public final class Config extends JsonConfig {
     @FloatConfigEntry(4.0f)
     public float rotaryCannonDamage;
 
-    @FloatConfigEntry(4.0f)
+    @FloatConfigEntry(5.0f)
     public float heavyCrossBowVelocity;
 
     @FloatConfigEntry(0.3f)
@@ -171,7 +171,7 @@ public final class Config extends JsonConfig {
     @FloatConfigEntry(0.1875f)
     public float heavyCrossBowCooldown;
 
-    @FloatConfigEntry(3.0f)
+    @FloatConfigEntry(3.5f)
     public float multiHeavyCrossBowVelocity;
 
     @FloatConfigEntry(1.0f)
