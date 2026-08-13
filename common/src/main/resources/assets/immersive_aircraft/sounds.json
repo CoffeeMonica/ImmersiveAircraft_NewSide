@@ -11,7 +11,7 @@
     "sounds": [
       {
         "name": "immersive_aircraft:engine_start_warship",
-        "attenuation_distance": 24
+        "attenuation_distance": 48
       }
     ]
   },
@@ -27,7 +27,7 @@
     "sounds": [
       {
         "name": "immersive_aircraft:warship",
-        "attenuation_distance": 24
+        "attenuation_distance": 128
       }
     ]
   },
@@ -35,7 +35,7 @@
     "sounds": [
       {
         "name": "immersive_aircraft:propeller",
-        "attenuation_distance": 24
+        "attenuation_distance": 96
       }
     ]
   },
@@ -43,7 +43,7 @@
     "sounds": [
       {
         "name": "immersive_aircraft:propeller_bamboo_hopper",
-        "attenuation_distance": 24
+        "attenuation_distance": 96
       }
     ]
   },
