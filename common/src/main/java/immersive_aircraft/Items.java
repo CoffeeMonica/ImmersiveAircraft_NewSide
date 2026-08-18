@@ -36,6 +36,7 @@ public interface Items {
     Supplier<Item> BAMBOO_HOPPER = register("bamboo_hopper", (name) -> new AircraftItem(baseProps(name).stacksTo(1), world -> new BambooHopperEntity(Entities.BAMBOO_HOPPER.get(), world)));
 
     Supplier<Item> UAV = register("uav", (name) -> new UavItem(baseProps(name).stacksTo(16)));
+    Supplier<Item> IMPROVED_UAV = register("improved_uav", (name) -> new UavItem(baseProps(name).stacksTo(16)));
 
     Supplier<Item> ROTARY_CANNON = register("rotary_cannon", (name) -> new WeaponItem(baseProps(name).stacksTo(1), WeaponMount.Type.ROTATING));
     Supplier<Item> REINFORCED_ROTARY_CANNON = register("reinforced_rotary_cannon", (name) -> new WeaponItem(baseProps(name).stacksTo(1), WeaponMount.Type.ROTATING));

@@ -4,6 +4,7 @@ import immersive_aircraft.Entities;
 import immersive_aircraft.Main;
 import immersive_aircraft.cobalt.network.NetworkHandler;
 import immersive_aircraft.config.Config;
+import immersive_aircraft.entity.ImprovedUavEntity;
 import immersive_aircraft.entity.InventoryVehicleEntity;
 import immersive_aircraft.entity.UavEntity;
 import immersive_aircraft.entity.VehicleEntity;
@@ -22,6 +23,7 @@ import org.joml.Vector4f;
 public class BombBay extends BulletWeapon {
     private float cooldown = 0.0f;
     private boolean spawnUav = false;
+    private boolean spawnImprovedUav = false;
 
     public BombBay(VehicleEntity entity, ItemStack stack, WeaponMount mount, int slot) {
         super(entity, stack, mount, slot);
@@ -47,8 +49,29 @@ public class BombBay extends BulletWeapon {
         }
         for (int i = 0; i < vehicle.getInventory().getContainerSize(); i++) {
             ItemStack stack = vehicle.getInventory().getItem(i);
-            if (stack.getItem() == Items.UAV.get()) {
+            if (stack.getItem() == Items.UAV.get() || stack.getItem() == Items.IMPROVED_UAV.get()) {
                 return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isFirstUavImproved() {
+        if (!(getEntity() instanceof InventoryVehicleEntity vehicle)) {
+            return false;
+        }
+        for (int i = 0; i < vehicle.getInventory().getContainerSize(); i++) {
+            ItemStack stack = vehicle.getInventory().getItem(i);
+            if (stack.isEmpty()) continue;
+            if (stack.getItem() == Items.IMPROVED_UAV.get()) {
+                return true;
+            }
+            if (stack.getItem() == Items.UAV.get()) {
+                return false;
+            }
+            String key = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
+            if (Config.getInstance().bombBayAmmunition.contains(key)) {
+                return false;
             }
         }
         return false;
@@ -63,7 +86,7 @@ public class BombBay extends BulletWeapon {
         }
         for (int i = 0; i < vehicle.getInventory().getContainerSize(); i++) {
             ItemStack stack = vehicle.getInventory().getItem(i);
-            if (stack.getItem() == Items.UAV.get()) {
+            if (stack.getItem() == Items.UAV.get() || stack.getItem() == Items.IMPROVED_UAV.get()) {
                 stack.shrink(1);
                 return true;
             }
@@ -111,7 +134,7 @@ public class BombBay extends BulletWeapon {
         for (int i = 0; i < vehicle.getInventory().getContainerSize(); i++) {
             ItemStack stack = vehicle.getInventory().getItem(i);
             if (stack.isEmpty()) continue;
-            if (stack.getItem() == Items.UAV.get()) {
+            if (stack.getItem() == Items.UAV.get() || stack.getItem() == Items.IMPROVED_UAV.get()) {
                 return true;
             }
             String key = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
@@ -127,14 +150,25 @@ public class BombBay extends BulletWeapon {
         VehicleEntity entity = getEntity();
 
         if (spawnUav) {
-            UavEntity uav = new UavEntity(Entities.UAV.get(), entity.level());
-            uav.setYRot(entity.getYRot());
-            uav.setXRot(entity.getXRot());
-            uav.setZRot(entity.getRoll());
-            uav.setOwner(entity);
-            uav.setPos(position.x(), position.y() - 0.5, position.z());
-            uav.setDeltaMovement(direction.x(), direction.y() * 0.5, direction.z());
-            return uav;
+            if (spawnImprovedUav) {
+                ImprovedUavEntity uav = new ImprovedUavEntity(Entities.IMPROVED_UAV.get(), entity.level());
+                uav.setYRot(entity.getYRot());
+                uav.setXRot(entity.getXRot());
+                uav.setZRot(entity.getRoll());
+                uav.setOwner(entity);
+                uav.setPos(position.x(), position.y() - 0.5, position.z());
+                uav.setDeltaMovement(direction.x(), direction.y() * 0.5, direction.z());
+                return uav;
+            } else {
+                UavEntity uav = new UavEntity(Entities.UAV.get(), entity.level());
+                uav.setYRot(entity.getYRot());
+                uav.setXRot(entity.getXRot());
+                uav.setZRot(entity.getRoll());
+                uav.setOwner(entity);
+                uav.setPos(position.x(), position.y() - 0.5, position.z());
+                uav.setDeltaMovement(direction.x(), direction.y() * 0.5, direction.z());
+                return uav;
+            }
         } else {
             // Spawn tiny TNT - don't add aircraft velocity, just drop downward
             Entity tnt = Entities.TINY_TNT.get().create(entity.level(), EntitySpawnReason.TRIGGERED);
@@ -152,12 +186,14 @@ public class BombBay extends BulletWeapon {
         VehicleEntity entity = getEntity();
         if (entity.isPilotCreative()) {
             spawnUav = hasUavInInventory();
+            spawnImprovedUav = isFirstUavImproved();
             super.fire(direction);
             return;
         }
 
         // Use the first valid ammunition found in inventory (UAV or TNT)
         if (isFirstAmmoUav()) {
+            spawnImprovedUav = isFirstUavImproved();
             if (!spentUav()) {
                 spawnUav = false;
                 return;
@@ -166,11 +202,13 @@ public class BombBay extends BulletWeapon {
             super.fire(direction);
         } else if (hasTntInInventory()) {
             spawnUav = false;
+            spawnImprovedUav = false;
             if (spentTnt()) {
                 super.fire(direction);
             }
         } else {
             spawnUav = false;
+            spawnImprovedUav = false;
             if (spentAmmoItems(Config.getInstance().bombBayAmmunition, 1)) {
                 super.fire(direction);
             }

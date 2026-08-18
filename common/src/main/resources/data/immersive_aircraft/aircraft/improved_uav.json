@@ -1,14 +1,14 @@
 {
   "properties": {
-    "fuel": 1.0,
+    "fuel": 1.5,
     "durability": 1.0,
     "yawSpeed": 5.0,
     "pitchSpeed": 4.0,
-    "engineSpeed": 0.045,
+    "engineSpeed": 0.08,
     "glideFactor": 0.3,
     "rollFactor": 60.0,
-    "wind": 0.04,
-    "mass": 2.0
+    "wind": 0.0,
+    "mass": 5.0
   },
   "inventorySlots": [],
   "weaponMounts": [],

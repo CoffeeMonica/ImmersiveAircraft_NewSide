@@ -1,12 +1,15 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "III",
-    "III",
-    "III"
+    "GDG",
+    "IRI",
+    "GIG"
   ],
   "key": {
-    "I": "minecraft:iron_block"
+    "I": "minecraft:iron_block",
+    "R": "immersive_aircraft:rotary_cannon",
+    "G": "immersive_aircraft:industrial_gears",
+    "D": "minecraft:dispenser"
   },
   "result": {
     "id": "immersive_aircraft:reinforced_rotary_cannon"

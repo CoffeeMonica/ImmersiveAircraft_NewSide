@@ -49,6 +49,14 @@ public abstract class VehicleEntityRenderer<T extends VehicleEntity> extends Ent
     @Override
     public void submit(VehicleEntityRenderState state, PoseStack matrixStack, SubmitNodeCollector collector, CameraRenderState cameraState) {
         T entity = (T) state.entity;
+
+        // Don't render the vehicle the player is scoping through
+        // This is a secondary check in addition to shouldRender(), which may not
+        // be called for the entity the camera is attached to in first-person mode.
+        if (entity instanceof InventoryVehicleEntity inv && inv.isScoping() && Config.getInstance().hideVehicleWhileScoping) {
+            return;
+        }
+
         float yaw = Mth.lerp(state.tickDelta, entity.yRotO, entity.getYRot());
         float tickDelta = state.tickDelta;
 

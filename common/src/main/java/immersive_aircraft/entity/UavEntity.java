@@ -30,12 +30,12 @@ public class UavEntity extends AirplaneEntity {
     // Initial HP buffer, drops to 1 after 2 seconds
     private static final float INITIAL_HP_BUFFER = 1000.0f;
     // Time after spawn when HP drops (3 seconds = 60 ticks)
-    private static final int HP_DROP_DELAY = 60;
+    protected static final int HP_DROP_DELAY = 60;
 
     private int fuelTicks = FUEL_TICKS;
     private int stoppedTicks = 0;
     private boolean engineStarted = false;
-    private int spawnTicks = 0;
+    protected int spawnTicks = 0;
     private UUID ownerUuid;
 
     public UavEntity(EntityType<? extends AircraftEntity> entityType, Level world) {
@@ -46,6 +46,10 @@ public class UavEntity extends AirplaneEntity {
     @Override
     protected float getEngineReactionSpeed() {
         return 50.0f;
+    }
+
+    protected int getHpDropDelay() {
+        return HP_DROP_DELAY;
     }
 
     public void setOwner(Entity owner) {
@@ -132,7 +136,7 @@ public class UavEntity extends AirplaneEntity {
         // Handle invulnerability period and HP drop
         if (!level().isClientSide()) {
             spawnTicks++;
-            if (spawnTicks == HP_DROP_DELAY) {
+            if (spawnTicks == getHpDropDelay()) {
                 // Drop HP to 1 after 2 seconds
                 setHealth(1.0f);
             }
@@ -152,7 +156,7 @@ public class UavEntity extends AirplaneEntity {
         }
     }
 
-    private void explode() {
+    protected void explode() {
         if (isRemoved()) {
             return;
         }

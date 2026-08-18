@@ -36,6 +36,13 @@ public interface Entities {
             .fireImmune()
     );
 
+    Supplier<EntityType<ImprovedUavEntity>> IMPROVED_UAV = register("improved_uav", EntityType.Builder
+            .of(ImprovedUavEntity::new, MobCategory.MISC)
+            .sized(1.0f, 0.566f)
+            .clientTrackingRange(12)
+            .fireImmune()
+    );
+
     Supplier<EntityType<AirshipEntity>> AIRSHIP = register("airship", EntityType.Builder
             .of(AirshipEntity::new, MobCategory.MISC)
             .sized(1.5f, 3.0f)

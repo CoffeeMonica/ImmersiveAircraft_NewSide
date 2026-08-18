@@ -6,7 +6,7 @@
     "pitchSpeed": 4.0,
     "engineSpeed": 0.03,
     "pushSpeed": 0.025,
-    "glideFactor": 0.1,
+    "glideFactor": 0.15,
     "driftDrag": 0.005,
     "lift": 0.15,
     "rollFactor": 60.0,

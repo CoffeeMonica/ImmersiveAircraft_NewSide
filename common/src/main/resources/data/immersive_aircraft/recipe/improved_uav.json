@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "EEE",
+    "EEE",
+    "EEE"
+  ],
+  "key": {
+    "E": "minecraft:egg"
+  },
+  "result": {
+    "id": "immersive_aircraft:improved_uav"
+  }
+}

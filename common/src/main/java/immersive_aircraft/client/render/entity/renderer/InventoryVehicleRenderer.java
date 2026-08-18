@@ -8,6 +8,7 @@ import immersive_aircraft.client.render.entity.renderer.utils.ModelPartRenderHan
 import immersive_aircraft.client.render.entity.weaponRenderer.WeaponRenderer;
 import immersive_aircraft.entity.InventoryVehicleEntity;
 import immersive_aircraft.entity.inventory.VehicleInventoryDescription;
+import immersive_aircraft.entity.weapon.Telescope;
 import immersive_aircraft.entity.weapon.Weapon;
 import immersive_aircraft.resources.bbmodel.BBFaceContainer;
 import immersive_aircraft.resources.bbmodel.BBMesh;
@@ -43,6 +44,10 @@ public abstract class InventoryVehicleRenderer<T extends InventoryVehicleEntity>
         LocalPlayer player = Minecraft.getInstance().player;
         for (List<Weapon> weapons : entity.getWeapons().values()) {
             for (Weapon weapon : weapons) {
+                // Don't render the telescope when the player is scoping through it in first person
+                if (weapon instanceof Telescope telescope && telescope.isScoping() && Main.firstPersonGetter.isFirstPerson()) {
+                    continue;
+                }
                 if (!weapon.getMount().blocking() || !Main.firstPersonGetter.isFirstPerson() || player == null || !entity.hasPassenger(player)) {
                     WeaponRenderer<Weapon> renderer = WeaponRendererRegistry.get(weapon);
                     if (renderer != null) {
