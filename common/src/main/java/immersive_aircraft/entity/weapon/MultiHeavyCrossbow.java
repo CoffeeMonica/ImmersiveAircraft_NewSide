@@ -38,7 +38,7 @@ public class MultiHeavyCrossbow extends HeavyCrossbow {
         // Set owner to the vehicle itself so arrows don't collide with it
         arrow.setOwner(getEntity());
 
-        // Speed is 1.5x less than heavy crossbow
+        // Uses its own velocity setting (default 3.5 vs 5.0 for the single-shot heavy crossbow)
         float speed = getVelocity();
 
         float velocitySpread = Config.getInstance().heavyCrossBowVelocitySpread;

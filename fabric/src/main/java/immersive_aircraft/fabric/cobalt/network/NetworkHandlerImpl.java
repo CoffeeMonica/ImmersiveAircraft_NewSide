@@ -53,10 +53,9 @@ public class NetworkHandlerImpl extends NetworkHandler.Impl {
         }
     }
 
-    // Prevent eager loading client side code
+    // Prevent eagerly loading client-only networking classes on dedicated servers.
     private static final class ClientProxy {
         private ClientProxy() {
-            // Nop
         }
 
         public static <T extends Message> void register(CustomPacketPayload.Type<T> type, NetworkHandler.ClientHandler<T> handler) {

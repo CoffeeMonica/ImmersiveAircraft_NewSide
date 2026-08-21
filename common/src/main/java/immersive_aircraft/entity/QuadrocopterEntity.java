@@ -80,6 +80,6 @@ public class QuadrocopterEntity extends Rotorcraft {
 
     @Override
     protected void convertPower(Vec3 direction) {
-        // Quadrocopters does not convert power
+        // Quadrocopters do not convert power
     }
 }

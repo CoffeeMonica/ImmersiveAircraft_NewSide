@@ -27,7 +27,7 @@ public class TrailRenderer {
         Vec3 pos = Minecraft.getInstance().gameRenderer.getMainCamera().position();
         Matrix3f matrix = matrices.normal();
 
-        //todo a custom vertex indexing methode would be beneficial here
+        // TODO: a custom vertex indexing method would be beneficial here
         for (int i = 1; i < Math.min(trail.entries, trail.size); i++) {
             int pre = ((i + trail.lastIndex - 1) % trail.size) * 7;
             int index = ((i + trail.lastIndex) % trail.size) * 7;
@@ -40,7 +40,7 @@ public class TrailRenderer {
             vertex(trail, lineVertexConsumer, matrix, 1, 1, index + 3, pos, a2, light);
             vertex(trail, lineVertexConsumer, matrix, 1, 0, index, pos, a2, light);
 
-            //todo the anti culling here is stupid
+            // TODO: the anti-culling duplicate vertices here are wasteful
             vertex(trail, lineVertexConsumer, matrix, 1, 0, index, pos, a2, light);
             vertex(trail, lineVertexConsumer, matrix, 1, 1, index + 3, pos, a2, light);
             vertex(trail, lineVertexConsumer, matrix, 0, 1, pre + 3, pos, a1, light);

@@ -86,7 +86,7 @@ public abstract class InventoryVehicleEntity extends DyeableVehicleEntity implem
         return list;
     }
 
-    //todo cache?
+    // TODO: consider caching upgrade totals; they are recomputed on every stat query
     public float getTotalUpgrade(VehicleStat stat) {
         float value = 1.0f;
         List<ItemStack> upgrades = new ArrayList<>();
@@ -436,7 +436,13 @@ public abstract class InventoryVehicleEntity extends DyeableVehicleEntity implem
     }
 
     public void fireWeapon(int slot, int index, Vector3f direction) {
-        getWeapons().get(slot).get(index).fire(direction);
+        List<Weapon> slotWeapons = getWeapons().get(slot);
+        // The weapon item may have been removed between the client's fire request
+        // and this server-side handling - ignore the stale shot instead of crashing.
+        if (slotWeapons == null || index < 0 || index >= slotWeapons.size()) {
+            return;
+        }
+        slotWeapons.get(index).fire(direction);
     }
 
     @Override

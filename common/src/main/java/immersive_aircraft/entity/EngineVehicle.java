@@ -60,7 +60,9 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
         PULL_UP,
         VOID,
         DAMAGED,
-        TOO_HIGH
+        TOO_HIGH,
+        LOW_FUEL,
+        FUEL_OUT
     }
 
     FuelState lastFuelState = FuelState.NEVER;
@@ -70,7 +72,10 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
     protected float engineTargetAtDismount = 0.0f;
 
     public static final int TARGET_FUEL = 1000;
-    public static final int LOW_FUEL = 900;
+    // Reference values for the low-fuel threshold: one stack of planks
+    // (vanilla plank burn time is 300 ticks).
+    public static final int REFERENCE_STACK_SIZE = 64;
+    public static final int PLANKS_BURN_TIME = 300;
 
     private final int[] fuel;
 
@@ -89,7 +94,7 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
         fuel = new int[getInventoryDescription().getSlots(VehicleInventoryDescription.BOILER).size()];
 
         for (EngineVehicle.Cautions c : EngineVehicle.Cautions.values()) {
-            cautions.compute(c, (cautions, v) -> 0);
+            cautions.put(c, 0);
         }
     }
 
@@ -154,7 +159,12 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
         if (!level().isClientSide() && getControllingPassenger() instanceof ServerPlayer player) {
             if (altitudePenalty < 1.0f) {
                 if (highAltitudeWarningCooldown <= 0) {
-                    player.displayClientMessage(Component.translatable("immersive_aircraft.too_high_to_fly"), true);
+                    // With the gyroscope HUD upgrade installed the warning is displayed in the
+                    // HUD's caution strip instead (the TOO_HIGH caution is already raised in
+                    // handleWarnings), so action-bar messages don't overlap with the HUD.
+                    if (!hasGyroscopeHudUpgrade()) {
+                        player.displayClientMessage(Component.translatable("immersive_aircraft.too_high_to_fly"), true);
+                    }
                     highAltitudeWarningCooldown = 40;
                 }
             } else {
@@ -191,7 +201,7 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
             consumeFuel(getFuelConsumption());
         }
 
-        // Refuel - remove isVehicle() check to allow refueling without pilot
+        // Refuel continuously, even without a pilot aboard
         if (!level().isClientSide()) {
             refuel();
         }
@@ -199,16 +209,29 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
         // Fuel notification
         if (getControllingPassenger() instanceof ServerPlayer player) {
             float utilization = getFuelUtilization();
+            boolean hudInstalled = hasGyroscopeHudUpgrade();
             if (utilization > 0 && isFuelLow()) {
+                // Route the warning into the gyroscope HUD's caution strip when installed;
+                // refreshed every tick so the lamp stays lit until the condition clears.
+                if (hudInstalled) {
+                    cautions.put(Cautions.LOW_FUEL, 40);
+                }
                 if (lastFuelState != FuelState.LOW) {
-                    player.displayClientMessage(Component.translatable("immersive_aircraft." + getFuelType() + ".low"), true);
+                    if (!hudInstalled) {
+                        player.displayClientMessage(Component.translatable("immersive_aircraft." + getFuelType() + ".low"), true);
+                    }
                     lastFuelState = FuelState.LOW;
                 }
             } else if (utilization > 0) {
                 lastFuelState = FuelState.FUELED;
             } else {
+                if (hudInstalled) {
+                    cautions.put(Cautions.FUEL_OUT, 40);
+                }
                 if (lastFuelState != FuelState.EMPTY) {
-                    player.displayClientMessage(Component.translatable("immersive_aircraft." + getFuelType() + "." + (lastFuelState == FuelState.FUELED ? "out" : "none")), true);
+                    if (!hudInstalled) {
+                        player.displayClientMessage(Component.translatable("immersive_aircraft." + getFuelType() + "." + (lastFuelState == FuelState.FUELED ? "out" : "none")), true);
+                    }
                     lastFuelState = FuelState.EMPTY;
                 }
             }
@@ -261,7 +284,7 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
             return 1.0f;
         }
 
-        // Мощность падает на 10% каждые 10 блоков выше границы
+        // Engine power drops by 10% for every 10 blocks above the threshold
         float penalty = 1.0f - 0.1f * (float)(altitudeAboveThreshold / 10.0d);
         return Math.max(0.0f, penalty);
     }
@@ -282,6 +305,13 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
         return getEnginePower();
     }
 
+    /**
+     * True when the remaining fuel is below the low-fuel threshold:
+     * 20% of one full stack of planks (64 items x 300 ticks burn time), scaled by this
+     * vehicle's fuel consumption stat (VehicleStat.FUEL, includes upgrades).
+     * The estimate sums the already-burned fuel in every boiler tank PLUS the unburned
+     * fuel items still stored in the boiler slots.
+     */
     public boolean isFuelLow() {
         if (!Config.getInstance().burnFuelInCreative && isPilotCreative()) {
             return false;
@@ -290,16 +320,34 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
         if (level().isClientSide()) {
             return entityData.get(LOW_ON_FUEL);
         } else {
-            boolean low = true;
-            for (int i : fuel) {
-                if (i > LOW_FUEL) {
-                    low = false;
-                    break;
+            List<SlotDescription> boilerSlots = getInventoryDescription().getSlots(VehicleInventoryDescription.BOILER);
+            long remaining = 0;
+            for (int i = 0; i < fuel.length && i < boilerSlots.size(); i++) {
+                // Fuel already burned into the tank...
+                remaining += fuel[i];
+                // ...plus the fuel item sitting in the boiler slot, not yet burned.
+                ItemStack stack = getInventory().getItem(boilerSlots.get(i).index());
+                if (!stack.isEmpty()) {
+                    remaining += Utils.getFuelTime(stack);
                 }
             }
+
+            // Low-fuel threshold: 20% of "64 planks x 300 ticks", scaled by this vehicle's
+            // fuel consumption stat.
+            double lowThreshold = 0.2 * REFERENCE_STACK_SIZE * PLANKS_BURN_TIME * getProperties().get(VehicleStat.FUEL);
+            boolean low = remaining < lowThreshold;
             entityData.set(LOW_ON_FUEL, low);
             return low;
         }
+    }
+
+    /**
+     * True when the gyroscope HUD upgrade is installed. Mirrors the exact condition the
+     * HUD overlay uses to render (VehicleStat.HUD == 0), so warnings can be rerouted
+     * into the HUD instead of the action bar.
+     */
+    private boolean hasGyroscopeHudUpgrade() {
+        return getProperties().get(VehicleStat.HUD) == 0.0f;
     }
 
     public String getFuelType() {
@@ -400,7 +448,7 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
                 entityData.set(UTILIZATION, 0.0f);
                 return 0.0f;
             }
-            float utilization = (float) running / fuel.length * (isFuelLow() ? 0.75f : 1.0f);
+            float utilization = (float) running / fuel.length;
             entityData.set(UTILIZATION, utilization);
             return utilization;
         }

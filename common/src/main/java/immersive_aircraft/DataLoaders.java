@@ -6,8 +6,11 @@ import immersive_aircraft.data.VehicleDataLoader;
 import immersive_aircraft.resources.BBModelLoader;
 
 public class DataLoaders {
+    /**
+     * No-op hook. Calling it forces the static initializer below to run,
+     * which registers the data and resource reload listeners.
+     */
     public static void bootstrap() {
-        // nop
     }
 
     static {

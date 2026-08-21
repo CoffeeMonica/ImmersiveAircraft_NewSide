@@ -16,7 +16,8 @@ import java.util.*;
 import java.util.function.Supplier;
 
 /**
- * Contains all the crap required to interface with forge's code
+ * NeoForge implementation of the registration abstraction layer:
+ * deferred registry access plus data/resource loader collection.
  */
 public class RegistrationImpl extends Registration.Impl {
     private final Map<String, RegistryRepo> repos = new HashMap<>();
@@ -83,7 +84,7 @@ public class RegistrationImpl extends Registration.Impl {
     }
 
     public static class DataLoaderRegister {
-        // Doing no setter means only the RegistrationImpl class can get access to registering more loaders.
+        // No public add method: only RegistrationImpl may register additional loaders.
         private final List<PreparableReloadListener> dataLoaders = new ArrayList<>();
 
         public List<PreparableReloadListener> getLoaders() {

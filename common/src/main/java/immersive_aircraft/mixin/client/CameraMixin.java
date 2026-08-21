@@ -17,10 +17,10 @@ public abstract class CameraMixin {
     @Inject(method = "setup", at = @At("TAIL"))
     public void ia$setup(Level level, Entity entity, boolean thirdPerson, boolean inverseView, float tickDelta, CallbackInfo ci) {
         if (entity.getVehicle() instanceof VehicleEntity vehicle) {
-            // Не отодвигаем камеру, если игрок использует подзорную трубу (scoping)
+            // Don't move the camera while the player is scoping through a telescope
             boolean isScoping = vehicle instanceof InventoryVehicleEntity invVehicle && invVehicle.isScoping();
-            
-            // Если hideVehicleWhileScoping включен и игрок смотрит в трубу — не двигаем камеру
+
+            // Skip the third-person zoom-out when scoping and hideVehicleWhileScoping is enabled
             if (isScoping && Config.getInstance().hideVehicleWhileScoping) {
                 return;
             }

@@ -15,7 +15,7 @@ public class NeoForgeOverlayRenderer {
         event.registerAbove(VanillaGuiLayers.FOOD_LEVEL, Main.locate("ia_overlay"),
                 (graphics, delta) -> {
                     OverlayRenderer.renderOverlay(graphics, delta.getGameTimeDeltaTicks(), 49);
-                    // TODO: Where is forgeGui.rightHeight += 10;?
+                    // TODO: push other GUI layers down like the old forgeGui.rightHeight += 10 did.
                 });
     }
 }

@@ -46,11 +46,11 @@ public class TinyTNT extends PrimedTnt {
     }
 
     private void boom() {
-        // Визуальный взрыв (без урона сущностям и блокам)
+        // Visual explosion only (no damage to entities or blocks)
         this.level().explode(this, this.getX(), this.getY(0.0625), this.getZ(), 4.0f, Level.ExplosionInteraction.NONE);
 
         if (Config.getInstance().weaponsAreDestructive) {
-            // Ручной расчёт урона, исключая владельца (свой самолёт)
+            // Manual damage calculation, excluding the owner (the launching aircraft)
             float radius = 4.0f;
             AABB aabb = new AABB(
                     this.getX() - radius, this.getY() - radius, this.getZ() - radius,

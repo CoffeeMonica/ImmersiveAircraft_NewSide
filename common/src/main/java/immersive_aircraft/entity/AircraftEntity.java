@@ -176,9 +176,11 @@ public abstract class AircraftEntity extends EngineVehicle {
 
     public float getWindStrength() {
         float sensitivity = getProperties().get(VehicleStat.WIND);
-        float thundering = level().getRainLevel(0.0f);
-        float raining = level().getThunderLevel(0.0f);
-        float weather = (float) ((Config.getInstance().windClearWeather + getDeltaMovement().length()) + thundering * Config.getInstance().windThunderWeather + raining * Config.getInstance().windRainWeather);
+        // Note: kept exactly as in the original mod - the rain level is scaled by
+        // windThunderWeather and the thunder level by windRainWeather (crosswise).
+        float rainLevel = level().getRainLevel(0.0f);
+        float thunderLevel = level().getThunderLevel(0.0f);
+        float weather = (float) ((Config.getInstance().windClearWeather + getDeltaMovement().length()) + rainLevel * Config.getInstance().windThunderWeather + thunderLevel * Config.getInstance().windRainWeather);
         return weather * sensitivity;
     }
 

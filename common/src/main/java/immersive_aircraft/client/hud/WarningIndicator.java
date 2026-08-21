@@ -23,7 +23,7 @@ public class WarningIndicator implements Indicator {
 
     public WarningIndicator() {
         for (EngineVehicle.Cautions c : EngineVehicle.Cautions.values()) {
-            cMap.compute(c, (cautions, v) -> false);
+            cMap.put(c, false);
         }
     }
 

@@ -47,13 +47,13 @@ public class VehicleItem extends DescriptionItem {
     public InteractionResult use(Level world, Player user, InteractionHand hand) {
         ItemStack itemStack = user.getItemInHand(hand);
         BlockHitResult hitResult = getPlayerPOVHitResult(world, user, onWater ? ClipContext.Fluid.ANY : ClipContext.Fluid.NONE);
-        if (((HitResult) hitResult).getType() == HitResult.Type.MISS) {
+        if (hitResult.getType() == HitResult.Type.MISS) {
             error(user, "immersive_aircraft.tooltip.no_target");
             return InteractionResult.PASS;
         }
 
         // Place the vehicle
-        if (((HitResult) hitResult).getType() == HitResult.Type.BLOCK) {
+        if (hitResult.getType() == HitResult.Type.BLOCK) {
             VehicleEntity entity = constructor.create(world);
 
             entity.readItemTag(itemStack);

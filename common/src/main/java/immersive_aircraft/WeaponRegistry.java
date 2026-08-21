@@ -27,8 +27,11 @@ public class WeaponRegistry {
         register(Main.locate("bomb_bay"), BombBay::new);
     }
 
+    /**
+     * No-op hook. Calling it forces the static initializer above to run,
+     * which populates the weapon registry.
+     */
     public static void bootstrap() {
-        // nop
     }
 
     public static WeaponConstructor get(ItemStack weapon) {

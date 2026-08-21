@@ -71,15 +71,15 @@ public class BulletEntity extends AbstractHurtingProjectile {
         if (entity == null) {
             return false;
         }
-        // Нельзя попасть в самого себя
+        // Cannot hit the shooter itself
         if (target == entity) {
             return false;
         }
-        // Нельзя попасть в пассажиров того же транспорта
+        // Cannot hit passengers riding the same vehicle
         if (entity.isPassengerOfSameVehicle(target)) {
             return false;
         }
-        // Нельзя попасть в транспорт, в котором сидит стрелок
+        // Cannot hit the vehicle the shooter is riding
         if (target == entity.getVehicle()) {
             return false;
         }

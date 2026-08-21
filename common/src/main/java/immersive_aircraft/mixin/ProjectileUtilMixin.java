@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -27,9 +28,36 @@ public class ProjectileUtilMixin {
         ia$vehicleTrace(cir.getReturnValue(), shooter.level(), shooter, startVec, endVec, boundingBox,filter, 0.0f, distance).ifPresent(cir::setReturnValue);
     }
 
+    @Inject(method = "getEntityHitResult(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/projectile/Projectile;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/AABB;Ljava/util/function/Predicate;)Lnet/minecraft/world/phys/EntityHitResult;", at = @At("RETURN"), cancellable = true)
+    private static void ia$getEntityHitResult(Level level, Projectile projectile, Vec3 startVec, Vec3 endVec, AABB boundingBox, Predicate<Entity> filter, CallbackInfoReturnable<EntityHitResult> cir) {
+        ia$vehicleTrace(cir.getReturnValue(), level, projectile, startVec, endVec, boundingBox, filter, 0.0f, Double.MAX_VALUE).ifPresent(cir::setReturnValue);
+    }
+
     @Inject(method = "getEntityHitResult(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/AABB;Ljava/util/function/Predicate;F)Lnet/minecraft/world/phys/EntityHitResult;", at = @At("RETURN"), cancellable = true)
     private static void ia$getEntityHitResult(Level level, Entity projectile, Vec3 startVec, Vec3 endVec, AABB boundingBox, Predicate<Entity> filter, float inflationAmount, CallbackInfoReturnable<EntityHitResult> cir) {
         ia$vehicleTrace(cir.getReturnValue(), level, projectile, startVec, endVec, boundingBox, filter, inflationAmount, Double.MAX_VALUE).ifPresent(cir::setReturnValue);
+    }
+
+    @Inject(method = "getManyEntityHitResult(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/AABB;Ljava/util/function/Predicate;Z)Ljava/util/Collection;", at = @At("RETURN"), cancellable = true)
+    private static void ia$getManyEntityHitResult(Level level, Entity projectile, Vec3 startVec, Vec3 endVec, AABB boundingBox, Predicate<Entity> filter, boolean flag, CallbackInfoReturnable<Collection<EntityHitResult>> cir) {
+        // 1.21.11 arrows (and tridents) scan entities through this multi-hit overload, which
+        // only tests each entity's MAIN bounding box - additional vehicle hit boxes were
+        // silently skipped. Trace the shapes and append the missing vehicle hit.
+        Optional<EntityHitResult> optional = ia$vehicleTrace(null, level, projectile, startVec, endVec, boundingBox, filter, 0.0f, Double.MAX_VALUE);
+        if (optional.isEmpty()) {
+            return;
+        }
+        EntityHitResult vehicleHit = optional.get();
+        Collection<EntityHitResult> current = cir.getReturnValue();
+        // If vanilla already found this vehicle through its main box, leave the result untouched.
+        for (EntityHitResult existing : current) {
+            if (existing.getEntity() == vehicleHit.getEntity()) {
+                return;
+            }
+        }
+        List<EntityHitResult> result = new ArrayList<>(current);
+        result.add(vehicleHit);
+        cir.setReturnValue(result);
     }
 
     @Unique

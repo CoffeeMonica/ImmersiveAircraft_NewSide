@@ -14,7 +14,10 @@ import net.minecraft.world.InteractionHand;
 public class ClientMain {
     private static int activeTicks;
 
-    // This is ugly. And wrong. And bad. But it works, and I don't care enough to fix it properly.
+    /**
+     * Consumes a key press exactly once: drains all pending clicks and forces
+     * the pressed state off, so no other key handling picks up the same press.
+     */
     protected static boolean consumeClick(KeyMapping keyMapping) {
         if (keyMapping.isDown() && keyMapping.consumeClick()) {
             keyMapping.setDown(false);

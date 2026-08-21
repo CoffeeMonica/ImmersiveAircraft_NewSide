@@ -68,6 +68,10 @@ public interface Items {
         return register;
     }
 
+    /**
+     * No-op hook. Calling it forces the static field initializers above to run,
+     * which register all items.
+     */
     static void bootstrap() {
     }
 

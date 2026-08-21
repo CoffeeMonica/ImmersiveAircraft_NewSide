@@ -6,7 +6,8 @@ import net.minecraft.world.level.Level;
 import org.joml.Vector3f;
 
 /**
- * Implements airplane like physics properties and accelerated towards
+ * An airplane-style aircraft: forward thrust, dedicated pitch controls and
+ * gravity that decreases with speed (lift).
  */
 public abstract class AirplaneEntity extends AircraftEntity {
     public AirplaneEntity(EntityType<? extends AircraftEntity> entityType, Level world, boolean canExplodeOnCrash) {

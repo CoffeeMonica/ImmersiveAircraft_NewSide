@@ -4,7 +4,6 @@ import immersive_aircraft.client.ColorUtils;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -17,9 +16,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 
-/*
-Added functionality to allow vehicles to be dyed.
-- Code by Cibernet
+/**
+ * Adds dyeing support to vehicles.
+ * Original concept by Cibernet.
  */
 public abstract class DyeableVehicleEntity extends VehicleEntity {
     protected static final EntityDataAccessor<Integer> DYE_COLOR = SynchedEntityData.defineId(DyeableVehicleEntity.class, EntityDataSerializers.INT);
@@ -105,10 +104,5 @@ public abstract class DyeableVehicleEntity extends VehicleEntity {
 
     public int getDefaultDyeColor() {
         return 0xFFFFFF;
-    }
-
-    @Override
-    public Component getDisplayName() {
-        return super.getDisplayName();
     }
 }

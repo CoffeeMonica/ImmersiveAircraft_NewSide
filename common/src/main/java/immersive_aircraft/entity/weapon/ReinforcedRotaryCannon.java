@@ -21,7 +21,6 @@ import static immersive_aircraft.Entities.BULLET;
 public class ReinforcedRotaryCannon extends BulletWeapon {
     private final RotationalManager rotationalManager = new RotationalManager(this);
     private float cooldown = 0.0f;
-    private static final float FIRE_INTERVAL = 4.0f / 60.0f; // 3x faster than rotary cannon
 
     public ReinforcedRotaryCannon(VehicleEntity entity, ItemStack stack, WeaponMount mount, int slot) {
         super(entity, stack, mount, slot);
@@ -34,11 +33,18 @@ public class ReinforcedRotaryCannon extends BulletWeapon {
     }
 
     public float getVelocity() {
-        return 12.0f; // 3x faster than rotary cannon (4.0 * 3)
+        return Config.getInstance().reinforcedRotaryCannonVelocity;
     }
 
     public float getInaccuracy() {
-        return 1.0f;
+        return Config.getInstance().reinforcedRotaryCannonInaccuracy;
+    }
+
+    private float getMaxCooldown() {
+        // Seconds between shots; the default of 4/60s is 3x shorter than the rotary cannon's.
+        // Because the cooldown is decremented once per tick (1/20s), this lands on one shot
+        // every 2 ticks in practice, i.e. about twice the effective fire rate.
+        return Config.getInstance().reinforcedRotaryCannonCooldown;
     }
 
     @Override
@@ -78,7 +84,7 @@ public class ReinforcedRotaryCannon extends BulletWeapon {
     @Override
     public void clientFire(int index) {
         if (cooldown <= 0.0f) {
-            cooldown = FIRE_INTERVAL;
+            cooldown = getMaxCooldown();
 
             // Advance the barrel rotation for animation.
             rotationalManager.roll += 0.25f;

@@ -45,7 +45,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.fish.WaterAnimal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.DismountHelper;
 import net.minecraft.world.item.Item;
@@ -256,7 +255,7 @@ public abstract class VehicleEntity extends Entity {
             return true;
         }
 
-        // Player on an empty vehicle is faster
+        // Unoccupied vehicles break faster when punched by players
         if (amount > 0 && source.getEntity() instanceof Player && getPassengers().isEmpty() && source.isDirect()) {
             amount = Math.max(5.0f, amount);
         }
@@ -294,7 +293,7 @@ public abstract class VehicleEntity extends Entity {
                 player.awardStat(AircraftStats.CRASHES, 1);
             }
 
-            // Saving cords for explode (if enabled)
+            // Save the current position for the crash explosion (if enabled)
             double x = getX();
             double y = getY();
             double z = getZ();
@@ -482,8 +481,8 @@ public abstract class VehicleEntity extends Entity {
         }
 
 
-        // interpolate keys for visual feedback
-        // Continue updating inputs even without pilot to prevent unwanted control drift
+        // Interpolate input keys for smooth visual feedback.
+        // Without a pilot the inputs are zero, so this smoothly decays the visuals back to neutral.
         if (isLocalInstanceAuthoritative()) {
             pressingInterpolatedX.update(movementX);
             pressingInterpolatedY.update(movementY);
@@ -735,7 +734,7 @@ public abstract class VehicleEntity extends Entity {
     }
 
     public void addItemTag(ItemStack stack) {
-        // Store plane's name
+        // Store the vehicle's custom name
         if (hasCustomName()) {
             stack.set(DataComponents.CUSTOM_NAME, getCustomName());
         }
@@ -801,7 +800,20 @@ public abstract class VehicleEntity extends Entity {
     @Override
     public void move(@NotNull MoverType movementType, @NotNull Vec3 movement) {
         Vec3 prediction = position().add(movement);
+
+        // Remember the vertical speed at the moment of touchdown. Impact damage is based on
+        // how FAST the vehicle hits the ground, not on accumulated fall distance: aircraft
+        // descend slowly (heavy damping), so accumulating distance made even gentle
+        // dirigible/drone landings take damage.
+        boolean airborneBeforeMove = !onGround();
+        double verticalImpact = airborneBeforeMove ? Math.max(0.0, -movement.y) : 0.0;
+
         super.move(movementType, movement);
+
+        // Hard vertical touchdown (water landings never hurt)
+        if (verticalImpact > 0.0 && onGround() && !isInWater()) {
+            applyFallDamage(verticalImpact);
+        }
 
         // Collision damage
         if (verticalCollision || horizontalCollision) {
@@ -845,16 +857,24 @@ public abstract class VehicleEntity extends Entity {
         return Math.min(1.0f, super.getBlockSpeedFactor());
     }
 
+    /**
+     * Fall damage is based on the vertical impact speed (blocks/tick) instead of fall distance:
+     * slow descents of dirigibles/drones (~0.1-0.3 blocks/tick) are always safe, while dives
+     * above the safe speed hurt. Raw damage is further scaled by durability and
+     * damagePerHealthPoint through hurtServer.
+     */
+    private void applyFallDamage(double impactSpeed) {
+        // Safe touchdown speed: 0.5 blocks/tick = 10 m/s. Anything gentler is a safe landing.
+        double safeImpactSpeed = 0.5;
+        if (impactSpeed > safeImpactSpeed) {
+            hurt(level().damageSources().fall(), (float) ((impactSpeed - safeImpactSpeed) * 8.0));
+        }
+    }
+
     @Override
     protected void checkFallDamage(double heightDifference, boolean onGround, @NotNull BlockState landedState, @NotNull BlockPos landedPosition) {
-        if (level().isClientSide() || !onGround || heightDifference <= 0.0) {
-            return;
-        }
-
-        float damage = (float) Math.max(0.0, heightDifference - 1.5);
-        if (damage > 0.0f) {
-            hurt(level().damageSources().fall(), damage * 0.5f);
-        }
+        // Intentionally empty: vanilla fall-distance accumulation is meaningless for aircraft,
+        // fall damage is handled in move() based on the vertical impact speed.
     }
 
     public void setDamageWobbleStrength(float wobbleStrength) {
@@ -1087,10 +1107,5 @@ public abstract class VehicleEntity extends Entity {
         BBAnimationVariables.set("velocity_x", (float) speed.x);
         BBAnimationVariables.set("velocity_y", (float) speed.y);
         BBAnimationVariables.set("velocity_z", (float) speed.z);
-    }
-
-    @Override
-    public Component getDisplayName() {
-        return super.getDisplayName();
     }
 }

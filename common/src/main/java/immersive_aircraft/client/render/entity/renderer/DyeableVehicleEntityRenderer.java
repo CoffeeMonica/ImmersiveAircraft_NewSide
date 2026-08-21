@@ -17,7 +17,7 @@ public abstract class DyeableVehicleEntityRenderer<T extends DyeableVehicleEntit
 
     public void renderUndyed(BBModel model, BBObject object, MultiBufferSource vertexConsumerProvider, T entity, PoseStack matrixStack, int light, float time) {
         if (entity.getDyeColor() < 0) {
-            renderObjectInner(model, object, matrixStack, vertexConsumerProvider, light, time, entity,  null,  1.0f,1.0f,1.0f, 1.0f) ;
+            renderObjectInner(model, object, matrixStack, vertexConsumerProvider, light, time, entity, null, 1.0f, 1.0f, 1.0f, 1.0f);
         }
     }
 
@@ -27,6 +27,6 @@ public abstract class DyeableVehicleEntityRenderer<T extends DyeableVehicleEntit
         }
         int color = highlight ? entity.getHighlightColor() : entity.getBodyColor();
         float[] rgb = ColorUtils.hexToDecimalRGB(color);
-        renderObjectInner(model, object, matrixStack, vertexConsumerProvider, light, time, entity,  null,  rgb[0], rgb[1], rgb[2], 1.0f) ;
+        renderObjectInner(model, object, matrixStack, vertexConsumerProvider, light, time, entity, null, rgb[0], rgb[1], rgb[2], 1.0f);
     }
 }

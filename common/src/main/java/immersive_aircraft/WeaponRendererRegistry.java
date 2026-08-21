@@ -25,8 +25,11 @@ public class WeaponRendererRegistry {
         register(Main.locate("bomb_bay"), new SimpleWeaponRenderer("bomb_bay"));
     }
 
+    /**
+     * No-op hook. Calling it forces the static initializer above to run,
+     * which populates the weapon renderer registry.
+     */
     public static void bootstrap() {
-        // nop
     }
 
     public static <W extends Weapon> WeaponRenderer<W> get(W weapon) {

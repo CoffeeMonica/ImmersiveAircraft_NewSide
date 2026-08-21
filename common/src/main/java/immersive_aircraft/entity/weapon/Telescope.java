@@ -35,7 +35,7 @@ public class Telescope extends Weapon {
 
     @Override
     public void fire(Vector3f direction) {
-        // pass
+        // The telescope cannot fire anything, it only scopes
     }
 
     @Override
@@ -48,7 +48,7 @@ public class Telescope extends Weapon {
         lastFireTick = 2;
     }
 
-    public Boolean isScoping() {
+    public boolean isScoping() {
         return lastFireTick > 0;
     }
 

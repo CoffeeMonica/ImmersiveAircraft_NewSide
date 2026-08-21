@@ -94,8 +94,11 @@ public interface Entities {
             .fireImmune()
     );
 
+    /**
+     * No-op hook. Calling it forces the static field initializers above to run,
+     * which register all entity types.
+     */
     static void bootstrap() {
-
     }
 
     static <T extends Entity> Supplier<EntityType<T>> register(String name, EntityType.Builder<T> builder) {

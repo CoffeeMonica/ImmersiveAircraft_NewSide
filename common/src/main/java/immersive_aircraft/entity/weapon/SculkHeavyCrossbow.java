@@ -16,7 +16,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Matrix3f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
@@ -56,18 +55,14 @@ public class SculkHeavyCrossbow extends HeavyCrossbow {
     }
 
     private Vec3 getMountWorldPos() {
-        // Calculate the beam start position from the MOUNT position (barrel tip), not entity center
-        Vector4f mountPos = new Vector4f(getBarrelOffset());
-        mountPos.mul(getTransform());
-
-        Vector3f localPos = new Vector3f(mountPos.x, mountPos.y, mountPos.z);
-        localPos.mul(getEntity().getVehicleNormalTransform());
-
-        return new Vec3(
-                getEntity().getX() + localPos.x,
-                getEntity().getY() + localPos.y + 0.625f,
-                getEntity().getZ() + localPos.z
-        );
+        // Same transform chain BulletWeapon.fire uses to spawn bullets (proven to line up
+        // with the visual weapon): barrel offset -> mount space -> world space.
+        // NOTE: no manual Y fudge here - any extra offset shifts the beam off the aim line,
+        // so it flies above thin hit boxes (wings) and hits get dropped.
+        Vector4f position = new Vector4f(getBarrelOffset());
+        position.mul(getTransform());
+        position.mul(getEntity().getVehicleTransform());
+        return new Vec3(position.x(), position.y(), position.z());
     }
 
     private void shootSonicBeam(Vector3f direction) {
@@ -76,7 +71,9 @@ public class SculkHeavyCrossbow extends HeavyCrossbow {
         Vec3 shooterPos = getMountWorldPos();
         Vec3 dir = new Vec3(direction.x(), direction.y(), direction.z()).normalize();
         double maxDistance = Config.getInstance().sculkHeavyCrossBowRange;
-        float radius = Config.getInstance().sculkHeavyCrossBowRadius;
+        // Never allow a zero-size query box (e.g. radius set to 0 in a stale config),
+        // otherwise getEntities would find almost nothing and hits would be dropped.
+        float radius = Math.max(0.5f, Config.getInstance().sculkHeavyCrossBowRadius);
 
         // Play sound from mount position
         world.playSound(null, shooterPos.x, shooterPos.y, shooterPos.z,
@@ -88,15 +85,21 @@ public class SculkHeavyCrossbow extends HeavyCrossbow {
 
         Set<Entity> damagedEntities = new HashSet<>();
 
+        Vec3 prevPos = shooterPos;
+
         while (totalDistance < maxDistance) {
             Vec3 beamPos = shooterPos.add(dir.scale(totalDistance));
             AABB box = new AABB(beamPos.x - radius, beamPos.y - radius, beamPos.z - radius,
                     beamPos.x + radius, beamPos.y + radius, beamPos.z + radius);
+            // Query volume also covers the segment travelled since the previous step,
+            // so thin shapes cannot slip between two sampling points.
+            AABB queryBox = box.minmax(new AABB(prevPos.x - radius, prevPos.y - radius, prevPos.z - radius,
+                    prevPos.x + radius, prevPos.y + radius, prevPos.z + radius));
 
             // Damage all entities (including vehicles) whose bounding boxes intersect the beam
             // Skip the first 2 blocks to avoid hitting the pilot
             if (totalDistance >= 2.0) {
-                List<Entity> entities = world.getEntitiesOfClass(Entity.class, box, entity -> {
+                List<Entity> entities = world.getEntitiesOfClass(Entity.class, queryBox, entity -> {
                     return entity != shooter
                             && entity.isAlive()
                             && entity.isPickable()
@@ -104,11 +107,12 @@ public class SculkHeavyCrossbow extends HeavyCrossbow {
                 });
 
                 for (Entity target : entities) {
-                    // Check if the entity's main bounding box or any additional bounding boxes intersect the beam
-                    boolean hit = target.getBoundingBox().intersects(box);
+                    boolean hit = target.getBoundingBox().intersects(queryBox);
                     if (!hit && target instanceof VehicleEntity vehicle) {
                         for (AABB shape : vehicle.getShapes()) {
-                            if (shape.intersects(box)) {
+                            // Precise segment clip: catches even very thin shapes (wings)
+                            // that lie between two beam sampling steps.
+                            if (shape.intersects(queryBox) || shape.clip(prevPos, beamPos).isPresent()) {
                                 hit = true;
                                 break;
                             }
@@ -166,6 +170,7 @@ public class SculkHeavyCrossbow extends HeavyCrossbow {
             }
 
             totalDistance += stepSize;
+            prevPos = beamPos;
         }
     }
 
@@ -175,18 +180,6 @@ public class SculkHeavyCrossbow extends HeavyCrossbow {
             cooldown = getMaxCooldown();
             NetworkHandler.sendToServer(new FireMessage(getSlot(), index, getDirection()));
         }
-    }
-
-    protected Vector3f getDirection() {
-        Vector3f direction = new Vector3f(0, 0, 1.0f);
-        direction.mul(new Matrix3f(getTransform()));
-        direction.mul(getEntity().getVehicleNormalTransform());
-        return direction;
-    }
-
-    @Override
-    public <T extends VehicleEntity> void setAnimationVariables(T entity, float time) {
-        super.setAnimationVariables(entity, time);
     }
 
     public float getCooldown() {

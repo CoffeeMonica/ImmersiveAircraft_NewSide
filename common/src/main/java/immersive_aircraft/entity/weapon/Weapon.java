@@ -74,6 +74,6 @@ public abstract class Weapon {
     public abstract void clientFire(int index);
 
     public <T extends VehicleEntity> void setAnimationVariables(T entity, float time) {
-        // nop
+        // Publishes no animation variables by default; subclasses add their own.
     }
 }

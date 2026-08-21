@@ -65,7 +65,9 @@ public class MultiKeyMapping extends KeyMapping {
     }
 
     /**
-     * Forge does some custom loading magic, lets just elevate the vanilla key to custom key if we detect such change
+     * The vanilla options screen may write the chosen key into the vanilla key
+     * field (e.g. while loading saved options). When such a change is detected,
+     * adopt it as the custom binding and reset the vanilla field.
      */
     public void validate() {
         if (!super.isDefault()) {

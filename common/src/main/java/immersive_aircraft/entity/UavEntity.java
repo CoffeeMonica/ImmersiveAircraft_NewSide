@@ -15,21 +15,21 @@ import net.minecraft.world.phys.Vec3;
 import java.util.UUID;
 
 /**
- * UAV - unmanned aircraft used as a bomb_bay projectile.
- * Cannot be boarded or placed. Has high initial HP that drops to 1 after 2 seconds.
- * Ignores collisions with the aircraft that launched it.
- * Flies until its single coal fuel runs out, then explodes.
+ * UAV - unmanned aircraft launched from a bomb bay.
+ * Cannot be boarded or placed. Has a temporary HP buffer that drops to 1
+ * after a few seconds of flight (see {@link #HP_DROP_DELAY}).
+ * Flies until its fuel runs out or it comes to a stop, then explodes.
  */
 public class UavEntity extends AirplaneEntity {
-    // Vanilla coal burns for 600 ticks (30 seconds)
+    // Flight duration per piece of fuel: 600 ticks = 30 seconds
     private static final int FUEL_TICKS = 600;
     // Speed below which the UAV is considered "not moving" (1 block/second = 0.05 blocks/tick)
     private static final double STOP_SPEED = 0.05;
     // Ticks of being stopped before exploding
     private static final int STOP_EXPLODE_DELAY = 20;
-    // Initial HP buffer, drops to 1 after 2 seconds
+    // Temporary HP buffer set on spawn so early hits don't destroy the UAV right away
     private static final float INITIAL_HP_BUFFER = 1000.0f;
-    // Time after spawn when HP drops (3 seconds = 60 ticks)
+    // Time after spawn when the HP buffer drops to 1 (60 ticks = 3 seconds)
     protected static final int HP_DROP_DELAY = 60;
 
     private int fuelTicks = FUEL_TICKS;
@@ -137,7 +137,7 @@ public class UavEntity extends AirplaneEntity {
         if (!level().isClientSide()) {
             spawnTicks++;
             if (spawnTicks == getHpDropDelay()) {
-                // Drop HP to 1 after 2 seconds
+                // Drop the HP buffer down to 1 once the protection window is over
                 setHealth(1.0f);
             }
         }
@@ -190,11 +190,7 @@ public class UavEntity extends AirplaneEntity {
 
     @Override
     public boolean canBeCollidedWith(net.minecraft.world.entity.Entity entity) {
-        // Ignore collisions with the launching aircraft
-        Entity owner = getOwner(level());
-        if (owner != null && owner == entity) {
-            return false;
-        }
+        // The UAV is launched in mid-air and never acts as a solid collision target
         return false;
     }
 

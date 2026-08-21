@@ -57,7 +57,8 @@ public class SparseSimpleInventory extends SimpleContainer {
                 inventoryRequested = true;
             }
         } else {
-            // Sync changed slots (excluding trailing inventory slots since they won't affect behavior)
+            // Round-robin sync: send one slot per tick, covering only the slots up to
+            // the last non-inventory slot, since cargo contents don't affect behavior
             int lastSyncIndex = entity.getInventoryDescription().getLastSyncIndex();
             if (lastSyncIndex == 0) return;
             int index = entity.tickCount % lastSyncIndex;

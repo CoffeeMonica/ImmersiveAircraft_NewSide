@@ -94,8 +94,10 @@ public class GyrodyneEntity extends Rotorcraft {
     protected void updateController() {
         super.updateController();
 
-        // launch that engine
-        if (getEngineTarget() < 1.0f) {
+        // launch that engine (pilot only!). Without this guard the non-force branch of
+        // setEngineTarget ("preserve RPM after eject") would restore the dismounted pilot's
+        // engine target every tick and the gyrodyne would hover in the air forever.
+        if (!getPassengers().isEmpty() && getEngineTarget() < 1.0f) {
             setEngineTarget(Math.max(0.0f, Math.min(1.0f, getEngineTarget() + pressingInterpolatedZ.getValue() * 0.05f - 0.035f)));
             updateEnginePowerTooltip();
 

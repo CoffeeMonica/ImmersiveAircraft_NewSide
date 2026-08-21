@@ -20,8 +20,11 @@ public interface Sounds {
     Supplier<SoundEvent> REPAIR = register("repair");
     Supplier<SoundEvent> CANNON = register("cannon");
 
+    /**
+     * No-op hook. Calling it forces the static initializer above to run,
+     * which registers all sound events.
+     */
     static void bootstrap() {
-        // nop
     }
 
     static Supplier<SoundEvent> register(String name) {

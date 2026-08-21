@@ -70,7 +70,6 @@ public class NetworkHandlerImpl extends NetworkHandler.Impl {
     // Prevent eagerly loading client-only networking classes on dedicated servers.
     private static final class ClientProxy {
         private ClientProxy() {
-            // Nop
         }
 
         public static void sendToServer(Message msg) {

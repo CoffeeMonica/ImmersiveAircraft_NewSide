@@ -1,9 +1,9 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    " C ",
+    "KCK",
     "CKC",
-    " C "
+    "KCK"
   ],
   "key": {
     "C": "minecraft:charcoal",

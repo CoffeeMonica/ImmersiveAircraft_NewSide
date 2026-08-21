@@ -50,7 +50,8 @@ public class WarshipEntity extends AirshipEntity {
             BBAnimationVariables.set("balloon_roll", (float) Utils.cosNoise((tickCount + tickDelta) * 0.01f) * 0.2f + getRoll(tickDelta) * 0.5f);
             BBAnimationVariables.set("balloon_pitch", (float) Utils.cosNoise(77.0f + (tickCount + tickDelta) * 0.02f) * 0.2f);
         } else {
-            // Weapon mounts would detach the vehicle if the vehicle is not moving
+            // Disable the idle balloon sway while weapons are mounted,
+            // otherwise the weapon mounts would visibly detach from the swaying balloon
             BBAnimationVariables.set("balloon_roll", 0.0f);
             BBAnimationVariables.set("balloon_pitch", 0.0f);
         }
@@ -94,6 +95,7 @@ public class WarshipEntity extends AirshipEntity {
         return getTurretGunner() == entity;
     }
 
+    @Override
     public void positionRider(@NotNull Entity passenger, @NotNull MoveFunction positionUpdater) {
         Matrix4f transform = getVehicleTransform();
 

@@ -21,7 +21,6 @@ import static immersive_aircraft.Entities.BULLET;
 public class RotaryCannon extends BulletWeapon {
     private final RotationalManager rotationalManager = new RotationalManager(this);
     private float cooldown = 0.0f;
-    private static final float FIRE_INTERVAL = 4.0f / 20.0f; // ~5 shots/sec, matching the original barrel-roll cadence
 
     public RotaryCannon(VehicleEntity entity, ItemStack stack, WeaponMount mount, int slot) {
         super(entity, stack, mount, slot);
@@ -34,11 +33,17 @@ public class RotaryCannon extends BulletWeapon {
     }
 
     public float getVelocity() {
-        return 4.0f;
+        return Config.getInstance().rotaryCannonVelocity;
     }
 
     public float getInaccuracy() {
-        return 1.0f;
+        return Config.getInstance().rotaryCannonInaccuracy;
+    }
+
+    private float getMaxCooldown() {
+        // Seconds between shots; the default of 0.2s means one shot every 4 ticks (~5 shots/sec),
+        // matching the original barrel-roll cadence.
+        return Config.getInstance().rotaryCannonCooldown;
     }
 
     @Override
@@ -78,7 +83,7 @@ public class RotaryCannon extends BulletWeapon {
     @Override
     public void clientFire(int index) {
         if (cooldown <= 0.0f) {
-            cooldown = FIRE_INTERVAL;
+            cooldown = getMaxCooldown();
 
             // Advance the barrel rotation for animation.
             rotationalManager.roll += 0.25f;

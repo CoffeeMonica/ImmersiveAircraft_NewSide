@@ -30,7 +30,6 @@ public class BBAnimationVariables {
         register("balloon_pitch");
         register("balloon_roll");
         register("chest");
-        register("turret_cooldown");
     }
 
     public static Argument[] getArgumentArray() {

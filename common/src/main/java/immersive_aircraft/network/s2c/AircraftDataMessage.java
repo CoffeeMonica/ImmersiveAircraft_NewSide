@@ -4,7 +4,6 @@ import immersive_aircraft.cobalt.network.Message;
 import immersive_aircraft.data.VehicleDataLoader;
 import immersive_aircraft.entity.misc.VehicleData;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
