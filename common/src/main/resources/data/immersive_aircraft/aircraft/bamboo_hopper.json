@@ -11,8 +11,8 @@
     "lift": 0.15,
     "rollFactor": 30.0,
     "groundPitch": 1.0,
-    "wind": 0.04,
-    "mass": 2.0,
+    "wind": 0.05,
+    "mass": 3.0,
     "fraction": 0.01,
     "groundFriction": 0.925,
     "wasterFriction": 0.95

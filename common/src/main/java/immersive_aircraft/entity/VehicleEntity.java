@@ -831,7 +831,7 @@ public abstract class VehicleEntity extends Entity {
                             NetworkHandler.sendToServer(new CollisionMessage(finalCollision));
                         } else if (getPassengers().isEmpty()) {
                             float mass = getVehicleData().getProperties().getOrDefault(VehicleStat.MASS, 1.0f);
-                            float appliedDamage = finalCollision * 1.5f * Config.getInstance().collisionDamageMultiplier * Math.max(1, mass / 2);
+                            float appliedDamage = finalCollision * 2f * Config.getInstance().collisionDamageMultiplier * Math.max(1, mass / 2);
                             hurt(level().damageSources().fall(), appliedDamage);
                         }
                     }
