@@ -27,6 +27,15 @@ public class Utils {
         return value;
     }
 
+    /**
+     * Same layered cosine noise, but with a constant phase offset applied BEFORE the
+     * per-layer frequency scaling. The offset shifts the whole waveform in time, which
+     * lets callers start the noise near zero instead of at its positive peak.
+     */
+    public static double cosNoise(double time, double phaseOffset) {
+        return cosNoise(time + phaseOffset, 5);
+    }
+
     public static int getFuelTime(ItemStack fuel) {
         if (fuel.isEmpty()) {
             return 0;

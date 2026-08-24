@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "RNR",
+    "NCN",
+    "RNR"
+  ],
+  "key": {
+    "R": "minecraft:redstone",
+    "N": "minecraft:iron_nugget",
+    "C": "minecraft:compass"
+  },
+  "result": {
+    "id": "immersive_aircraft:radar"
+  }
+}

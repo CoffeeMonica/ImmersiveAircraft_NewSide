@@ -619,8 +619,6 @@ public abstract class VehicleEntity extends Entity {
             return;
         }
 
-        Matrix4f transform = getVehicleTransform();
-
         int size = getPassengers().size() - 1;
         List<List<PositionDescriptor>> positions = getVehicleData().getPassengerPositions();
         if (size < positions.size()) {
@@ -638,7 +636,7 @@ public abstract class VehicleEntity extends Entity {
                 y -= (float) attachmentPoint.y;
                 z -= (float) attachmentPoint.z;
 
-                Vector4f worldPosition = transformPosition(transform, x, y, z);
+                Vec3 worldPosition = transformToWorld(x, y, z);
 
                 passenger.setPos(worldPosition.x, worldPosition.y, worldPosition.z);
 
@@ -990,11 +988,20 @@ public abstract class VehicleEntity extends Entity {
 
     public Matrix4f getVehicleTransform() {
         Matrix4f transform = new Matrix4f();
-        transform.translate((float) getX(), (float) getY(), (float) getZ());
+        // ROTATION ONLY: never bake the absolute world position into this float matrix.
+        // Floats lose all precision far from the world origin, which made riders,
+        // weapons and particles shake violently at large coordinates. Translation is
+        // applied in double precision via transformToWorld().
         transform.rotate(Axis.YP.rotationDegrees(-getYRot()));
         transform.rotate(Axis.XP.rotationDegrees(getXRot()));
         transform.rotate(Axis.ZP.rotationDegrees(getRoll()));
         return transform;
+    }
+
+    /** Transforms a vehicle-local offset to world coordinates in double precision. */
+    public Vec3 transformToWorld(float x, float y, float z) {
+        Vector3f v = transformVector(getVehicleNormalTransform(), x, y, z);
+        return new Vec3(getX() + v.x, getY() + v.y, getZ() + v.z);
     }
 
     private float quantize(float value) {
@@ -1035,6 +1042,13 @@ public abstract class VehicleEntity extends Entity {
     @SuppressWarnings("unused")
     protected static final Vector4f ZERO_VEC4 = new Vector4f();
 
+    /**
+     * True when the radar upgrade is installed in an upgrade slot of this aircraft.
+     */
+    public boolean hasRadarUpgrade() {
+        return this instanceof InventoryVehicleEntity && hasUpgrade(immersive_aircraft.Items.RADAR.get());
+    }
+
     @Override
     public boolean shouldRenderAtSqrDistance(double distance) {
         double d = Config.getInstance().renderDistance * getViewScale();
@@ -1054,14 +1068,26 @@ public abstract class VehicleEntity extends Entity {
     }
 
     protected AABB getOffsetBoundingBox(BoundingBoxDescriptor descriptor) {
-        Vector3f center = transformVectorQuantized(descriptor.x(), descriptor.y(), descriptor.z());
+        // Rotate the box CENTER by the full vehicle orientation (yaw+pitch+roll) and
+        // conservatively inflate the extents by the rotated box envelope, so hitboxes
+        // follow the aircraft's attitude instead of staying level.
+        Matrix3f r = getVehicleNormalTransform();
+        Vector3f center = transformVector(r, descriptor.x(), descriptor.y(), descriptor.z());
+
+        float ex = descriptor.width() / 2.0F;
+        float ey = descriptor.height() / 2.0F;
+        float ez = descriptor.depth() / 2.0F;
+        float hx = Math.abs(r.m00()) * ex + Math.abs(r.m10()) * ey + Math.abs(r.m20()) * ez;
+        float hy = Math.abs(r.m01()) * ex + Math.abs(r.m11()) * ey + Math.abs(r.m21()) * ez;
+        float hz = Math.abs(r.m02()) * ex + Math.abs(r.m12()) * ey + Math.abs(r.m22()) * ez;
+
         return new AABB(
-                center.x() - descriptor.width() / 2.0 + getX(),
-                center.y() - descriptor.height() / 2.0 + getY(),
-                center.z() - descriptor.width() / 2.0 + getZ(),
-                center.x() + descriptor.width() / 2.0 + getX(),
-                center.y() + descriptor.height() / 2.0 + getY(),
-                center.z() + descriptor.width() / 2.0 + getZ());
+                center.x() - hx + getX(),
+                center.y() - hy + getY(),
+                center.z() - hz + getZ(),
+                center.x() + hx + getX(),
+                center.y() + hy + getY(),
+                center.z() + hz + getZ());
     }
 
     public List<AABB> getAdditionalShapes() {

@@ -68,7 +68,8 @@ public class HeavyCrossbow extends BulletWeapon {
 
     @Override
     protected Entity getBullet(Vector4f position, Vector3f direction) {
-        Arrow arrow = new Arrow(getEntity().level(), position.x(), position.y(), position.z(), new ItemStack(net.minecraft.world.item.Items.ARROW), null);
+        VehicleEntity entity = getEntity();
+        Arrow arrow = new Arrow(getEntity().level(), position.x() + entity.getX(), position.y() + entity.getY(), position.z() + entity.getZ(), new ItemStack(net.minecraft.world.item.Items.ARROW), null);
         arrow.pickup = AbstractArrow.Pickup.DISALLOWED;
         // Set owner to the vehicle itself so arrows don't collide with it
         arrow.setOwner(getEntity());

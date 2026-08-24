@@ -10,6 +10,7 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 
@@ -43,12 +44,11 @@ public class BambooHopperEntity extends AirplaneEntity {
             return;
         }
 
-        Matrix4f transform = getVehicleTransform();
         double length = Math.min(100, getSpeedVector().length() * 20.0f);
         while (length > 1.0) {
             length--;
             if (length > random.nextFloat()) {
-                Vector4f p = transformPosition(transform, x + (random.nextFloat() - 0.5f), y, z - (random.nextFloat() - 0.0f));
+                Vec3 p = transformToWorld(x + (random.nextFloat() - 0.5f), y, z - (random.nextFloat() - 0.0f));
                 level().addParticle(ParticleTypes.BUBBLE, p.x, p.y, p.z, nx, ny, nz);
                 level().addParticle(ParticleTypes.SPLASH, p.x, p.y, p.z, nx, ny, nz);
             }

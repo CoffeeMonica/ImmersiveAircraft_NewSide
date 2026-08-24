@@ -46,8 +46,10 @@ public class TinyTNT extends PrimedTnt {
     }
 
     private void boom() {
-        // Visual explosion only (no damage to entities or blocks)
-        this.level().explode(this, this.getX(), this.getY(0.0625), this.getZ(), 4.0f, Level.ExplosionInteraction.NONE);
+        // weaponsAreDestructive decides whether the blast breaks blocks; otherwise the
+        // explosion is purely visual. Entity damage below is applied when destructive.
+        this.level().explode(this, this.getX(), this.getY(0.0625), this.getZ(), 4.0f,
+                Config.getInstance().weaponsAreDestructive ? Level.ExplosionInteraction.TNT : Level.ExplosionInteraction.NONE);
 
         if (Config.getInstance().weaponsAreDestructive) {
             // Manual damage calculation, excluding the owner (the launching aircraft)

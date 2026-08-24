@@ -15,6 +15,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix3f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
@@ -41,17 +42,26 @@ public abstract class BulletWeapon extends Weapon {
     }
 
     public void fire(Vector3f direction) {
-        // Calculate the position of the barrel
+        // Calculate the LOCAL position of the barrel (weapon transform only).
+        // The vehicle transform is rotation-only now; the entity's double-precision
+        // world position is added inside getBullet() implementations.
         Vector4f position = getBarrelOffset();
         VehicleEntity entity = getEntity();
         position.mul(getTransform());
-        position.mul(entity.getVehicleTransform());
 
         Vec3 speed = entity.getSpeedVector();
 
-        // Offset the position by the barrel length
+        // Offset the position by the barrel length along the aim direction,
+        // converted into vehicle-local space so 'position' stays fully local
         float barrelLength = getBarrelLength();
-        position.add(direction.x() * barrelLength, direction.y() * barrelLength, direction.z() * barrelLength, 0.0f);
+        Matrix3f inverseVehicleRotation = new Matrix3f(entity.getVehicleNormalTransform()).invert();
+        Vector3f localDirection = inverseVehicleRotation.transform(new Vector3f(direction.x(), direction.y(), direction.z()));
+        position.add(localDirection.x * barrelLength, localDirection.y * barrelLength, localDirection.z * barrelLength, 0.0f);
+
+        // Rotate the local offset into world-aligned offsets. The vehicle transform is
+        // ROTATION ONLY (no absolute translation), so this is precision-safe even far
+        // from the world origin - getBullet() then adds the entity position in doubles.
+        position.mul(entity.getVehicleTransform());
 
         // Spawn bullets
         for (int i = 0; i < getBulletCount(); i++) {

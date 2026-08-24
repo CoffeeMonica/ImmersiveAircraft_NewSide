@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "LLL",
+    "LLL",
+    "LLL"
+  ],
+  "key": {
+    "L": "minecraft:oak_leaves"
+  },
+  "result": {
+    "id": "immersive_aircraft:camouflage_net"
+  }
+}

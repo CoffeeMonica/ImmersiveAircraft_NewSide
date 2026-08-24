@@ -38,6 +38,18 @@ public record VehicleStat(String name, boolean positive, float defaultValue) {
     public static final VehicleStat HORIZONTAL_DECAY = register("horizontalDecay", false, 0.97f);
     public static final VehicleStat VERTICAL_DECAY = register("verticalDecay", false, 0.97f);
 
+    // Distance (blocks) from which the radar upgrade can detect this vehicle.
+    // A NEGATIVE value means a multiple of the config render distance (-1 = exactly the
+    // render distance). Upgrades scale the magnitude (camouflage net x0.5, radar x1.5).
+    // positive=false: lower detectability is better (camouflage shows green in tooltips).
+    public static final VehicleStat RADAR_DETECTABILITY = register("radarDetectability", false, 128.0f);
+    // Distance (blocks) at which this vehicle's engine sound fades to silence.
+    // Upgrades scale it (muffler x0.5). positive=false: quieter is better.
+    public static final VehicleStat SOUND_RANGE = register("soundRange", false, 48.0f);
+    // Marker stat for the radar upgrade tooltip ("Detects nearby aircraft").
+    // Has no physical effect - the radar logic checks the installed item instead.
+    public static final VehicleStat RADAR = register("radar", true);
+
     public static VehicleStat register(String name, boolean positive) {
         return register(name, positive, 0.0f);
     }

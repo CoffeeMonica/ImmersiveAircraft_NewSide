@@ -31,14 +31,14 @@ public interface Entities {
 
     Supplier<EntityType<UavEntity>> UAV = register("uav", EntityType.Builder
             .of(UavEntity::new, MobCategory.MISC)
-            .sized(1.0f, 0.566f)
+            .sized(1.5f, 0.566f)
             .clientTrackingRange(12)
             .fireImmune()
     );
 
     Supplier<EntityType<ImprovedUavEntity>> IMPROVED_UAV = register("improved_uav", EntityType.Builder
             .of(ImprovedUavEntity::new, MobCategory.MISC)
-            .sized(1.0f, 0.566f)
+            .sized(1.5f, 0.566f)
             .clientTrackingRange(12)
             .fireImmune()
     );
@@ -59,7 +59,7 @@ public interface Entities {
 
     Supplier<EntityType<WarshipEntity>> WARSHIP = register("warship", EntityType.Builder
             .of(WarshipEntity::new, MobCategory.MISC)
-            .sized(5.0f, 6.5f)
+            .sized(3.0f, 2.15f)
             .clientTrackingRange(16)
             .fireImmune()
     );

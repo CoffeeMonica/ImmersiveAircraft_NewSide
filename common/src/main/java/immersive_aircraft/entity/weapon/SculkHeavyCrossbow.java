@@ -50,19 +50,21 @@ public class SculkHeavyCrossbow extends HeavyCrossbow {
     @Override
     public void fire(Vector3f direction) {
         if (spentAmmoItems(Config.getInstance().arrowAmmunition, 1)) {
-            shootSonicBeam(direction);
+            // Recompute the beam direction SERVER-SIDE from this vehicle's own turret
+            // state. Trusting the client-sent direction desynchronizes origin and beam
+            // in multiplayer: the beam misses aircraft hit boxes and can clip the pilot.
+            shootSonicBeam(getDirection());
         }
     }
 
     private Vec3 getMountWorldPos() {
         // Same transform chain BulletWeapon.fire uses to spawn bullets (proven to line up
         // with the visual weapon): barrel offset -> mount space -> world space.
-        // NOTE: no manual Y fudge here - any extra offset shifts the beam off the aim line,
-        // so it flies above thin hit boxes (wings) and hits get dropped.
+        // The vehicle transform is rotation-only; the entity position is added in
+        // double precision so the beam origin stays exact far from the world origin.
         Vector4f position = new Vector4f(getBarrelOffset());
         position.mul(getTransform());
-        position.mul(getEntity().getVehicleTransform());
-        return new Vec3(position.x(), position.y(), position.z());
+        return getEntity().transformToWorld(position.x(), position.y(), position.z());
     }
 
     private void shootSonicBeam(Vector3f direction) {
@@ -85,6 +87,17 @@ public class SculkHeavyCrossbow extends HeavyCrossbow {
 
         Set<Entity> damagedEntities = new HashSet<>();
 
+        // Collect candidate vehicles along the ENTIRE beam corridor up front. A vehicle's
+        // detailed hit boxes (wings, balloons) extend far beyond its main entity box, so
+        // per-step main-box based entity retrieval silently skipped aircraft that were
+        // hit only on a wing - especially in multiplayer at longer ranges.
+        List<VehicleEntity> vehicles = world.getEntitiesOfClass(VehicleEntity.class,
+                new AABB(shooterPos, shooterPos.add(dir.scale(maxDistance))).inflate(radius + 16.0),
+                v -> v != shooter
+                        && v.getRootVehicle() != shooter
+                        && v.isAlive()
+                        && v.isPickable());
+
         Vec3 prevPos = shooterPos;
 
         while (totalDistance < maxDistance) {
@@ -96,11 +109,13 @@ public class SculkHeavyCrossbow extends HeavyCrossbow {
             AABB queryBox = box.minmax(new AABB(prevPos.x - radius, prevPos.y - radius, prevPos.z - radius,
                     prevPos.x + radius, prevPos.y + radius, prevPos.z + radius));
 
-            // Damage all entities (including vehicles) whose bounding boxes intersect the beam
-            // Skip the first 2 blocks to avoid hitting the pilot
+            // Damage all non-vehicle entities whose bounding boxes intersect the beam.
+            // Skip the first 2 blocks to avoid hitting the pilot.
             if (totalDistance >= 2.0) {
                 List<Entity> entities = world.getEntitiesOfClass(Entity.class, queryBox, entity -> {
-                    return entity != shooter
+                    return !(entity instanceof VehicleEntity)
+                            && entity != shooter
+                            && entity.getRootVehicle() != shooter
                             && entity.isAlive()
                             && entity.isPickable()
                             && !damagedEntities.contains(entity);
@@ -108,16 +123,6 @@ public class SculkHeavyCrossbow extends HeavyCrossbow {
 
                 for (Entity target : entities) {
                     boolean hit = target.getBoundingBox().intersects(queryBox);
-                    if (!hit && target instanceof VehicleEntity vehicle) {
-                        for (AABB shape : vehicle.getShapes()) {
-                            // Precise segment clip: catches even very thin shapes (wings)
-                            // that lie between two beam sampling steps.
-                            if (shape.intersects(queryBox) || shape.clip(prevPos, beamPos).isPresent()) {
-                                hit = true;
-                                break;
-                            }
-                        }
-                    }
 
                     if (hit) {
                         damagedEntities.add(target);
@@ -131,6 +136,28 @@ public class SculkHeavyCrossbow extends HeavyCrossbow {
                             living.knockback(1.5F, dx, dz);
                         }
                     }
+                }
+            }
+
+            // Aircraft: test every detailed bounding box shape of every candidate vehicle
+            // against this beam segment - completely independent of where the vehicle's
+            // main box happens to be.
+            for (VehicleEntity vehicle : vehicles) {
+                if (damagedEntities.contains(vehicle)) {
+                    continue;
+                }
+                boolean hit = false;
+                for (AABB shape : vehicle.getShapes()) {
+                    // Precise segment clip: catches even very thin shapes (wings)
+                    // that lie between two beam sampling steps.
+                    if (shape.intersects(queryBox) || shape.clip(prevPos, beamPos).isPresent()) {
+                        hit = true;
+                        break;
+                    }
+                }
+                if (hit) {
+                    damagedEntities.add(vehicle);
+                    vehicle.hurt(world.damageSources().sonicBoom(shooter), Config.getInstance().sculkHeavyCrossBowDamage);
                 }
             }
 

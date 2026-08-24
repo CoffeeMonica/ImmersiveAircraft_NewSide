@@ -2,6 +2,7 @@ package immersive_aircraft.entity;
 
 import immersive_aircraft.Items;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -45,7 +46,21 @@ public class UavEntity extends AirplaneEntity {
 
     @Override
     protected float getEngineReactionSpeed() {
-        return 50.0f;
+        // 160 * 7.5 / 20 = 60 ticks = exactly 3 seconds to full power
+        return 7.5f;
+    }
+
+    // UAVs use the tiny drone propeller sound (same as the quadrocopter),
+    // not the loud biplane engine.
+    @Override
+    protected SoundEvent getEngineSound() {
+        return immersive_aircraft.Sounds.PROPELLER_TINY.get();
+    }
+
+    // The drone propeller is quiet by nature - play it twice as loud.
+    @Override
+    public float getSoundVolumeMultiplier() {
+        return 2.0f;
     }
 
     protected int getHpDropDelay() {
@@ -164,7 +179,8 @@ public class UavEntity extends AirplaneEntity {
         double y = getY();
         double z = getZ();
         discard();
-        level().explode(this, x, y, z, 10.0f, Level.ExplosionInteraction.MOB);
+        level().explode(this, x, y, z, immersive_aircraft.config.Config.getInstance().uavExplosionPower,
+                immersive_aircraft.config.Config.getInstance().weaponsAreDestructive ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
     }
 
     @Override

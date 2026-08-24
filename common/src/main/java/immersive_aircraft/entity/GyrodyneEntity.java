@@ -105,7 +105,9 @@ public class GyrodyneEntity extends Rotorcraft {
                 if (getControllingPassenger() instanceof Player player) {
                     player.displayClientMessage(Component.translatable("immersive_aircraft.gyrodyne_target_reached"), true);
                 }
-                if (onGround()) {
+                // Launch boost only while the pilot actively pulls up - otherwise re-entering
+                // a landed gyrodyne gave it a sudden jolt the moment full power was reached.
+                if (onGround() && pressingInterpolatedY.getSmooth() > 0.1f) {
                     setDeltaMovement(getDeltaMovement().add(0, 0.25f, 0));
                 }
             }

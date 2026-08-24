@@ -156,7 +156,7 @@ public class BombBay extends BulletWeapon {
                 uav.setXRot(entity.getXRot());
                 uav.setZRot(entity.getRoll());
                 uav.setOwner(entity);
-                uav.setPos(position.x(), position.y() - 0.5, position.z());
+                uav.setPos(position.x() + entity.getX(), position.y() - 0.5 + entity.getY(), position.z() + entity.getZ());
                 uav.setDeltaMovement(direction.x(), direction.y() * 0.5, direction.z());
                 return uav;
             } else {
@@ -165,7 +165,7 @@ public class BombBay extends BulletWeapon {
                 uav.setXRot(entity.getXRot());
                 uav.setZRot(entity.getRoll());
                 uav.setOwner(entity);
-                uav.setPos(position.x(), position.y() - 0.5, position.z());
+                uav.setPos(position.x() + entity.getX(), position.y() - 0.5 + entity.getY(), position.z() + entity.getZ());
                 uav.setDeltaMovement(direction.x(), direction.y() * 0.5, direction.z());
                 return uav;
             }
@@ -173,7 +173,7 @@ public class BombBay extends BulletWeapon {
             // Spawn tiny TNT - don't add aircraft velocity, just drop downward
             Entity tnt = Entities.TINY_TNT.get().create(entity.level(), EntitySpawnReason.TRIGGERED);
             if (tnt != null) {
-                tnt.setPos(position.x(), position.y() - 0.5, position.z());
+                tnt.setPos(position.x() + entity.getX(), position.y() - 0.5 + entity.getY(), position.z() + entity.getZ());
                 // Only use the direction (which is downward), don't add aircraft speed
                 tnt.setDeltaMovement(0, -0.1, 0);
             }

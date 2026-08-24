@@ -38,4 +38,13 @@ public class VehicleProperties {
     public float getAdditive(VehicleStat stat) {
         return baseValues.getOrDefault(stat, 0.0f) + vehicle.getTotalUpgrade(stat) - 1.0f;
     }
+
+    /**
+     * Returns the RAW upgrade multiplier of a stat without the vehicle's base value
+     * (1.0 = no upgrade touched it). Used e.g. for the wind lean: a gyroscope gives
+     * WIND x0.25, so the aircraft is considered stabilized by 75%.
+     */
+    public float getUpgradeMultiplier(VehicleStat stat) {
+        return vehicle.getTotalUpgrade(stat);
+    }
 }

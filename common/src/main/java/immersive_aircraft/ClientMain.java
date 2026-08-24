@@ -1,6 +1,7 @@
 package immersive_aircraft;
 
 import immersive_aircraft.client.KeyBindings;
+import immersive_aircraft.client.RadarHandler;
 import immersive_aircraft.config.Config;
 import immersive_aircraft.entity.InventoryVehicleEntity;
 import immersive_aircraft.entity.VehicleEntity;
@@ -60,6 +61,9 @@ public class ClientMain {
             return;
         }
         lastTime = client.level.getGameTime();
+
+        // Radar upgrade: recompute the highlighted target set for this client.
+        RadarHandler.tick(client);
 
         // Toggle view when entering a vehicle
         if (Config.getInstance().separateCamera) {

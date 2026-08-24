@@ -33,7 +33,8 @@ public class MultiHeavyCrossbow extends HeavyCrossbow {
 
     @Override
     protected Entity getBullet(Vector4f position, Vector3f direction) {
-        Arrow arrow = new Arrow(getEntity().level(), position.x(), position.y(), position.z(), ItemStack.EMPTY, null);
+        VehicleEntity entity = getEntity();
+        Arrow arrow = new Arrow(getEntity().level(), position.x() + entity.getX(), position.y() + entity.getY(), position.z() + entity.getZ(), ItemStack.EMPTY, null);
         arrow.pickup = AbstractArrow.Pickup.DISALLOWED;
         // Set owner to the vehicle itself so arrows don't collide with it
         arrow.setOwner(getEntity());

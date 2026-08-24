@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SSS",
+    "SSS",
+    "SSS"
+  ],
+  "key": {
+    "S": "minecraft:slime_block"
+  },
+  "result": {
+    "id": "immersive_aircraft:muffler"
+  }
+}

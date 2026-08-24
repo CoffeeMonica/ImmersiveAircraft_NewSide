@@ -10,20 +10,32 @@ import net.minecraft.world.level.Level;
  * - Reaches maximum speed instantly
  * - Mass of 5
  * - Completely immune to wind effects
- * - Explosion radius is 3 units larger (13.0f vs 10.0f)
+ * - Explosion power is configurable (improvedUavExplosionPower, default 13)
  */
 public class ImprovedUavEntity extends UavEntity {
-    // Explosion radius is 3 units larger than the standard UAV (10.0f)
-    private static final float EXPLOSION_RADIUS = 13.0f;
+    // Explosion power comes from the config (improvedUavExplosionPower).
+    @Override
+    protected void explode() {
+        if (isRemoved()) {
+            return;
+        }
+        double x = getX();
+        double y = getY();
+        double z = getZ();
+        discard();
+        level().explode(this, x, y, z, immersive_aircraft.config.Config.getInstance().improvedUavExplosionPower,
+                immersive_aircraft.config.Config.getInstance().weaponsAreDestructive ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
+    }
+
+    // Falls off over exactly ONE second (20 ticks) without the engine, unscaled by
+    // its near-zero reaction speed - then instantly spools back up to 100%.
+    @Override
+    protected float getEngineDecayTicks(float reactionScale) {
+        return Math.max(1, immersive_aircraft.config.Config.getInstance().engineDecayTicks);
+    }
 
     public ImprovedUavEntity(EntityType<? extends AircraftEntity> entityType, Level world) {
         super(entityType, world);
-    }
-
-    @Override
-    protected float getEngineReactionSpeed() {
-        // Very small value makes enginePower reach target instantly
-        return 0.001f;
     }
 
     @Override
@@ -41,18 +53,6 @@ public class ImprovedUavEntity extends UavEntity {
     @Override
     public Item asItem() {
         return Items.IMPROVED_UAV.get();
-    }
-
-    @Override
-    protected void explode() {
-        if (isRemoved()) {
-            return;
-        }
-        double x = getX();
-        double y = getY();
-        double z = getZ();
-        discard();
-        level().explode(this, x, y, z, EXPLOSION_RADIUS, Level.ExplosionInteraction.MOB);
     }
 
 }

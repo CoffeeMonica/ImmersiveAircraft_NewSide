@@ -70,11 +70,9 @@ public class AirshipEntity extends Rotorcraft {
         float power = getEnginePower();
 
         if (level().isClientSide() && isWithinParticleRange() && power > 0.01) {
-            Matrix4f transform = getVehicleTransform();
-
             // Smoke
             if (tickCount % 2 == 0) {
-                Vector4f p = transformPosition(transform, (random.nextFloat() - 0.5f) * 0.4f, 0.8f, -0.8f);
+                Vec3 p = transformToWorld((random.nextFloat() - 0.5f) * 0.4f, 0.8f, -0.8f);
                 Vec3 velocity = getDeltaMovement();
                 level().addParticle(ParticleTypes.SMOKE, p.x, p.y, p.z, velocity.x, velocity.y, velocity.z);
             }

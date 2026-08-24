@@ -4,6 +4,7 @@ import immersive_aircraft.Main;
 import immersive_aircraft.client.hud.*;
 import immersive_aircraft.config.Config;
 import immersive_aircraft.entity.EngineVehicle;
+import immersive_aircraft.entity.InventoryVehicleEntity;
 import immersive_aircraft.entity.VehicleEntity;
 import immersive_aircraft.item.upgrade.VehicleStat;
 import net.minecraft.client.CameraType;
@@ -41,13 +42,17 @@ public class OverlayRenderer {
         if (client.gameMode != null && client.player != null) {
             INSTANCE.tick = (INSTANCE.tick + 1) % 60;
 
+            // While scoping through the telescope the HUD must stay hidden - it would
+            // cover the magnified view.
+            boolean scoping = client.player.getRootVehicle() instanceof InventoryVehicleEntity inv && inv.isScoping();
+
             // Engine status
-            if (Config.getInstance().showHotbarEngineGauge && client.player.getRootVehicle() instanceof EngineVehicle aircraft) {
+            if (!scoping && Config.getInstance().showHotbarEngineGauge && client.player.getRootVehicle() instanceof EngineVehicle aircraft) {
                 INSTANCE.renderAircraftGui(client, context, tickDelta, aircraft);
             }
 
             // Upgrade HUDs
-            if (client.player.getRootVehicle() instanceof EngineVehicle aircraft) {
+            if (!scoping && client.player.getRootVehicle() instanceof EngineVehicle aircraft) {
                 if (aircraft.getProperties().get(VehicleStat.HUD) == 0 || aircraft.getProperties().get(VehicleStat.DIALS) == 0) {
                     for (Indicator i : INDICATORS) i.update(client, aircraft);
 

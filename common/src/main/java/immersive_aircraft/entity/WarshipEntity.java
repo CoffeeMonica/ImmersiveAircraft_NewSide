@@ -97,8 +97,6 @@ public class WarshipEntity extends AirshipEntity {
 
     @Override
     public void positionRider(@NotNull Entity passenger, @NotNull MoveFunction positionUpdater) {
-        Matrix4f transform = getVehicleTransform();
-
         if (isTurretGunner(passenger)) {
             Vector3f position = getGunnerPosition();
 
@@ -111,7 +109,7 @@ public class WarshipEntity extends AirshipEntity {
             y -= (float) attachmentPoint.y;
             z -= (float) attachmentPoint.z;
 
-            Vector4f worldPosition = transformPosition(transform, x, y, z);
+            Vec3 worldPosition = transformToWorld(x, y, z);
             positionUpdater.accept(passenger, worldPosition.x, worldPosition.y, worldPosition.z);
             copyEntityData(passenger);
         } else {

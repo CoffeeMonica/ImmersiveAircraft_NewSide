@@ -1,5 +1,7 @@
 {
   "properties": {
+    "radarDetectability": 96,
+    "soundRange": 96,
     "fuel": 1.0,
     "durability": 1.0,
     "yawSpeed": 5.0,

@@ -5,7 +5,9 @@ import immersive_aircraft.config.Config;
 import immersive_aircraft.entity.misc.Trail;
 import immersive_aircraft.entity.misc.TrailDescriptor;
 import immersive_aircraft.item.upgrade.VehicleStat;
+import immersive_aircraft.util.InterpolatedFloat;
 import immersive_aircraft.util.Utils;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -24,6 +26,9 @@ import java.util.List;
 public abstract class AircraftEntity extends EngineVehicle {
     protected double lastY;
     public float inWaterLevel;
+
+    /** Smoothed roll induced by side wind gusts. */
+    private final InterpolatedFloat windRoll = new InterpolatedFloat(20.0f);
 
     public AircraftEntity(EntityType<? extends AircraftEntity> entityType, Level world, boolean canExplodeOnCrash) {
         super(entityType, world, canExplodeOnCrash);
@@ -46,7 +51,7 @@ public abstract class AircraftEntity extends EngineVehicle {
     }
 
     private void recordTrail(Matrix4f transform, int index, TrailDescriptor trail) {
-        Matrix4f t = new Matrix4f(transform);
+        Matrix4f t = new Matrix4f(transform); // rotation-only vehicle transform
         t.translate(trail.x(), trail.y(), trail.z());
         if (trail.rotate() != 0.0) {
             t.rotate(Axis.ZP.rotationDegrees(engineRotation.getSmooth() * trail.rotate()));
@@ -54,6 +59,11 @@ public abstract class AircraftEntity extends EngineVehicle {
 
         Vector4f p0 = mulXVec(t, -trail.size());
         Vector4f p1 = mulXVec(t, trail.size());
+
+        // Vehicle position is added in double precision AFTER rotating the local
+        // offsets, so trail points stay stable far away from the world origin.
+        p0.add((float) getX(), (float) getY(), (float) getZ(), 0.0f);
+        p1.add((float) getX(), (float) getY(), (float) getZ(), 0.0f);
 
         float trailStrength = Math.max(0.0f, Math.min(1.0f, getBaseTrailWidth(t, index, trail)));
         getTrails().get(index).add(p0, p1, trailStrength);
@@ -79,11 +89,34 @@ public abstract class AircraftEntity extends EngineVehicle {
 
         // rolling interpolation
         prevRoll = roll;
+        float controlRoll;
         if (onGround()) {
-            setZRot(roll * 0.9f);
+            controlRoll = roll * 0.9f;
+            windRoll.update(0.0f);
         } else {
-            setZRot(-pressingInterpolatedX.getSmooth() * getProperties().get(VehicleStat.ROLL_FACTOR) * (1.0f - inWaterLevel));
+            controlRoll = -pressingInterpolatedX.getSmooth() * getProperties().get(VehicleStat.ROLL_FACTOR) * (1.0f - inWaterLevel);
+
+            // Wind gently banks the aircraft toward the side it pushes it to: a gust pushing
+            // the plane to the left slightly raises its right wing. The lean is driven by the
+            // WEATHER intensity (clear + rain + thunder + own speed), NOT by the per-vehicle
+            // WIND stat, so it stays visible in storms on every aircraft. Wind-immune
+            // vehicles (getWindStrength() == 0) do not lean at all.
+            if (getWindStrength() > 0.0f) {
+                Vector3f leanGust = getLeanGust();
+                Vec3 rightDir = toVec3d(getRightDirection());
+                float sideWind = (float) (leanGust.x * rightDir.x + leanGust.z * rightDir.z);
+                // Wind stabilizers scale the lean by their wind multiplier: a gyroscope
+                // (WIND x0.25) reduces the bank by exactly 75%. Vehicles without any
+                // wind-stabilizing upgrade keep the full lean; wind-immune vehicles
+                // (getWindStrength() == 0) do not lean at all.
+                float stabilization = Mth.clamp(getProperties().getUpgradeMultiplier(VehicleStat.WIND), 0.0f, 1.0f);
+                windRoll.update(Mth.clamp(-sideWind * 0.8f * stabilization, -22.0f, 22.0f));
+                controlRoll += windRoll.getSmooth();
+            } else {
+                windRoll.update(0.0f);
+            }
         }
+        setZRot(controlRoll);
 
         // Fixes broken states
         if (Double.isNaN(getDeltaMovement().x) || Double.isNaN(getDeltaMovement().y) || Double.isNaN(getDeltaMovement().z)) {
@@ -186,8 +219,26 @@ public abstract class AircraftEntity extends EngineVehicle {
 
     public Vector3f getWindEffect() {
         float wind = getWindStrength();
-        float nx = (float) (Utils.cosNoise(tickCount / 20.0 / getProperties().get(VehicleStat.MASS)) * wind);
-        float nz = (float) (Utils.cosNoise(tickCount / 21.0 / getProperties().get(VehicleStat.MASS)) * wind);
+        // The phase offset starts the layered noise near zero, so a freshly spawned or
+        // launched vehicle is not immediately pushed sideways by a constant gust.
+        float nx = (float) (Utils.cosNoise(tickCount / 20.0 / getProperties().get(VehicleStat.MASS), 3.81) * wind);
+        float nz = (float) (Utils.cosNoise(tickCount / 21.0 / getProperties().get(VehicleStat.MASS), 3.81) * wind);
+        return new Vector3f(nx, 0.0f, nz);
+    }
+
+    /**
+     * Side gust used for the visual wind lean. Unlike {@link #getWindEffect()} it ignores
+     * the per-vehicle WIND stat and is driven purely by weather intensity + speed, so the
+     * banking stays visible in storms on every aircraft.
+     */
+    private Vector3f getLeanGust() {
+        Vec3 speed = getDeltaMovement();
+        float intensity = (float) ((Config.getInstance().windClearWeather + speed.length())
+                + level().getRainLevel(0.0f) * Config.getInstance().windThunderWeather
+                + level().getThunderLevel(0.0f) * Config.getInstance().windRainWeather);
+        float mass = Math.max(1.0f, (float) getProperties().get(VehicleStat.MASS));
+        float nx = (float) (Utils.cosNoise(tickCount / 20.0 / mass, 3.81) * 0.35 * intensity);
+        float nz = (float) (Utils.cosNoise(tickCount / 21.0 / mass, 3.81) * 0.35 * intensity);
         return new Vector3f(nx, 0.0f, nz);
     }
 }

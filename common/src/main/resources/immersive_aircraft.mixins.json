@@ -13,6 +13,6 @@
     "client.AbstractClientPlayerMixin", "client.CameraMixin", "client.ClientPlayerEntityMixin",
     "client.ClientPlayerInteractionManagerMixin", "client.ClientPlayNetworkHandlerMixin", "client.GameRendererMixin",
     "client.GuiMixin", "client.KeyMappingAccessorMixin", "client.KeyMappingMixin", "client.LivingEntityRendererMixin",
-    "client.LivingEntityRenderStateMixin", "client.PlayerEntityRendererMixin"
+    "client.LivingEntityRenderStateMixin", "client.MinecraftMixin", "client.PlayerEntityRendererMixin"
   ]
 }

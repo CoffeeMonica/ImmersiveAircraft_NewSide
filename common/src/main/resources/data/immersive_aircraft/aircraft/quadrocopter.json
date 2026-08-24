@@ -1,5 +1,7 @@
 {
   "properties": {
+    "radarDetectability": 48,
+    "soundRange": 32,
     "fuel": 0.5,
     "durability": 0.5,
     "stabilizer": 0.1,
@@ -41,6 +43,5 @@
       {"x": 0.0, "y": 0.5, "z": -0.1}
     ]
   ],
-  "boundingBoxes": [
-  ]
+  "boundingBoxes": []
 }

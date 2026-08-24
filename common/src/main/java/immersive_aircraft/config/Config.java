@@ -68,14 +68,14 @@ public final class Config extends JsonConfig {
 
     // Radius (in blocks) of the crash explosion. Larger = bigger, more destructive blast.
     // Only used when enableCrashExplosion is true (or a TNT bundle is installed).
-    @FloatConfigEntry(3.0F)
+    @FloatConfigEntry(2.0F)
     public float crashExplosionRadius;
 
     // Applies only to the crash explosion above.
     // true  = the crash explosion leaves fire around the impact site.
-    // false = no fire from crash explosions.
-    @BooleanConfigEntry(true)
-    public boolean enableCrashFire = true;
+    // false = no fire from crash explosions (default).
+    @BooleanConfigEntry(false)
+    public boolean enableCrashFire = false;
 
     // Applies only to the crash explosion above.
     // true  = the crash explosion breaks blocks (MOB-power explosion).
@@ -163,12 +163,21 @@ public final class Config extends JsonConfig {
     @FloatConfigEntry(1.0f)
     public float globalEngineSpeedMultiplier;
 
-    // Engine spool-up speed multiplier. Engine power moves towards its target in
-    // "steps = baseReaction / acceleration / this value", so:
-    // higher = faster spin-up (2.0 = twice as fast), lower = slower (0.5 = twice as slow).
-    // Spin-DOWN is always 5x faster than spin-up regardless of this value.
-    @FloatConfigEntry(0.2f)
+    // Engine spool-up speed multiplier. Calibrated so that 1.0 = a stock biplane
+    // (engineReactionSpeed 20, no acceleration upgrades) reaches full power in
+    // exactly 8 seconds (160 ticks). Higher = faster spin-up (2.0 = 4 s),
+    // lower = slower (0.5 = 16 s). Vehicles scale by their own
+    // getEngineReactionSpeed()/20. Acceleration upgrades divide this further.
+    // Does NOT affect spool-down: see engineDecayTicks.
+    @FloatConfigEntry(1.0f)
     public float engineAccelerationMultiplier;
+
+    // Ticks for the engine to spin DOWN: real power falls linearly from 100% to
+    // 0% in this many ticks (scaled by each vehicle's getEngineReactionSpeed()/20,
+    // e.g. the warship with reaction 100 decays 5x slower). Acceleration upgrades
+    // and engineAccelerationMultiplier do NOT affect spool-down.
+    @IntegerConfigEntry(20)
+    public int engineDecayTicks = 20;
 
     // Global gravity multiplier for all vehicles.
     // 0.5 = half gravity (floatier flight), 2.0 = double gravity (heavier feel), 1.0 = normal.
@@ -287,15 +296,15 @@ public final class Config extends JsonConfig {
     @FloatConfigEntry(4.0f)
     public float rotaryCannonDamage;
 
-    // Muzzle velocity of rotary cannon bullets, in blocks per tick (4.0 = 80 blocks/second).
+    // Muzzle velocity of rotary cannon bullets, in blocks per tick (3.0 = 60 blocks/second).
     // Higher = flatter trajectory, longer effective range.
-    @FloatConfigEntry(4.0f)
+    @FloatConfigEntry(3.0f)
     public float rotaryCannonVelocity;
 
     // Aim deviation of rotary cannon bullets (vanilla shoot() spread parameter).
     // Intentionally very small: 0.1 = nearly laser-straight bursts with a tiny wobble.
     // Higher = looser spread; 0 = perfectly straight shots.
-    @FloatConfigEntry(0.1f)
+    @FloatConfigEntry(0.3f)
     public float rotaryCannonInaccuracy;
 
     // Cooldown between rotary cannon shots, in seconds (client-side rate limit).
@@ -310,12 +319,12 @@ public final class Config extends JsonConfig {
 
     // Damage per reinforced rotary cannon bullet, in health points (2.0 = one heart).
     // Higher = more damaging shots.
-    @FloatConfigEntry(8.0f)
+    @FloatConfigEntry(6.0f)
     public float reinforcedRotaryCannonDamage;
 
     // Muzzle velocity of reinforced rotary cannon bullets, in blocks per tick
-    // (12.0 = 240 blocks/second, 3x the regular rotary cannon). Higher = longer range.
-    @FloatConfigEntry(12.0f)
+    // (5.0 = 100 blocks/second, 3x the regular rotary cannon). Higher = longer range.
+    @FloatConfigEntry(5.0f)
     public float reinforcedRotaryCannonVelocity;
 
     // Aim deviation of reinforced rotary cannon bullets (vanilla shoot() spread parameter).
@@ -326,7 +335,7 @@ public final class Config extends JsonConfig {
     // Cooldown between reinforced rotary cannon shots, in seconds (client-side rate limit).
     // The default of 4/60s (~0.0667s) is 3x shorter than the rotary cannon's interval; because
     // cooldown is decremented once per tick, this lands on one shot every 2 ticks in practice.
-    @FloatConfigEntry(0.0667f)
+    @FloatConfigEntry(0.1f)
     public float reinforcedRotaryCannonCooldown;
 
     // Items accepted as reinforced rotary cannon ammunition (item ids). 1 item per shot.
@@ -371,11 +380,11 @@ public final class Config extends JsonConfig {
 
     // Aim deviation of multi heavy crossbow arrows (vanilla shoot() spread parameter).
     // Higher = a wider fan of arrows.
-    @FloatConfigEntry(1.0f)
+    @FloatConfigEntry(0.5f)
     public float multiHeavyCrossBowInaccuracy;
 
     // Cooldown between multi heavy crossbow volleys, in seconds. Lower = faster firing.
-    @FloatConfigEntry(0.75f)
+    @FloatConfigEntry(1.0f)
     public float multiHeavyCrossBowCooldown;
 
     // Number of arrows actually FIRED per multi heavy crossbow volley.
@@ -390,8 +399,8 @@ public final class Config extends JsonConfig {
     public int multiHeavyCrossBowAmmoPerShot;
 
     // Random directional deviation of multi heavy crossbow arrows, in RADIANS
-    // (0.5 ≈ ±14° fan). Higher = wider fan, 0 = all arrows fly parallel.
-    @FloatConfigEntry(0.5f)
+    // (0.25 ≈ ±7° fan). Higher = wider fan, 0 = all arrows fly parallel.
+    @FloatConfigEntry(0.25f)
     public float multiHeavyCrossBowSpread;
 
     // Radius (in blocks) of the sculk crossbow sonic beam - the damage area around the beam line.
@@ -404,11 +413,11 @@ public final class Config extends JsonConfig {
     public float sculkHeavyCrossBowRange;
 
     // Cooldown between sculk crossbow shots, in seconds. Lower = faster firing.
-    @FloatConfigEntry(1.0f)
+    @FloatConfigEntry(2.0f)
     public float sculkHeavyCrossBowCooldown;
 
     // Damage dealt by one sonic beam hit, in health points (applied once per target per shot).
-    @FloatConfigEntry(10.0f)
+    @FloatConfigEntry(15.0f)
     public float sculkHeavyCrossBowDamage;
 
     // ========================
@@ -423,4 +432,25 @@ public final class Config extends JsonConfig {
     // Bomb bay cooldown between drops, in seconds. Lower = faster bombing runs.
     @FloatConfigEntry(1.5f)
     public float bombBayCooldown;
+
+    // Explosion power of the standard UAV (in blocks, vanilla TNT = 4).
+    @FloatConfigEntry(10.0f)
+    public float uavExplosionPower;
+
+    // Explosion power of the improved UAV (in blocks).
+    @FloatConfigEntry(15.0f)
+    public float improvedUavExplosionPower;
+
+    // ========================
+    // Upgrades
+    // ========================
+    // Global CAP for the radar detection range: a target is detected within
+    // min(its radarDetectability, this value). 0 disables the cap.
+    @FloatConfigEntry(256.0f)
+    public float radarRange;
+
+    // Color of the radar-detected glowing outline, as RGB hex (16777215 = 0xFFFFFF,
+    // white - like the spectral arrow outline).
+    @IntegerConfigEntry(16777215)
+    public int radarGlowColor;
 }
