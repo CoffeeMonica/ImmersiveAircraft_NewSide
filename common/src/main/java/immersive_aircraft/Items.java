@@ -12,6 +12,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
@@ -21,6 +22,14 @@ import java.util.function.Supplier;
 
 public interface Items {
     List<Supplier<Item>> items = new LinkedList<>();
+
+    /**
+     * Tag that marks an item as an ENGINE upgrade. The dedicated engine upgrade slot
+     * only accepts items from this tag, and regular upgrade slots reject them.
+     * Add new engines by editing data/immersive_aircraft/tags/item/engines.json -
+     * no code changes required.
+     */
+    TagKey<Item> ENGINE_TAG = TagKey.create(Registries.ITEM, Main.locate("engines"));
 
     Supplier<Item> HULL = register("hull", (name) -> new DescriptionItem(baseProps(name).stacksTo(8)) {});
     Supplier<Item> ENGINE = register("engine", (name) -> new DescriptionItem(baseProps(name).stacksTo(8)) {});
@@ -32,6 +41,8 @@ public interface Items {
     Supplier<Item> CARGO_AIRSHIP = register("cargo_airship", (name) -> new DyeableAircraftItem(baseProps(name).stacksTo(1), world -> new CargoAirshipEntity(Entities.CARGO_AIRSHIP.get(), world)));
     Supplier<Item> WARSHIP = register("warship", (name) -> new DyeableAircraftItem(baseProps(name).stacksTo(1), world -> new WarshipEntity(Entities.WARSHIP.get(), world)));
     Supplier<Item> BIPLANE = register("biplane", (name) -> new AircraftItem(baseProps(name).stacksTo(1), world -> new BiplaneEntity(Entities.BIPLANE.get(), world)));
+    Supplier<Item> SCARLET_BIPLANE = register("scarlet_biplane", (name) -> new DyeableAircraftItem(baseProps(name).stacksTo(1), world -> new ScarletBiplaneEntity(Entities.SCARLET_BIPLANE.get(), world)));
+    Supplier<Item> ECONOMY_PLANE = register("economy_plane", (name) -> new DyeableAircraftItem(baseProps(name).stacksTo(1), world -> new EconomyPlaneEntity(Entities.ECONOMY_PLANE.get(), world)));
     Supplier<Item> GYRODYNE = register("gyrodyne", (name) -> new AircraftItem(baseProps(name).stacksTo(1), world -> new GyrodyneEntity(Entities.GYRODYNE.get(), world)));
     Supplier<Item> QUADROCOPTER = register("quadrocopter", (name) -> new AircraftItem(baseProps(name).stacksTo(1), world -> new QuadrocopterEntity(Entities.QUADROCOPTER.get(), world)));
     Supplier<Item> BAMBOO_HOPPER = register("bamboo_hopper", (name) -> new AircraftItem(baseProps(name).stacksTo(1), world -> new BambooHopperEntity(Entities.BAMBOO_HOPPER.get(), world)));
@@ -51,6 +62,7 @@ public interface Items {
     Supplier<Item> ECO_ENGINE = register("eco_engine", (name) -> new DescriptionItem(baseProps(name).stacksTo(8)) {});
     Supplier<Item> NETHER_ENGINE = register("nether_engine", (name) -> new DescriptionItem(baseProps(name).stacksTo(8)) {});
     Supplier<Item> ENGINEER_ENGINE = register("engineer_engine", (name) -> new DescriptionItem(baseProps(name).stacksTo(8)) {});
+    Supplier<Item> INERTIA_ENGINE = register("inertia_engine", (name) -> new DescriptionItem(baseProps(name).stacksTo(8)) {});
     Supplier<Item> STEEL_BOILER = register("steel_boiler", (name) -> new DescriptionItem(baseProps(name).stacksTo(8)) {});
     Supplier<Item> INDUSTRIAL_GEARS = register("industrial_gears", (name) -> new DescriptionItem(baseProps(name).stacksTo(8)) {});
     Supplier<Item> STURDY_PIPES = register("sturdy_pipes", (name) -> new DescriptionItem(baseProps(name).stacksTo(8)) {});
@@ -62,9 +74,9 @@ public interface Items {
     Supplier<Item> TNT_BUNDLE = register("tnt_bundle", (name) -> new DescriptionItem(baseProps(name).stacksTo(8)) {});
     Supplier<Item> AVIATION_FUEL = register("aviation_fuel", (name) -> new DescriptionItem(baseProps(name).stacksTo(64)) {});
 
-    Supplier<Item> RADAR = register("radar", (name) -> new DescriptionItem(baseProps(name).stacksTo(4)) {});
-    Supplier<Item> MUFFLER = register("muffler", (name) -> new DescriptionItem(baseProps(name).stacksTo(4)) {});
-    Supplier<Item> CAMOUFLAGE_NET = register("camouflage_net", (name) -> new DescriptionItem(baseProps(name).stacksTo(4)) {});
+    Supplier<Item> RADAR = register("radar", (name) -> new DescriptionItem(baseProps(name).stacksTo(8)) {});
+    Supplier<Item> MUFFLER = register("muffler", (name) -> new DescriptionItem(baseProps(name).stacksTo(8)) {});
+    Supplier<Item> CAMOUFLAGE_NET = register("camouflage_net", (name) -> new DescriptionItem(baseProps(name).stacksTo(8)) {});
 
     static Supplier<Item> register(String name, java.util.function.Function<String, Item> factory) {
         Identifier id = Main.locate(name);

@@ -66,6 +66,7 @@ import org.joml.Vector4f;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Abstract vehicle, which handles player input, collisions, passengers, and destruction
@@ -766,13 +767,13 @@ public abstract class VehicleEntity extends Entity {
                 level().playSound(null, getX(), getY(), getZ(), Sounds.REPAIR.get(), SoundSource.NEUTRAL, 1.0f, 0.7f + random.nextFloat() * 0.2f);
             } else {
                 // Repair particles
-                for (AABB shape : getAdditionalShapes()) {
+                for (BoundingBoxDescriptor shape : getVehicleData().getBoundingBoxes()) {
                     for (int i = 0; i < 5; i++) {
-                        Vec3 center = shape.getCenter();
-                        double x = center.x + shape.getXsize() * (random.nextDouble() - 0.5) * 1.5;
-                        double y = center.y + shape.getYsize() * (random.nextDouble() - 0.5) * 1.5;
-                        double z = center.z + shape.getZsize() * (random.nextDouble() - 0.5) * 1.5;
-                        level().addParticle(ParticleTypes.COMPOSTER, x, y, z, 0, random.nextDouble(), 0);
+                        Vec3 p = transformToWorld(
+                                shape.x() + shape.width() * (random.nextFloat() - 0.5f) * 1.5f,
+                                shape.y() + shape.height() * (random.nextFloat() - 0.5f) * 1.5f,
+                                shape.z() + shape.depth() * (random.nextFloat() - 0.5f) * 1.5f);
+                        level().addParticle(ParticleTypes.COMPOSTER, p.x, p.y, p.z, 0, random.nextDouble(), 0);
                     }
                 }
             }
@@ -1068,18 +1069,16 @@ public abstract class VehicleEntity extends Entity {
     }
 
     protected AABB getOffsetBoundingBox(BoundingBoxDescriptor descriptor) {
-        // Rotate the box CENTER by the full vehicle orientation (yaw+pitch+roll) and
-        // conservatively inflate the extents by the rotated box envelope, so hitboxes
-        // follow the aircraft's attitude instead of staying level.
+        // Rigid-lattice approach: each box keeps its ORIGINAL local size and only
+        // ORBITS around the vehicle center by the full orientation (yaw+pitch+roll).
+        // No envelope inflation - boxes never grow or pulse while turning, so the
+        // cluster revolves with the model instead of morphing in place.
         Matrix3f r = getVehicleNormalTransform();
         Vector3f center = transformVector(r, descriptor.x(), descriptor.y(), descriptor.z());
 
-        float ex = descriptor.width() / 2.0F;
-        float ey = descriptor.height() / 2.0F;
-        float ez = descriptor.depth() / 2.0F;
-        float hx = Math.abs(r.m00()) * ex + Math.abs(r.m10()) * ey + Math.abs(r.m20()) * ez;
-        float hy = Math.abs(r.m01()) * ex + Math.abs(r.m11()) * ey + Math.abs(r.m21()) * ez;
-        float hz = Math.abs(r.m02()) * ex + Math.abs(r.m12()) * ey + Math.abs(r.m22()) * ez;
+        float hx = descriptor.width() / 2.0F;
+        float hy = descriptor.height() / 2.0F;
+        float hz = descriptor.depth() / 2.0F;
 
         return new AABB(
                 center.x() - hx + getX(),
@@ -1092,6 +1091,44 @@ public abstract class VehicleEntity extends Entity {
 
     public List<AABB> getAdditionalShapes() {
         return getVehicleData().getBoundingBoxes().stream().map(this::getOffsetBoundingBox).toList();
+    }
+
+    /**
+     * Exact oriented-bounding-box ray clip: transforms the ray into the vehicle's LOCAL
+     * space and clips it against the raw (unrotated) bounding box descriptors. Because
+     * the boxes are tested in local space, they follow the aircraft's orientation
+     * perfectly at any angle - no envelope inflation, no gaps.
+     *
+     * @return world-space location of the closest detailed-box hit along the segment, if any.
+     */
+    public Optional<Vec3> clipDetailed(Vec3 from, Vec3 to, float inflation) {
+        Matrix3f r = getVehicleNormalTransform();
+        Matrix3f inv = r.transpose(new Matrix3f());
+        Vector3f lf = inv.transform(new Vector3f((float) (from.x - getX()), (float) (from.y - getY()), (float) (from.z - getZ())));
+        Vector3f lt = inv.transform(new Vector3f((float) (to.x - getX()), (float) (to.y - getY()), (float) (to.z - getZ())));
+        Vec3 localFrom = new Vec3(lf.x, lf.y, lf.z);
+        Vec3 localTo = new Vec3(lt.x, lt.y, lt.z);
+
+        Vec3 best = null;
+        double bestDist = Double.MAX_VALUE;
+        for (BoundingBoxDescriptor d : getVehicleData().getBoundingBoxes()) {
+            AABB local = new AABB(
+                    d.x() - d.width() / 2.0, d.y() - d.height() / 2.0, d.z() - d.depth() / 2.0,
+                    d.x() + d.width() / 2.0, d.y() + d.height() / 2.0, d.z() + d.depth() / 2.0).inflate(inflation);
+            Optional<Vec3> hit = local.clip(localFrom, localTo);
+            if (hit.isPresent()) {
+                double dist = localFrom.distanceToSqr(hit.get());
+                if (dist < bestDist) {
+                    bestDist = dist;
+                    best = hit.get();
+                }
+            }
+        }
+        if (best == null) {
+            return Optional.empty();
+        }
+        Vector3f w = r.transform(new Vector3f((float) best.x, (float) best.y, (float) best.z));
+        return Optional.of(new Vec3(getX() + w.x, getY() + w.y, getZ() + w.z));
     }
 
     public List<AABB> getShapes() {

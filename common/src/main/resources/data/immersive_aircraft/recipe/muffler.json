@@ -1,12 +1,14 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "SSS",
-    "SSS",
-    "SSS"
+    "CWC",
+    "WPW",
+    "CWC"
   ],
   "key": {
-    "S": "minecraft:slime_block"
+    "W": "#minecraft:wool",
+    "C": "minecraft:copper_ingot",
+    "P": "immersive_aircraft:sturdy_pipes"
   },
   "result": {
     "id": "immersive_aircraft:muffler"

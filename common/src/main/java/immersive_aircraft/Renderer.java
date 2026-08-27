@@ -8,6 +8,8 @@ public class Renderer {
     public static void bootstrap() {
         Registration.register(Entities.GYRODYNE.get(), GyrodyneEntityRenderer::new);
         Registration.register(Entities.BIPLANE.get(), BiplaneEntityRenderer::new);
+        Registration.register(Entities.SCARLET_BIPLANE.get(), ScarletBiplaneEntityRenderer::new);
+        Registration.register(Entities.ECONOMY_PLANE.get(), EconomyPlaneEntityRenderer::new);
         Registration.register(Entities.UAV.get(), UavEntityRenderer::new);
         Registration.register(Entities.IMPROVED_UAV.get(), ImprovedUavEntityRenderer::new);
         Registration.register(Entities.AIRSHIP.get(), AirshipEntityRenderer::new);

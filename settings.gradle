@@ -12,6 +12,8 @@ pluginManagement {
 
 include("common")
 include("fabric")
-include("neoforge")
+// neoforge temporarily disabled: its Loom cache locks conflict with the VS Code
+// language server and break every Gradle invocation. Re-enable for Neo builds:
+// include("neoforge")
 
 rootProject.name = "immersive-aircraft-new-side"

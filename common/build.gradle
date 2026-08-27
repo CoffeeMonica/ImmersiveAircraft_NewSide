@@ -13,7 +13,10 @@ dependencies {
 
     implementation 'org.mariuszgromada.math:MathParser.org-mXparser:5.2.1'
 
-    modApi "com.terraformersmc:modmenu:${mod_menu_version}"
+    // Compile-only: Mod Menu integration is optional at runtime.
+    // modApi here would drag Mod Menu into the dev runtime without its
+    // Fabric API dependencies and crash the client on startup.
+    modCompileOnly("com.terraformersmc:modmenu:${mod_menu_version}") { transitive false }
 
     modApi("me.shedaniel.cloth:cloth-config-fabric:${cloth_version}") {
         //noinspection GroovyAssignabilityCheck

@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "immersive_aircraft:eco_engine",
+    "immersive_aircraft:nether_engine",
+    "immersive_aircraft:engineer_engine",
+    "immersive_aircraft:inertia_engine"
+  ]
+}

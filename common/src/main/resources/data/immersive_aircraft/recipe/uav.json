@@ -1,14 +1,20 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "DDD",
-    "DDD",
-    "DDD"
+    "PTP",
+    "HEH",
+    "ICI"
   ],
   "key": {
-    "D": "minecraft:dirt"
+    "P": "immersive_aircraft:propeller",
+    "T": "immersive_aircraft:tnt_bundle",
+    "E": "immersive_aircraft:engine",
+    "H": "immersive_aircraft:hull",
+    "I": "minecraft:iron_ingot",
+    "C": "minecraft:copper_ingot"
   },
   "result": {
-    "id": "immersive_aircraft:uav"
+    "id": "immersive_aircraft:uav",
+    "count": 8
   }
 }

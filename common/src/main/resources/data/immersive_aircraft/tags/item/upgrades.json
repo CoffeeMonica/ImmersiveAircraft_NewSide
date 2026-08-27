@@ -2,9 +2,6 @@
   "replace": false,
   "values": [
     "immersive_aircraft:enhanced_propeller",
-    "immersive_aircraft:eco_engine",
-    "immersive_aircraft:nether_engine",
-    "immersive_aircraft:engineer_engine",
     "immersive_aircraft:steel_boiler",
     "immersive_aircraft:industrial_gears",
     "immersive_aircraft:sturdy_pipes",
@@ -16,3 +13,4 @@
     "immersive_aircraft:tnt_bundle"
   ]
 }
+

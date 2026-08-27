@@ -139,22 +139,16 @@ public class SculkHeavyCrossbow extends HeavyCrossbow {
                 }
             }
 
-            // Aircraft: test every detailed bounding box shape of every candidate vehicle
-            // against this beam segment - completely independent of where the vehicle's
-            // main box happens to be.
+            // Aircraft: exact oriented-box test against this beam segment - detailed
+            // boxes are clipped in the vehicle's LOCAL space, so they follow its
+            // orientation perfectly and thin parts (wings, balloons) cannot slip
+            // between two beam sampling steps.
             for (VehicleEntity vehicle : vehicles) {
                 if (damagedEntities.contains(vehicle)) {
                     continue;
                 }
-                boolean hit = false;
-                for (AABB shape : vehicle.getShapes()) {
-                    // Precise segment clip: catches even very thin shapes (wings)
-                    // that lie between two beam sampling steps.
-                    if (shape.intersects(queryBox) || shape.clip(prevPos, beamPos).isPresent()) {
-                        hit = true;
-                        break;
-                    }
-                }
+                boolean hit = vehicle.getBoundingBox().intersects(queryBox)
+                        || vehicle.clipDetailed(prevPos, beamPos, radius).isPresent();
                 if (hit) {
                     damagedEntities.add(vehicle);
                     vehicle.hurt(world.damageSources().sonicBoom(shooter), Config.getInstance().sculkHeavyCrossBowDamage);

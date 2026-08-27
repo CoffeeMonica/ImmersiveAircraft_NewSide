@@ -83,19 +83,27 @@ public class ProjectileUtilMixin {
                     }
                 }
 
-                // Check both main bounding box and additional shapes.
-                // This keeps projectile damage and arrow damage aligned with the vehicle's full shape map.
-                List<AABB> allShapes = new ArrayList<>(vehicle.getShapes());
-                for (AABB aabb : allShapes) {
-                    Optional<Vec3> optionalCollision = aabb.inflate(inflationAmount).clip(startVec, endVec);
-                    if (optionalCollision.isPresent()) {
-                        Vec3 newCollision = optionalCollision.get();
-                        double dist = startVec.distanceToSqr(newCollision);
-                        if (dist < bestDistance) {
-                            entity = vehicle;
-                            collision = newCollision;
-                            bestDistance = dist;
-                        }
+                // Exact oriented-box test: main entity box (vanilla-style volume) plus the
+                // detailed boxes clipped in the vehicle's LOCAL space, so wings/tail/balloon
+                // are hit precisely at any orientation without envelope inflation.
+                Optional<Vec3> mainHit = vehicle.getBoundingBox().inflate(inflationAmount).clip(startVec, endVec);
+                if (mainHit.isPresent()) {
+                    Vec3 newCollision = mainHit.get();
+                    double dist = startVec.distanceToSqr(newCollision);
+                    if (dist < bestDistance) {
+                        entity = vehicle;
+                        collision = newCollision;
+                        bestDistance = dist;
+                    }
+                }
+                Optional<Vec3> detailedHit = vehicle.clipDetailed(startVec, endVec, inflationAmount);
+                if (detailedHit.isPresent()) {
+                    Vec3 newCollision = detailedHit.get();
+                    double dist = startVec.distanceToSqr(newCollision);
+                    if (dist < bestDistance) {
+                        entity = vehicle;
+                        collision = newCollision;
+                        bestDistance = dist;
                     }
                 }
             }

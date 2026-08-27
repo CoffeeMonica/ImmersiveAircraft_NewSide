@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "PHS",
+    "GEH",
+    "PHS"
+  ],
+  "key": {
+    "H": "immersive_aircraft:hull",
+    "G": "immersive_aircraft:industrial_gears",
+    "E": "immersive_aircraft:engine",
+    "P": "immersive_aircraft:propeller",
+    "S": "immersive_aircraft:sail"
+  },
+  "result": {
+    "id": "immersive_aircraft:economy_plane"
+  }
+}

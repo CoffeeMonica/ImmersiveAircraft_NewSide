@@ -11,6 +11,7 @@ import immersive_aircraft.config.Config;
 import immersive_aircraft.entity.EngineVehicle;
 import immersive_aircraft.entity.InventoryVehicleEntity;
 import immersive_aircraft.entity.VehicleEntity;
+import immersive_aircraft.entity.misc.BoundingBoxDescriptor;
 import immersive_aircraft.resources.BBModelLoader;
 import immersive_aircraft.resources.bbmodel.BBAnimationVariables;
 import immersive_aircraft.resources.bbmodel.BBModel;
@@ -101,46 +102,42 @@ public abstract class VehicleEntityRenderer<T extends VehicleEntity> extends Ent
             matrixStack.popPose();
         }
 
-        // F3+B debug: visualize every detailed vehicle bounding box with a purple
-        // outline. The shapes are the SAME rotated world-space envelopes used for
-        // collision (they follow the aircraft's attitude), drawn relative to the
-        // entity position on this pose stack.
+        // F3+B debug: visualize every detailed vehicle bounding box as a TRUE oriented
+        // wireframe - the 8 local corners are transformed to world space through the
+        // full vehicle orientation, so the outlines hug the model exactly at any angle
+        // (same boxes that projectile rays test via clipDetailed).
         if (Minecraft.getInstance().debugEntries.isCurrentlyEnabled(DebugScreenEntries.ENTITY_HITBOXES)) {
             VertexConsumer lines = bufferSource.getBuffer(RenderTypes.LINES);
-            for (AABB shape : entity.getAdditionalShapes()) {
-                Vec3 c = shape.getCenter();
-                drawHitboxOutline((float) c.x - (float) state.x, (float) c.y - (float) state.y, (float) c.z - (float) state.z,
-                        (float) (shape.getXsize() / 2), (float) (shape.getYsize() / 2), (float) (shape.getZsize() / 2),
-                        matrixStack.last(), lines);
+            for (BoundingBoxDescriptor d : entity.getVehicleData().getBoundingBoxes()) {
+                drawOrientedBox(entity, state, d, matrixStack.last(), lines);
             }
         }
 
         super.submit(state, matrixStack, collector, cameraState);
     }
 
-    /** Draws a purple wireframe box centered at (cx,cy,cz) with half-extents (hx,hy,hz). */
-    private static void drawHitboxOutline(float cx, float cy, float cz,
-                                          float hx, float hy, float hz,
-                                          PoseStack.Pose pose, VertexConsumer lines) {
-        float x0 = cx - hx, y0 = cy - hy, z0 = cz - hz;
-        float x1 = cx + hx, y1 = cy + hy, z1 = cz + hz;
+    /** Draws a purple wireframe of an oriented bounding box descriptor (8 transformed corners, 12 edges). */
+    private static void drawOrientedBox(VehicleEntity entity, VehicleEntityRenderState state,
+                                        BoundingBoxDescriptor d, PoseStack.Pose pose, VertexConsumer lines) {
+        float[][] c = new float[8][3];
+        int i = 0;
+        for (int sx = -1; sx <= 1; sx += 2)
+            for (int sy = -1; sy <= 1; sy += 2)
+                for (int sz = -1; sz <= 1; sz += 2) {
+                    Vec3 w = entity.transformToWorld(
+                            d.x() + sx * d.width() / 2.0f,
+                            d.y() + sy * d.height() / 2.0f,
+                            d.z() + sz * d.depth() / 2.0f);
+                    c[i][0] = (float) (w.x - state.x);
+                    c[i][1] = (float) (w.y - state.y);
+                    c[i][2] = (float) (w.z - state.z);
+                    i++;
+                }
+        int[][] edges = {{0, 4}, {1, 5}, {2, 6}, {3, 7}, {0, 2}, {1, 3}, {4, 6}, {5, 7}, {0, 1}, {2, 3}, {4, 5}, {6, 7}};
         float r = 0.55F, g = 0.15F, b = 0.9F, a = 1.0F;
-
-        // bottom rectangle
-        line(pose, lines, x0, y0, z0, x1, y0, z0, r, g, b, a);
-        line(pose, lines, x1, y0, z0, x1, y0, z1, r, g, b, a);
-        line(pose, lines, x1, y0, z1, x0, y0, z1, r, g, b, a);
-        line(pose, lines, x0, y0, z1, x0, y0, z0, r, g, b, a);
-        // top rectangle
-        line(pose, lines, x0, y1, z0, x1, y1, z0, r, g, b, a);
-        line(pose, lines, x1, y1, z0, x1, y1, z1, r, g, b, a);
-        line(pose, lines, x1, y1, z1, x0, y1, z1, r, g, b, a);
-        line(pose, lines, x0, y1, z1, x0, y1, z0, r, g, b, a);
-        // pillars
-        line(pose, lines, x0, y0, z0, x0, y1, z0, r, g, b, a);
-        line(pose, lines, x1, y0, z0, x1, y1, z0, r, g, b, a);
-        line(pose, lines, x1, y0, z1, x1, y1, z1, r, g, b, a);
-        line(pose, lines, x0, y0, z1, x0, y1, z1, r, g, b, a);
+        for (int[] e : edges) {
+            line(pose, lines, c[e[0]][0], c[e[0]][1], c[e[0]][2], c[e[1]][0], c[e[1]][1], c[e[1]][2], r, g, b, a);
+        }
     }
 
     private static void line(PoseStack.Pose pose, VertexConsumer lines,

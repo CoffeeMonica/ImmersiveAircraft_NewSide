@@ -1,7 +1,10 @@
 {
+  "replace": false,
   "values": [
     "immersive_aircraft:airship",
     "immersive_aircraft:cargo_airship",
-    "immersive_aircraft:warship"
+    "immersive_aircraft:warship",
+    "immersive_aircraft:scarlet_biplane",
+    "immersive_aircraft:economy_plane"
   ]
 }

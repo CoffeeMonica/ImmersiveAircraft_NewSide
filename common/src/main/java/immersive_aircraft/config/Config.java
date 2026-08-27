@@ -44,19 +44,19 @@ public final class Config extends JsonConfig {
     // Base wind strength in clear weather; it is added on top of the vehicle's own
     // speed contribution and then scaled by the vehicle's WIND stat.
     // Higher = bumpier clear-weather flights, lower = calmer skies.
-    @FloatConfigEntry(3.0f)
+    @FloatConfigEntry(4.0f)
     public float windClearWeather;
 
     // Wind strength added during storms. NOTE (kept exactly as in the original mod):
     // the code combines weather levels crosswise - THIS multiplier is applied to the
     // THUNDER level while windThunderWeather is applied to the RAIN level.
     // Higher = stronger storm wind.
-    @FloatConfigEntry(10.0f)
+    @FloatConfigEntry(8.0f)
     public float windRainWeather;
 
     // Storm wind strength (see the note on windRainWeather about the crosswise
     // application to rain/thunder levels). Higher = stronger storm wind.
-    @FloatConfigEntry(20.0f)
+    @FloatConfigEntry(16.0f)
     public float windThunderWeather;
 
     // Whether a vehicle destroyed by crash damage (not by a player) explodes.

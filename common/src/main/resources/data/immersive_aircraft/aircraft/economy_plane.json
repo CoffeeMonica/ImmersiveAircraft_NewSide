@@ -1,0 +1,170 @@
+{
+    "properties":  {
+                       "radarDetectability":  256,
+                       "soundRange":  64,
+                       "fuel":  0.5,
+                       "durability":  0.5,
+                       "yawSpeed":  1.5,
+                       "pitchSpeed":  2.0,
+                       "engineSpeed":  0.03,
+                       "pushSpeed":  0.015,
+                       "glideFactor":  0.5,
+                       "driftDrag":  0.01,
+                       "lift":  0.15,
+                       "rollFactor":  30.0,
+                       "groundPitch":  6.0,
+                       "wind":  0.01,
+                       "mass":  2.0
+                   },
+    "inventorySlots":  [
+                           {
+                               "type":  "engineUpgrade",
+                               "x":  10,
+                               "y":  18
+                           },
+                           {
+                               "type":  "upgrade",
+                               "x":  10,
+                               "y":  42
+                           },
+                           {
+                               "type":  "upgrade",
+                               "x":  150,
+                               "y":  18
+                           },
+                           {
+                               "type":  "upgrade",
+                               "x":  150,
+                               "y":  42
+                           },
+                           {
+                               "type":  "boiler",
+                               "x":  80,
+                               "y":  38
+                           },
+                           {
+                               "type":  "inventory",
+                               "x":  32,
+                               "y":  18,
+                               "cols":  2,
+                               "rows":  1
+                           },
+                           {
+                               "type":  "inventory",
+                               "x":  32,
+                               "y":  42,
+                               "cols":  2,
+                               "rows":  1
+                           },
+                           {
+                               "type":  "inventory",
+                               "x":  110,
+                               "y":  18,
+                               "cols":  2,
+                               "rows":  1
+                           },
+                           {
+                               "type":  "inventory",
+                               "x":  110,
+                               "y":  42,
+                               "cols":  2,
+                               "rows":  1
+                           }
+                       ],
+    "weaponMounts":  [
+
+                     ],
+    "passengerPositions":  [
+                               [
+                                   {
+                                       "x":  0.0,
+                                       "y":  1.4,
+                                       "z":  1.6
+                                   }
+                               ],
+                               [
+                                   {
+                                       "x":  0.0,
+                                       "y":  1.4,
+                                       "z":  1.6
+                                   },
+                                   {
+                                       "x":  0.0,
+                                       "y":  1.55,
+                                       "z":  0.5
+                                   }
+                               ]
+                           ],
+    "boundingBoxes":  [
+                          {
+                              "width":  14.88,
+                              "height":  2.63,
+                              "depth":  9,
+                              "x":  0,
+                              "y":  2.31,
+                              "z":  2
+                          },
+                          {
+                              "width":  1.38,
+                              "height":  2.19,
+                              "depth":  9.94,
+                              "x":  0,
+                              "y":  2.03,
+                              "z":  1.66
+                          },
+                          {
+                              "width":  10.63,
+                              "height":  2.07,
+                              "depth":  1.51,
+                              "x":  0,
+                              "y":  2.34,
+                              "z":  "-3.19"
+                          },
+                          {
+                              "width":  1.55,
+                              "height":  0.75,
+                              "depth":  1.5,
+                              "x":  "-0.02",
+                              "y":  2.95,
+                              "z":  1.09
+                          }
+                      ],
+    "trails":  [
+                   {
+                       "x":  -5.5,
+                       "y":  2.2,
+                       "z":  -0.6,
+                       "size":  0.25,
+                       "rotate":  0.0,
+                       "gray":  1.0,
+                       "length":  60
+                   },
+                   {
+                       "x":  5.5,
+                       "y":  2.2,
+                       "z":  -0.6,
+                       "size":  0.25,
+                       "rotate":  0.0,
+                       "gray":  1.0,
+                       "length":  60
+                   },
+                   {
+                       "x":  -3.2,
+                       "y":  2.5,
+                       "z":  -6.6,
+                       "size":  0.15,
+                       "rotate":  0.0,
+                       "gray":  1.0,
+                       "length":  30
+                   },
+                   {
+                       "x":  3.2,
+                       "y":  2.5,
+                       "z":  -6.6,
+                       "size":  0.15,
+                       "rotate":  0.0,
+                       "gray":  1.0,
+                       "length":  30
+                   }
+               ]
+}

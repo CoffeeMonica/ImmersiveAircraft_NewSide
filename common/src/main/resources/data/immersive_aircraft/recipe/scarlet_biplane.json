@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "IHI",
+    "PBH",
+    "IHI"
+  ],
+  "key": {
+    "H": "immersive_aircraft:hull",
+    "B": "immersive_aircraft:biplane",
+    "P": "immersive_aircraft:propeller",
+    "I": "minecraft:iron_ingot"
+  },
+  "result": {
+    "id": "immersive_aircraft:scarlet_biplane"
+  }
+}

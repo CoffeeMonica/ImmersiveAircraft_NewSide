@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "immersive_aircraft:item/economy_plane",
+    "tints": [
+      {
+        "type": "minecraft:dye",
+        "default": [1.0, 1.0, 1.0]
+      }
+    ]
+  }
+}

@@ -1,20 +1,77 @@
 {
-  "properties": {
-    "radarDetectability": 96,
-    "soundRange": 96,
-    "fuel": 1.0,
-    "durability": 1.0,
-    "yawSpeed": 5.0,
-    "pitchSpeed": 4.0,
-    "engineSpeed": 0.045,
-    "glideFactor": 0.3,
-    "rollFactor": 60.0,
-    "wind": 0.04,
-    "mass": 2.0
-  },
-  "inventorySlots": [],
-  "weaponMounts": [],
-  "passengerPositions": [],
-  "boundingBoxes": [],
-  "trails": []
+    "properties":  {
+                       "radarDetectability":  96,
+                       "soundRange":  96,
+                       "fuel":  1.0,
+                       "durability":  1.0,
+                       "yawSpeed":  5.0,
+                       "pitchSpeed":  4.0,
+                       "engineSpeed":  0.045,
+                       "glideFactor":  0.3,
+                       "rollFactor":  60.0,
+                       "wind":  0.04,
+                       "mass":  2.0
+                   },
+    "inventorySlots":  [
+
+                       ],
+    "weaponMounts":  [
+
+                     ],
+    "passengerPositions":  [
+
+                           ],
+    "boundingBoxes":  [
+                          {
+                              "width":  6.38,
+                              "height":  0.72,
+                              "depth":  1.13,
+                              "x":  0,
+                              "y":  0.66,
+                              "z":  1.12
+                          },
+                          {
+                              "width":  1.25,
+                              "height":  0.56,
+                              "depth":  0.94,
+                              "x":  0,
+                              "y":  0.47,
+                              "z":  "-0.19"
+                          },
+                          {
+                              "width":  3,
+                              "height":  0.13,
+                              "depth":  0.82,
+                              "x":  0,
+                              "y":  0.59,
+                              "z":  "-2.72"
+                          },
+                          {
+                              "width":  1.25,
+                              "height":  0.13,
+                              "depth":  0.91,
+                              "x":  0,
+                              "y":  0.25,
+                              "z":  "-0.18"
+                          },
+                          {
+                              "width":  0.13,
+                              "height":  1.25,
+                              "depth":  0.95,
+                              "x":  0,
+                              "y":  1,
+                              "z":  "-2.91"
+                          },
+                          {
+                              "width":  1,
+                              "height":  1,
+                              "depth":  0.06,
+                              "x":  0,
+                              "y":  0.75,
+                              "z":  2
+                          }
+                      ],
+    "trails":  [
+
+               ]
 }
