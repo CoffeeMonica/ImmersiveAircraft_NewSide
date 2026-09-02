@@ -1,7 +1,7 @@
 {
     "properties":  {
                        "radarDetectability":  224,
-                       "soundRange":  88,
+                       "soundRange":  128,
                        "fuel":  1.5,
                        "durability":  2.5,
                        "yawSpeed":  3.0,
@@ -121,12 +121,12 @@
                                           ],
                              "FRONT":  [
                                            {
-                                               "x":  -4.0,
+                                               "x":  -5.0,
                                                "y":  4.0,
                                                "z":  1.0
                                            },
                                            {
-                                               "x":  4.0,
+                                               "x":  5.0,
                                                "y":  4.0,
                                                "z":  1.0
                                            }
@@ -168,44 +168,40 @@
                            ],
     "boundingBoxes":  [
                           {
-                              "width":  1.63,
-                              "height":  2.13,
-                              "depth":  10.06,
+                              "_comment":  "SCR1 - wings: wing cell (9 segments), full span",
+                              "width":  12,
+                              "height":  2.4,
+                              "depth":  2.5,
                               "x":  0,
-                              "y":  2.31,
-                              "z":  "-0.22"
+                              "y":  2.8,
+                              "z":  1
                           },
                           {
-                              "width":  12.75,
-                              "height":  3.56,
-                              "depth":  8.75,
+                              "_comment":  "SCR2 - fuselage (cockpit+tail merged)",
+                              "width":  1.8,
+                              "height":  2.0,
+                              "depth":  10.5,
                               "x":  0,
-                              "y":  3.03,
-                              "z":  0.75
+                              "y":  2.3,
+                              "z":  -1.6
                           },
                           {
+                              "_comment":  "SCR3 - elevator (long horizontal flap)",
                               "width":  5.25,
-                              "height":  0.19,
-                              "depth":  2.06,
+                              "height":  0.4,
+                              "depth":  2,
                               "x":  0,
-                              "y":  2.53,
-                              "z":  4.09
+                              "y":  2.5,
+                              "z":  -5.6
                           },
                           {
-                              "width":  0.25,
-                              "height":  3.56,
-                              "depth":  2.06,
+                              "_comment":  "SCR4 - rudder (vertical flap)",
+                              "width":  0.3,
+                              "height":  2.8,
+                              "depth":  2,
                               "x":  0,
-                              "y":  3.03,
-                              "z":  4.09
-                          },
-                          {
-                              "width":  0.5,
-                              "height":  4,
-                              "depth":  0.45,
-                              "x":  0,
-                              "y":  2.06,
-                              "z":  "-4.97"
+                              "y":  3.4,
+                              "z":  -5.7
                           }
                       ],
     "trails":  [

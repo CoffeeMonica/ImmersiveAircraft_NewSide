@@ -25,6 +25,7 @@ public class ImprovedUavEntity extends UavEntity {
         discard();
         level().explode(this, x, y, z, immersive_aircraft.config.Config.getInstance().improvedUavExplosionPower,
                 immersive_aircraft.config.Config.getInstance().weaponsAreDestructive ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
+        spawnExplosionParticles(x, y, z);
     }
 
     // Falls off over exactly ONE second (20 ticks) without the engine, unscaled by

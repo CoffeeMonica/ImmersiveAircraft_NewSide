@@ -57,16 +57,16 @@ public interface Entities {
             .fireImmune()
     );
 
-    Supplier<EntityType<AirshipEntity>> AIRSHIP = register("airship", EntityType.Builder
+        Supplier<EntityType<AirshipEntity>> AIRSHIP = register("airship", EntityType.Builder
             .of(AirshipEntity::new, MobCategory.MISC)
-            .sized(1.5f, 3.0f)
+            .sized(1.5f, 0.6f)
             .clientTrackingRange(12)
             .fireImmune()
     );
 
-    Supplier<EntityType<CargoAirshipEntity>> CARGO_AIRSHIP = register("cargo_airship", EntityType.Builder
+        Supplier<EntityType<CargoAirshipEntity>> CARGO_AIRSHIP = register("cargo_airship", EntityType.Builder
             .of(CargoAirshipEntity::new, MobCategory.MISC)
-            .sized(1.75f, 3.0f)
+            .sized(1.75f, 0.6f)
             .clientTrackingRange(12)
             .fireImmune()
     );

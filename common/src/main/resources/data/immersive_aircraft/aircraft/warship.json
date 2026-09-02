@@ -1,9 +1,9 @@
 {
     "properties":  {
                        "radarDetectability":  -1,
-                       "soundRange":  128,
+                       "soundRange":  160,
                        "fuel":  0.8,
-                       "durability":  5.0,
+                       "durability":  10.0,
                        "stabilizer":  0.1,
                        "yawSpeed":  2.5,
                        "engineSpeed":  0.035,
@@ -143,8 +143,8 @@
                                                "enableRotation":  true,
                                                "minYaw":  -180,
                                                "maxYaw":  180,
-                                               "minPitch":  0,
-                                               "maxPitch":  0
+                                               "minPitch":  -10,
+                                               "maxPitch":  10
                                            },
                                            {
                                                "x":  3.875,
@@ -155,8 +155,8 @@
                                                "enableRotation":  true,
                                                "minYaw":  -180,
                                                "maxYaw":  180,
-                                               "minPitch":  0,
-                                               "maxPitch":  0
+                                               "minPitch":  -10,
+                                               "maxPitch":  10
                                            },
                                            {
                                                "x":  -3.875,
@@ -167,8 +167,8 @@
                                                "enableRotation":  true,
                                                "minYaw":  -180,
                                                "maxYaw":  180,
-                                               "minPitch":  0,
-                                               "maxPitch":  0
+                                               "minPitch":  -10,
+                                               "maxPitch":  10
                                            },
                                            {
                                                "x":  3.875,
@@ -179,8 +179,8 @@
                                                "enableRotation":  true,
                                                "minYaw":  -180,
                                                "maxYaw":  180,
-                                               "minPitch":  0,
-                                               "maxPitch":  0
+                                               "minPitch":  -10,
+                                               "maxPitch":  10
                                            }
                                        ],
                              "DROP":  [
@@ -337,44 +337,67 @@
                            ],
     "boundingBoxes":  [
                           {
-                              "width":  7.13,
-                              "height":  4.62,
-                              "depth":  11.28,
+                              "_comment":  "WAR1 - main balloon (centre balloon body only, no cone tips); screen-space y kept positive",
+                              "width":  2.75,
+                              "height":  3.75,
+                              "depth":  8.25,
                               "x":  0,
-                              "y":  5,
-                              "z":  1.68
+                              "y":  5.19,
+                              "z":  0.0
                           },
                           {
+                              "_comment":  "WAR2 - left sub-balloon",
                               "width":  1.88,
-                              "height":  2.87,
+                              "height":  2.88,
                               "depth":  6.63,
-                              "x":  "-2.44",
-                              "y":  4.13,
-                              "z":  3.25
+                              "x":  -2.44,
+                              "y":  4.75,
+                              "z":  0.0
                           },
                           {
+                              "_comment":  "WAR3 - right sub-balloon",
                               "width":  1.88,
-                              "height":  2.87,
+                              "height":  2.88,
                               "depth":  6.63,
                               "x":  2.44,
-                              "y":  4.13,
-                              "z":  3.25
+                              "y":  4.75,
+                              "z":  0.0
                           },
                           {
-                              "width":  4.88,
-                              "height":  4.6,
-                              "depth":  7.31,
+                              "_comment":  "WAR4 - centre rear engine",
+                              "width":  1.2,
+                              "height":  1.2,
+                              "depth":  1.6,
                               "x":  0,
-                              "y":  1.24,
-                              "z":  2.66
+                              "y":  4.6,
+                              "z":  -5
                           },
                           {
-                              "width":  11.13,
-                              "height":  2.04,
-                              "depth":  3.82,
+                              "_comment":  "WAR5 - left rear engine",
+                              "width":  1.2,
+                              "height":  1.2,
+                              "depth":  1.6,
+                              "x":  2.4,
+                              "y":  4.6,
+                              "z":  -5
+                          },
+                          {
+                              "_comment":  "WAR6 - right rear engine",
+                              "width":  1.2,
+                              "height":  1.2,
+                              "depth":  1.6,
+                              "x":  -2.4,
+                              "y":  4.6,
+                              "z":  -5
+                          },
+                          {
+                              "_comment":  "WAR7 - gondola cabin (hanging gondola + turret seat)",
+                              "width":  1.4,
+                              "height":  2.4,
+                              "depth":  6,
                               "x":  0,
-                              "y":  8.89,
-                              "z":  14.16
+                              "y":  0.8,
+                              "z":  1.1
                           }
                       ],
     "trails":  [

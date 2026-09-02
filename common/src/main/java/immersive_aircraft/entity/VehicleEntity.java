@@ -38,6 +38,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.BlockUtil;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.Util;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -312,6 +313,9 @@ public abstract class VehicleEntity extends Entity {
                         explosionRadius,
                         Config.getInstance().enableCrashFire,
                         Config.getInstance().enableCrashBlockDestruction ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
+
+                // Add extra visual particles on top of the explosion (density from config).
+                spawnExplosionParticles(x, y, z);
             }
 
             // Drop stuff if enabled
@@ -332,6 +336,38 @@ public abstract class VehicleEntity extends Entity {
         float health = Math.min(1.0f, getHealth() + amount);
         setHealth(health);
     }
+
+    /**
+     * Spawns additional fire/smoke particles at an explosion site (UAV, plane crash, etc.)
+     * on top of the vanilla explosion. The number of extra particles is controlled by
+     * the config entry {@code explosionParticleDensity}. Only run on the server so the
+     * particles are broadcast to all nearby players.
+     */
+    protected void spawnExplosionParticles(double x, double y, double z) {
+        if (level().isClientSide()) {
+            return;
+        }
+        int count = Math.max(0, (int) Config.getInstance().explosionParticleDensity);
+        RandomSource random = level().getRandom();
+        for (int i = 0; i < count; i++) {
+            double dx = random.nextGaussian() * 0.6;
+            double dy = random.nextGaussian() * 0.6;
+            double dz = random.nextGaussian() * 0.6;
+            switch (i % 4) {
+                case 0 -> level().addParticle(ParticleTypes.LARGE_SMOKE, x, y, z, dx * 0.5, dy * 0.5, dz * 0.5);
+                case 1 -> level().addParticle(ParticleTypes.SMALL_FLAME, x, y, z, dx, dy, dz);
+                case 2 -> level().addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, x, y, z, dx * 0.3, 0.15 + random.nextDouble() * 0.3, dz * 0.3);
+                default -> level().addParticle(ParticleTypes.MYCELIUM, x, y, z, dx * 0.3, dy * 0.3 + 0.2, dz * 0.3);
+            }
+        }
+        // Big bright flashes + an emitter so the blast clearly reads to the eye.
+        int flashes = Math.max(2, count / 3);
+        for (int i = 0; i < flashes; i++) {
+            level().addParticle(ParticleTypes.EXPLOSION_EMITTER, x, y, z, 0.0, 0.0, 0.0);
+        }
+        level().addParticle(ParticleTypes.EXPLOSION, x, y, z, 0.0, 0.0, 0.0);
+    }
+
 
     public float getDurability() {
         return 1.0f;

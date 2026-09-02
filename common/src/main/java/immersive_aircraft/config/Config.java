@@ -169,7 +169,7 @@ public final class Config extends JsonConfig {
     // lower = slower (0.5 = 16 s). Vehicles scale by their own
     // getEngineReactionSpeed()/20. Acceleration upgrades divide this further.
     // Does NOT affect spool-down: see engineDecayTicks.
-    @FloatConfigEntry(1.0f)
+    @FloatConfigEntry(1.5f)
     public float engineAccelerationMultiplier;
 
     // Ticks for the engine to spin DOWN: real power falls linearly from 100% to
@@ -303,13 +303,16 @@ public final class Config extends JsonConfig {
 
     // Aim deviation of rotary cannon bullets (vanilla shoot() spread parameter).
     // Intentionally very small: 0.1 = nearly laser-straight bursts with a tiny wobble.
-    // Higher = looser spread; 0 = perfectly straight shots.
-    @FloatConfigEntry(0.3f)
+    // Higher = looser spread; 0 = perfectly straight shots. Doubled (0.3 -> 0.6) so the
+    // cannon throws a wider, less laser-like cone of fire.
+    @FloatConfigEntry(0.6f)
     public float rotaryCannonInaccuracy;
 
     // Cooldown between rotary cannon shots, in seconds (client-side rate limit).
-    // The default of 0.2s equals one shot every 4 ticks (~5 shots/sec). Lower = faster firing.
-    @FloatConfigEntry(0.2f)
+    // Time between rotary cannon shots, in seconds. The default of 0.4s equals one shot
+    // every 8 ticks (~2.5 shots/sec) - the fire rate was deliberately halved relative to
+    // the classic 0.2s so the cannon reads as a heavier, slower-firing weapon. Lower = faster.
+    @FloatConfigEntry(0.4f)
     public float rotaryCannonCooldown;
 
     // Items accepted as rotary cannon ammunition (item ids). 1 item is consumed per shot.
@@ -328,14 +331,15 @@ public final class Config extends JsonConfig {
     public float reinforcedRotaryCannonVelocity;
 
     // Aim deviation of reinforced rotary cannon bullets (vanilla shoot() spread parameter).
-    // Intentionally very small: 0.1 = nearly laser-straight bursts with a tiny wobble.
-    @FloatConfigEntry(0.1f)
+    // Spread doubled (0.1 -> 0.2): still fairly accurate, but no longer a laser beam.
+    @FloatConfigEntry(0.2f)
     public float reinforcedRotaryCannonInaccuracy;
 
     // Cooldown between reinforced rotary cannon shots, in seconds (client-side rate limit).
     // The default of 4/60s (~0.0667s) is 3x shorter than the rotary cannon's interval; because
-    // cooldown is decremented once per tick, this lands on one shot every 2 ticks in practice.
-    @FloatConfigEntry(0.1f)
+    // cooldown is decremented once per tick, this lands on one shot every 4 ticks in practice.
+    // Default 0.2s is twice as slow as the classic 0.1s (halved fire rate, like the rotary).
+    @FloatConfigEntry(0.2f)
     public float reinforcedRotaryCannonCooldown;
 
     // Items accepted as reinforced rotary cannon ammunition (item ids). 1 item per shot.
@@ -440,6 +444,11 @@ public final class Config extends JsonConfig {
     // Explosion power of the improved UAV (in blocks).
     @FloatConfigEntry(15.0f)
     public float improvedUavExplosionPower;
+
+    // Number of extra fire/smoke particles spawned on top of a vehicle or drone
+    // explosion. Higher = denser, more spectacular blast; 0 = vanilla explosion only.
+    @FloatConfigEntry(24.0f)
+    public float explosionParticleDensity;
 
     // ========================
     // Upgrades

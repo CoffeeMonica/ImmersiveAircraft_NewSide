@@ -45,9 +45,8 @@ public class UavEntity extends AirplaneEntity {
     }
 
     @Override
-    protected float getEngineReactionSpeed() {
-        // 160 * 7.5 / 20 = 60 ticks = exactly 3 seconds to full power
-        return 7.5f;
+    protected float getEngineReactionSpeed() { 
+        return 5f;
     }
 
     // UAVs use the tiny drone propeller sound (same as the quadrocopter),
@@ -181,6 +180,7 @@ public class UavEntity extends AirplaneEntity {
         discard();
         level().explode(this, x, y, z, immersive_aircraft.config.Config.getInstance().uavExplosionPower,
                 immersive_aircraft.config.Config.getInstance().weaponsAreDestructive ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
+        spawnExplosionParticles(x, y, z);
     }
 
     @Override

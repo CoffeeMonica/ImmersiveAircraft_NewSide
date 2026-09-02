@@ -76,13 +76,23 @@
                                                "x":  -0.5,
                                                "y":  0.375,
                                                "z":  0.0,
-                                               "roll":  90
+                                               "roll":  90,
+                                               "enableRotation":  true,
+                                               "minYaw":  -180,
+                                               "maxYaw":  180,
+                                               "minPitch":  -10,
+                                               "maxPitch":  10
                                            },
                                            {
                                                "x":  0.5,
                                                "y":  0.375,
                                                "z":  0.0,
-                                               "roll":  -90
+                                               "roll":  -90,
+                                               "enableRotation":  true,
+                                               "minYaw":  -180,
+                                               "maxYaw":  180,
+                                               "minPitch":  -10,
+                                               "maxPitch":  10
                                            }
                                        ],
                              "DROP":  [
@@ -124,20 +134,13 @@
                            ],
     "boundingBoxes":  [
                           {
-                              "width":  1.63,
-                              "height":  1.5,
-                              "depth":  2.25,
+                              "_comment":  "AIR1 - balloon (envelope)",
+                              "width":  1.6,
+                              "height":  1.4,
+                              "depth":  2.4,
                               "x":  0,
-                              "y":  2.5,
+                              "y":  2.55,
                               "z":  0
-                          },
-                          {
-                              "width":  1.75,
-                              "height":  1.9,
-                              "depth":  3.13,
-                              "x":  0,
-                              "y":  0.95,
-                              "z":  0.38
                           }
                       ],
     "trails":  [

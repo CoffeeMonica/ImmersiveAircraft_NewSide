@@ -21,6 +21,10 @@ import static immersive_aircraft.Entities.BULLET;
 public class RotaryCannon extends BulletWeapon {
     private final RotationalManager rotationalManager = new RotationalManager(this);
     private float cooldown = 0.0f;
+    // Angular velocity of the barrel (radians/tick). It is "recharged" on every shot and
+    // decays exponentially, so after you stop firing the barrel coasts for a few ticks
+    // (inertia) then settles - instead of slamming to a stop or spinning too long.
+    private float spinSpeed = 0.0f;
 
     public RotaryCannon(VehicleEntity entity, ItemStack stack, WeaponMount mount, int slot) {
         super(entity, stack, mount, slot);
@@ -51,6 +55,7 @@ public class RotaryCannon extends BulletWeapon {
         BulletEntity bullet = BULLET.get().create(getEntity().level(), EntitySpawnReason.TRIGGERED);
         assert bullet != null;
         bullet.setDamage(Config.getInstance().rotaryCannonDamage);
+        bullet.setTrailParticle(net.minecraft.core.particles.ParticleTypes.SMOKE);
         bullet.setPos(position.x() + getEntity().getX(), position.y() + getEntity().getY(), position.z() + getEntity().getZ());
         bullet.setOwner(getEntity().getControllingPassenger());
         bullet.shoot(direction.x(), direction.y(), direction.z(), getVelocity(), getInaccuracy());
@@ -62,6 +67,36 @@ public class RotaryCannon extends BulletWeapon {
         cooldown -= 1.0f / 20.0f;
         rotationalManager.tick();
         rotationalManager.pointTo(getEntity());
+
+        // Smooth barrel spin with inertia. We advance roll every tick (after the manager
+        // captured the previous value) so the renderer interpolates a continuous turn, and
+        // decay the velocity so it coasts briefly after the trigger is released.
+        if (spinSpeed > 0.0008f) {
+            rotationalManager.roll += spinSpeed;
+            spinSpeed *= getSpinDecay();
+            if (spinSpeed <= 0.0008f) {
+                spinSpeed = 0.0f;
+            }
+        }
+    }
+
+    /**
+     * One shot means a smooth 90° barrel turn. The angular velocity is therefore
+     * scaled by the fire rate (1 shot per cooldown seconds), which also covers the
+     * faster-firing reinforced cannon automatically.
+     */
+    private float getSpinPerTick() {
+        float interval = Math.max(1.0f, getMaxCooldown() * 20.0f); // ticks per shot
+        return (float) (Math.PI / 2.0) / interval;
+    }
+
+    /**
+     * Exponential decay that makes a single shot deliver exactly one 90° turn before
+     * settling, while repeated shots keep the barrel spinning at full cadence.
+     */
+    private float getSpinDecay() {
+        float interval = Math.max(1.0f, getMaxCooldown() * 20.0f);
+        return 1.0f - 1.0f / interval;
     }
 
     @Override
@@ -85,8 +120,9 @@ public class RotaryCannon extends BulletWeapon {
         if (cooldown <= 0.0f) {
             cooldown = getMaxCooldown();
 
-            // Advance the barrel rotation for animation.
-            rotationalManager.roll += 0.25f;
+            // Recharge the spin for the inertia animation. Holding fire keeps the barrel
+            // turning; letting go lets the recycled velocity in tick() coast to a stop.
+            spinSpeed = Math.max(spinSpeed, getSpinPerTick());
 
             // Send a fire message for every actual shot so ammo consumption
             // matches the number of bullets that leave the barrel.

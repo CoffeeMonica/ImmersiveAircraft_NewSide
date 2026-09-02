@@ -6,7 +6,7 @@
                        "durability":  1.0,
                        "yawSpeed":  5.0,
                        "pitchSpeed":  4.0,
-                       "engineSpeed":  0.06,
+                       "engineSpeed":  0.04,
                        "glideFactor":  0.3,
                        "rollFactor":  60.0,
                        "wind":  0.0,

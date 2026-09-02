@@ -70,7 +70,9 @@ public abstract class BulletWeapon extends Weapon {
             entity.level().addFreshEntity(bullet);
         }
 
-        // Fire-particle
+        // Fire-particle - push the muzzle flash a bit further past the barrel so it
+        // clears the weapon geometry and reads as coming from the barrel tip.
+        position.add(direction.x * 0.75f, direction.y * 0.75f, direction.z * 0.75f, 0.0f);
         direction.mul(0.25f);
         direction.add((float) speed.x, (float) speed.y, (float) speed.z);
         FireResponse fireMessage = new FireResponse(position, direction);

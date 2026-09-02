@@ -59,10 +59,10 @@
                                                "y":  0.375,
                                                "z":  1.0,
                                                "enableRotation":  true,
-                                               "minYaw":  -60,
-                                               "maxYaw":  60,
-                                               "minPitch":  -60,
-                                               "maxPitch":  60
+                                               "minYaw":  -30,
+                                               "maxYaw":  30,
+                                               "minPitch":  -30,
+                                               "maxPitch":  30
                                            }
                                        ],
                              "DROP":  [
@@ -85,20 +85,22 @@
                            ],
     "boundingBoxes":  [
                           {
-                              "width":  1.06,
-                              "height":  0.5,
-                              "depth":  1.56,
-                              "x":  0,
-                              "y":  0.28,
-                              "z":  0
+                              "_comment": "QUAD1 frame - central body with motor arms",
+                              "width": 2.94,
+                              "height": 0.5,
+                              "depth": 1.63,
+                              "x": 0,
+                              "y": 0.25,
+                              "z": -0.03
                           },
                           {
-                              "width":  2.88,
-                              "height":  0.5,
-                              "depth":  1.63,
-                              "x":  0,
-                              "y":  0.25,
-                              "z":  0
+                              "_comment": "QUAD2 engine pod on top",
+                              "width": 0.63,
+                              "height": 0.38,
+                              "depth": 0.56,
+                              "x": 0.03,
+                              "y": 0.69,
+                              "z": -0.53
                           }
                       ]
 }
