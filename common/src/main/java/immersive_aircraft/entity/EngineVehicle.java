@@ -1,6 +1,7 @@
 package immersive_aircraft.entity;
 
 import immersive_aircraft.AircraftStats;
+import immersive_aircraft.Items;
 import immersive_aircraft.Sounds;
 import immersive_aircraft.cobalt.network.NetworkHandler;
 import immersive_aircraft.config.Config;
@@ -75,10 +76,29 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
     protected float engineTargetAtDismount = 0.0f;
 
     public static final int TARGET_FUEL = 1000;
+
+    /**
+     * A "low fuel" warning is raised when the remaining fuel reserve (tank + unburned
+     * items) can sustain the current consumption for at most this many seconds.
+     */
+    public static final float LOW_FUEL_SECONDS = 10.0f;
     // Reference values for the low-fuel threshold: one stack of planks
     // (vanilla plank burn time is 300 ticks).
     public static final int REFERENCE_STACK_SIZE = 64;
     public static final int PLANKS_BURN_TIME = 300;
+
+    /**
+     * Fraction of the regular fuel consumption charged to a hover-capable vehicle
+     * ({@link #canHover()}) while it holds its position in the air: 20%.
+     */
+    public static final float HOVER_FUEL_FACTOR = 0.2f;
+
+    /**
+     * Speed (blocks per tick) below which a hovering vehicle counts as standing still
+     * and therefore qualifies for the hover fuel reduction.
+     * 0.05 blocks/tick = 1 block/second, the same "has stopped" threshold the UAV uses.
+     */
+    public static final double HOVER_STOP_SPEED = 0.05;
 
     private final int[] fuel;
 
@@ -212,13 +232,27 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
         // affected by acceleration upgrades or the config multiplier.
         float accelerationStat = Math.max(0.001f, getProperties().get(VehicleStat.ACCELERATION));
         float reactionScale = getEngineReactionSpeed() / 20.0f;
+        // Spool-UP time: full power in ENGINE_SPOOL_UP_TICKS (8 s for a stock biplane),
+        // scaled by the vehicle's getEngineReactionSpeed()/20 and divided by the
+        // ACCELERATION stat and the config multiplier. Acceleration upgrades affect
+        // ONLY this phase.
+        float spoolUpTicks = ENGINE_SPOOL_UP_TICKS * reactionScale
+                / accelerationStat
+                / Math.max(0.001f, Config.getInstance().engineAccelerationMultiplier);
+        // Spool-DOWN time: real power falls linearly from 100% to 0% in
+        // Config.engineDecayTicks ticks (scaled by reactionSpeed/20), never affected
+        // by acceleration upgrades or the config multiplier.
+        float decayTicks = getEngineDecayTicks(reactionScale);
         float rampTicks;
-        if (getEngineTarget() <= enginePower.getSmooth()) {
-            rampTicks = getEngineDecayTicks(reactionScale);
+        if (hasInertiaEngine()) {
+            // The inertia engine does NOT drop RPM instantly: its spool-down lasts
+            // exactly as long as its own (slow) spool-up, instead of the short decay.
+            // Spool-up still uses the same slow time, so both phases are symmetric.
+            rampTicks = spoolUpTicks;
+        } else if (getEngineTarget() <= enginePower.getSmooth()) {
+            rampTicks = decayTicks;
         } else {
-            rampTicks = ENGINE_SPOOL_UP_TICKS * reactionScale
-                    / accelerationStat
-                    / Math.max(0.001f, Config.getInstance().engineAccelerationMultiplier);
+            rampTicks = spoolUpTicks;
         }
         enginePower.setSteps(Math.max(1f, rampTicks));
         // Linear mode: move exactly 100%/rampTicks per tick, so timings are exact
@@ -255,6 +289,23 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
         if (getPassengers().isEmpty() && onGround() && tickCount - lastDismountTick > 20) {
             setEngineTarget(0.0f, true);
         }
+        // Hovering vehicles (airships and drones, all Rotorcraft subclasses) park on
+        // the ground WITHOUT a pilot: their engine cancels gravity, so the vanilla
+        // onGround() flag goes stale (no vertical movement -> no collision update).
+        // Detect ground contact with an explicit collision probe just below the
+        // bounding box instead. SERVER-SIDE ONLY: writing ENGINE on the client would
+        // desync the propellers/sound, and the server would never re-send its
+        // (unchanged) value to correct it. The shutdown still spools the engine
+        // down smoothly over the configured decay time (see setEngineTarget).
+        // Planes (AirplaneEntity etc.) are handled by the onGround() block above -
+        // their gravity is never cancelled, so the flag is reliable for them.
+        if (!level().isClientSide() && this instanceof Rotorcraft
+                && getPassengers().isEmpty()
+                && tickCount - lastDismountTick > 20
+                && !level().noCollision(this, getBoundingBox().expandTowards(0.0, -0.05, 0.0))) {
+            setEngineTarget(0.0f, true);
+            engineTargetAtDismount = 0.0f;
+        }
 
         // Mirror the fuel cautions on the client so the gyroscope HUD lamp works in
         // multiplayer too (the server-side warning block only runs on the logical server).
@@ -284,6 +335,16 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
         // Fuel
         if (fuel.length > 0 && !level().isClientSide()) {
             consumeFuel(getFuelConsumption());
+
+            // Tanks ran dry: cut the THROTTLE TARGET, not the power itself - the
+            // engine then spools down smoothly over the configured decay time
+            // (engineDecayTicks) instead of snapping to 0 instantly. Refueling does
+            // NOT restart the engine: the pilot has to re-apply the throttle, which
+            // spools back up through the normal (slow) spool-up phase.
+            if (getEngineTarget() > 0.0f && getFuelUtilization() <= 0.0f) {
+                setEngineTarget(0.0f, true);
+                engineTargetAtDismount = 0.0f;
+            }
         }
 
         // Refuel continuously, even without a pilot aboard
@@ -397,11 +458,11 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
     }
 
     /**
-     * True when the remaining fuel is below the low-fuel threshold:
-     * 20% of one full stack of planks (64 items x 300 ticks burn time), scaled by this
-     * vehicle's fuel consumption stat (VehicleStat.FUEL, includes upgrades).
+     * True when the remaining fuel will last for at most LOW_FUEL_SECONDS of flight
+     * at the CURRENT consumption (engine target x vehicle FUEL stat x config rate).
      * The estimate sums the already-burned fuel in every boiler tank PLUS the unburned
      * fuel items still stored in the boiler slots.
+     * Gated by Config.lowFuelWarning: when disabled, never reports low fuel.
      */
     public boolean isFuelLow() {
         if (!Config.getInstance().burnFuelInCreative && isPilotCreative()) {
@@ -411,25 +472,42 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
         if (level().isClientSide()) {
             return entityData.get(LOW_ON_FUEL);
         } else {
-            List<SlotDescription> boilerSlots = getInventoryDescription().getSlots(VehicleInventoryDescription.BOILER);
-            long remaining = 0;
-            for (int i = 0; i < fuel.length && i < boilerSlots.size(); i++) {
-                // Fuel already burned into the tank...
-                remaining += fuel[i];
-                // ...plus the fuel item sitting in the boiler slot, not yet burned.
-                ItemStack stack = getInventory().getItem(boilerSlots.get(i).index());
-                if (!stack.isEmpty()) {
-                    remaining += Utils.getFuelTime(stack);
-                }
-            }
-
-            // Low-fuel threshold: 20% of "64 planks x 300 ticks", scaled by this vehicle's
-            // fuel consumption stat.
-            double lowThreshold = 0.2 * REFERENCE_STACK_SIZE * PLANKS_BURN_TIME * getProperties().get(VehicleStat.FUEL);
-            boolean low = remaining < lowThreshold;
+            boolean low = computeLowFuel();
             entityData.set(LOW_ON_FUEL, low);
             return low;
         }
+    }
+
+    private boolean computeLowFuel() {
+        // Warning disabled in the config - never report low fuel.
+        if (!Config.getInstance().lowFuelWarning) {
+            return false;
+        }
+
+        float consumption = getFuelConsumption();
+        // No fuel burn at all (0% throttle or fuel consumption disabled) - nothing to warn about.
+        if (consumption <= 0.0f) {
+            return false;
+        }
+
+        List<SlotDescription> boilerSlots = getInventoryDescription().getSlots(VehicleInventoryDescription.BOILER);
+        long remaining = 0;
+        for (int i = 0; i < fuel.length && i < boilerSlots.size(); i++) {
+            // Fuel already burned into the tank...
+            remaining += fuel[i];
+            // ...plus the fuel item sitting in the boiler slot, not yet burned.
+            // The WHOLE stack counts, not just its first item (a stack of 64 aviation
+            // fuel holds 64x the burn time of a single item).
+            ItemStack stack = getInventory().getItem(boilerSlots.get(i).index());
+            if (!stack.isEmpty()) {
+                remaining += (long) Utils.getFuelTime(stack) * stack.getCount();
+            }
+        }
+
+        // Flight time in seconds the current fuel reserve can sustain:
+        // remaining fuel-ticks / (fuel-ticks burned per real tick) / 20 ticks per second.
+        double remainingSeconds = (double) remaining / consumption / 20.0;
+        return remainingSeconds <= LOW_FUEL_SECONDS;
     }
 
     /**
@@ -445,8 +523,58 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
         return "fuel";
     }
 
+    /**
+     * Whether this vehicle can hover on the spot, i.e. hold its position in the air
+     * without any thrust input. Hover-capable vehicles burn only {@link #HOVER_FUEL_FACTOR}
+     * of their regular fuel while doing so (see {@link #getFuelConsumption()}).
+     * <p>
+     * Hovercraft ({@link Rotorcraft}: airships, cargo airships, warships) return true.
+     * Drones and the gyrodyne return false ON PURPOSE: they may look like they are
+     * hovering, but they must keep burning fuel at the full rate. Planes and the UAV
+     * return false as well - holding a position in the air is not a valid flight state
+     * for them, and with the engine off they already consume no fuel at all.
+     */
+    public boolean canHover() {
+        return false;
+    }
+
+    /**
+     * True while this vehicle is a hover-capable craft ({@link #canHover()}) that is
+     * currently hovering on the spot: airborne, holding its position and not applying any
+     * thrust. Only in that state the fuel consumption is scaled by
+     * {@link #HOVER_FUEL_FACTOR}.
+     * <p>
+     * "Standing still" requires BOTH the current velocity and the averaged speed vector
+     * (the real position change over the last 10 ticks, the measure the HUD, the distance
+     * stat and the pull-up warning use) to be below {@link #HOVER_STOP_SPEED}, so a stale
+     * or zeroed velocity alone cannot fake a hover while the craft is actually cruising.
+     * <p>
+     * The vanilla onGround() flag is unreliable for Rotorcraft: their engine cancels
+     * gravity, so a landed airship keeps reporting "on ground" and a parked one is
+     * detected with the same collision probe the parking code in tick() uses (a block
+     * just below the bounding box). Planes keep using onGround() - their gravity is
+     * never cancelled, so the flag stays accurate for them.
+     */
+    protected boolean isHoveringInPlace() {
+        if (!canHover()) {
+            return false;
+        }
+
+        boolean airborne = this instanceof Rotorcraft
+                ? level().noCollision(this, getBoundingBox().expandTowards(0.0, -0.05, 0.0))
+                : !onGround();
+
+        return airborne
+                && getDeltaMovement().length() < HOVER_STOP_SPEED
+                && getSpeedVector().length() < HOVER_STOP_SPEED;
+    }
+
     public float getFuelConsumption() {
-        return getEngineTarget() * getProperties().get(VehicleStat.FUEL) * Config.getInstance().fuelConsumption;
+        float consumption = getEngineTarget() * getProperties().get(VehicleStat.FUEL) * Config.getInstance().fuelConsumption;
+        // Hovering on the spot is cheap for hover-capable vehicles: they only burn a fifth
+        // of the regular amount while they hold their position in the air. Thrusting,
+        // climbing, descending or drifting at speed still costs the full amount.
+        return isHoveringInPlace() ? consumption * HOVER_FUEL_FACTOR : consumption;
     }
 
     private void refuel(int i) {
@@ -479,12 +607,35 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
         }
     }
 
+    /**
+     * Real engine power follows ONLY the interpolated enginePower ramp, so running
+     * out of fuel (or refueling) can never snap the RPM instantly - the throttle
+     * target is what changes (see the fuel-out handling in tick()), and the power
+     * then spools down/up smoothly over the configured ramp time.
+     */
     public float getEnginePower() {
-        return (float) (enginePower.getSmooth() * Math.sqrt(getFuelUtilization()));
+        return enginePower.getSmooth();
     }
 
     public float getEngineTarget() {
         return entityData.get(ENGINE);
+    }
+
+    /**
+     * True while the engine is running or still spooling up/down (any nonzero RPM).
+     * Used to lock the engine upgrade slot: swapping engines is only allowed at zero RPM.
+     */
+    public boolean isEngineRunning() {
+        return enginePower.getSmooth() > 0.0f || getEngineTarget() > 0.0f;
+    }
+
+    /**
+     * True when the inertia engine is installed: its spool-up time equals its
+     * spool-down time (it does not drop RPM instantly).
+     */
+    public boolean hasInertiaEngine() {
+        return getSlots(VehicleInventoryDescription.ENGINE_UPGRADE).stream()
+                .anyMatch(s -> s.is(Items.INERTIA_ENGINE.get()));
     }
 
     public void setEngineTarget(float engineTarget) {

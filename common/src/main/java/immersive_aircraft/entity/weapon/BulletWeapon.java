@@ -75,7 +75,15 @@ public abstract class BulletWeapon extends Weapon {
         position.add(direction.x * 0.75f, direction.y * 0.75f, direction.z * 0.75f, 0.0f);
         direction.mul(0.25f);
         direction.add((float) speed.x, (float) speed.y, (float) speed.z);
-        FireResponse fireMessage = new FireResponse(position, direction);
+        // 'position' is a VEHICLE-LOCAL offset (the vehicle transform is rotation-only and
+        // carries no translation), but FireResponse is broadcast to every player as ABSOLUTE
+        // world coordinates. Without adding the vehicle's position the muzzle flash/smoke
+        // would be emitted at the world origin instead of at the barrel - visible in single
+        // player and on every other player's screen in multiplayer.
+        Vector4f worldPosition = new Vector4f(position.x() + (float) entity.getX(),
+                position.y() + (float) entity.getY(),
+                position.z() + (float) entity.getZ(), 1.0f);
+        FireResponse fireMessage = new FireResponse(worldPosition, direction);
         for (ServerPlayer player : ((ServerLevel) entity.level()).players()) {
             NetworkHandler.sendToPlayer(fireMessage, player);
         }

@@ -2,7 +2,8 @@
   "type": "minecraft:crafting_shaped",
   "pattern": [
     "G G",
-    "IEI"
+    "IEI",
+    "G G"
   ],
   "key": {
     "G": "immersive_aircraft:industrial_gears",

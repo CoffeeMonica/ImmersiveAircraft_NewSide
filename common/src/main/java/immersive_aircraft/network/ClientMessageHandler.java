@@ -14,8 +14,9 @@ public class ClientMessageHandler implements MessageHandler {
     public void handleOpenGuiRequest(OpenGuiRequest message) {
         Minecraft client = Minecraft.getInstance();
         if (client.level != null && client.player != null) {
-            InventoryVehicleEntity vehicle = (InventoryVehicleEntity) client.level.getEntity(message.getVehicle());
-            if (vehicle != null) {
+            // Guard against a stale/other-type entity id: casting blindly would otherwise
+            // crash the client if the server ever references a non-inventory vehicle.
+            if (client.level.getEntity(message.getVehicle()) instanceof InventoryVehicleEntity vehicle) {
                 VehicleScreenRegistry.GUI_OPEN_HANDLERS
                         .getOrDefault(vehicle.getClass(), VehicleScreenRegistry.DEFAULT)
                         .handle(vehicle, client.player, message);
@@ -26,8 +27,9 @@ public class ClientMessageHandler implements MessageHandler {
     public void handleInventoryUpdate(InventoryUpdateMessage message) {
         Minecraft client = Minecraft.getInstance();
         if (client.level != null && client.player != null) {
-            InventoryVehicleEntity vehicle = (InventoryVehicleEntity) client.level.getEntity(message.getVehicle());
-            if (vehicle != null) {
+            // Guard against a stale/other-type entity id so a bad packet cannot crash the
+            // client (e.g. an entity id reused after a vehicle was removed).
+            if (client.level.getEntity(message.getVehicle()) instanceof InventoryVehicleEntity vehicle) {
                 vehicle.getInventory().setItem(message.getIndex(), message.getStack(vehicle));
             }
         }

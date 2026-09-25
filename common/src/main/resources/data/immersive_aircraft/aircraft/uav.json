@@ -7,7 +7,7 @@
                        "yawSpeed":  5.0,
                        "pitchSpeed":  4.0,
                        "engineSpeed":  0.03,
-                       "glideFactor":  0.3,
+                       "glideFactor":  0.5,
                        "rollFactor":  60.0,
                        "wind":  0.04,
                        "mass":  2.0

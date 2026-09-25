@@ -2,6 +2,7 @@ package immersive_aircraft.client.gui;
 
 import immersive_aircraft.entity.EngineVehicle;
 import immersive_aircraft.entity.inventory.slots.SlotDescription;
+import immersive_aircraft.screen.slot.EngineUpgradeSlot;
 import net.minecraft.client.gui.GuiGraphics;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,7 +29,20 @@ public class SlotRenderer {
         });
         register("weapon", new BasicRenderer(262, 22));
         register("upgrade", new BasicRenderer(262, 22 * 2));
-        register("engineUpgrade", new BasicRenderer(262, 22 * 6));
+        register("engineUpgrade", new BasicRenderer(262, 22 * 6) {
+            @Override
+            public void render(VehicleScreen screen, @NotNull GuiGraphics context, SlotDescription slot, int mouseX, int mouseY, float delta) {
+                super.render(screen, context, slot, mouseX, mouseY, delta);
+                // Hovered engine slot turns slightly red while the engine is running
+                // (engine can not be swapped at non-zero RPM)
+                if (mouseX >= screen.getX() + slot.x() && mouseX < screen.getX() + slot.x() + 16
+                        && mouseY >= screen.getY() + slot.y() && mouseY < screen.getY() + slot.y() + 16
+                        && EngineUpgradeSlot.isEngineBlocked(screen.getMenu().getVehicle())) {
+                    context.fill(screen.getX() + slot.x(), screen.getY() + slot.y(),
+                            screen.getX() + slot.x() + 16, screen.getY() + slot.y() + 16, 0x60FF3C3C);
+                }
+            }
+        });
         register("banner", new BasicRenderer(262, 22 * 3));
         register("dye", new BasicRenderer(262, 22 * 4));
         register("booster", new BasicRenderer(262, 22 * 5));

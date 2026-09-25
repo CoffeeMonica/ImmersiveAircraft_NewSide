@@ -143,6 +143,12 @@ public final class Config extends JsonConfig {
     @BooleanConfigEntry(false)
     public boolean burnFuelInCreative;
 
+    // Show the "low fuel" warning (action-bar message and gyroscope HUD lamp) when
+    // the remaining flight time drops below LOW_FUEL_SECONDS (10 s) at the current
+    // fuel consumption. false = never warn about low fuel.
+    @BooleanConfigEntry(true)
+    public boolean lowFuelWarning = true;
+
     // Whether vanilla furnace fuels (coal, planks, etc.) work in vehicle boilers.
     // true  = anything that burns in a furnace is accepted (using its vanilla burn time).
     // false = only items from fuelList below are accepted.
@@ -312,7 +318,7 @@ public final class Config extends JsonConfig {
     // Time between rotary cannon shots, in seconds. The default of 0.4s equals one shot
     // every 8 ticks (~2.5 shots/sec) - the fire rate was deliberately halved relative to
     // the classic 0.2s so the cannon reads as a heavier, slower-firing weapon. Lower = faster.
-    @FloatConfigEntry(0.4f)
+    @FloatConfigEntry(0.35f)
     public float rotaryCannonCooldown;
 
     // Items accepted as rotary cannon ammunition (item ids). 1 item is consumed per shot.

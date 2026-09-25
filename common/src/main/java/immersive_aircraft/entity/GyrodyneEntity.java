@@ -90,6 +90,16 @@ public class GyrodyneEntity extends Rotorcraft {
         return false;
     }
 
+    /**
+     * The gyrodyne may hold its position in the air, but it must keep burning fuel at the
+     * full rate: the hover fuel reduction available to the other rotorcraft (airships)
+     * never applies to it.
+     */
+    @Override
+    public boolean canHover() {
+        return false;
+    }
+
     @Override
     protected void updateController() {
         super.updateController();

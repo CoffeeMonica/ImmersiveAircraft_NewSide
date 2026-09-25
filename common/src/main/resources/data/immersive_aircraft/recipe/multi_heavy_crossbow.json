@@ -1,12 +1,13 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    " S ",
-    "SHS",
-    " S "
+    "SSW",
+    "SS ",
+    "W H"
   ],
   "key": {
     "S": "immersive_aircraft:heavy_crossbow",
+    "W": "#minecraft:logs",
     "H": "immersive_aircraft:industrial_gears"
   },
   "result": {

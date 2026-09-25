@@ -1,8 +1,8 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "BUB",
-    " G ",
+    "UUU",
+    "BGB",
     " R "
   ],
   "key": {
@@ -12,6 +12,7 @@
     "R": "immersive_aircraft:hull_reinforcement"
   },
   "result": {
-    "id": "immersive_aircraft:improved_uav"
+    "id": "immersive_aircraft:improved_uav",
+    "count": 3
   }
 }

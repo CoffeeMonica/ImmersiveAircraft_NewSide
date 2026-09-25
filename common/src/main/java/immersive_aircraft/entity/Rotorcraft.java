@@ -43,4 +43,15 @@ public abstract class Rotorcraft extends AircraftEntity {
                 newVelocity.z
         );
     }
+
+    /**
+     * Rotorcraft (airships, cargo airships, warships) are the hover-capable craft: while
+     * one holds its position in the air it burns only a fifth of the regular fuel.
+     * Exceptions - the gyrodyne and the quadrocopter drone - override this back to false,
+     * they must keep burning fuel at the full rate even when they appear to hover.
+     */
+    @Override
+    public boolean canHover() {
+        return true;
+    }
 }

@@ -1,9 +1,12 @@
 package immersive_aircraft.client.gui;
 
 import immersive_aircraft.Main;
+import immersive_aircraft.entity.inventory.VehicleInventoryDescription;
 import immersive_aircraft.entity.inventory.slots.SlotDescription;
 import immersive_aircraft.screen.VehicleScreenHandler;
+import immersive_aircraft.screen.slot.EngineUpgradeSlot;
 import immersive_aircraft.util.Rect2iCommon;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -12,6 +15,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Optional;
 
 public class VehicleScreen extends AbstractContainerScreen<VehicleScreenHandler> {
@@ -71,12 +75,47 @@ public class VehicleScreen extends AbstractContainerScreen<VehicleScreenHandler>
     public void render(@NotNull GuiGraphics context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
 
+        // Locked engine slot gets a red hover highlight
+        if (hoveredSlot != null
+                && hoveredSlot.container == menu.getVehicle().getInventory()) {
+            List<SlotDescription> vehicleSlots = menu.getVehicle().getInventoryDescription().getSlots();
+            int slotIndex = hoveredSlot.getContainerSlot();
+            // hoveredSlot can also be a player inventory slot - never index outside vehicle slots
+            if (slotIndex >= 0 && slotIndex < vehicleSlots.size()
+                    && VehicleInventoryDescription.ENGINE_UPGRADE.equals(vehicleSlots.get(slotIndex).type())
+                    && EngineUpgradeSlot.isEngineBlocked(menu.getVehicle())) {
+                context.fill(
+                        leftPos + hoveredSlot.x,
+                        topPos + hoveredSlot.y,
+                        leftPos + hoveredSlot.x + 16,
+                        topPos + hoveredSlot.y + 16,
+                        0x50FF4040);
+            }
+        }
+
         // Slot tooltip
-        if (hoveredSlot != null && !hoveredSlot.hasItem() && hoveredSlot.container == menu.getVehicle().getInventory()) {
-            SlotDescription slot = menu.getVehicle().getInventoryDescription().getSlots().get(hoveredSlot.getContainerSlot());
-            slot.getToolTip().ifPresent(
-                tooltip -> context.setTooltipForNextFrame(this.font, tooltip, Optional.empty(), mouseX, mouseY)
-            );
+        if (hoveredSlot != null && hoveredSlot.container == menu.getVehicle().getInventory()) {
+            List<SlotDescription> vehicleSlots = menu.getVehicle().getInventoryDescription().getSlots();
+            int slotIndex = hoveredSlot.getContainerSlot();
+            if (slotIndex >= 0 && slotIndex < vehicleSlots.size()) {
+                SlotDescription slot = vehicleSlots.get(slotIndex);
+                // Locked engine slot shows a warning tooltip even when it holds an engine
+                if (hoveredSlot.hasItem()
+                        && VehicleInventoryDescription.ENGINE_UPGRADE.equals(slot.type())
+                        && EngineUpgradeSlot.isEngineBlocked(menu.getVehicle())) {
+                    context.setTooltipForNextFrame(this.font,
+                            List.of(Component.translatable("immersive_aircraft.slot.engine_locked").withStyle(ChatFormatting.RED)),
+                            Optional.empty(), mouseX, mouseY);
+                } else if (!hoveredSlot.hasItem()) {
+                    slot.getToolTip().ifPresent(
+                        tooltip -> context.setTooltipForNextFrame(this.font, tooltip, Optional.empty(), mouseX, mouseY)
+                    );
+                } else {
+                    renderTooltip(context, mouseX, mouseY);
+                }
+            } else {
+                renderTooltip(context, mouseX, mouseY);
+            }
         } else {
             renderTooltip(context, mouseX, mouseY);
         }

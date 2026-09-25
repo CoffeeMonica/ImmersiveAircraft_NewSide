@@ -1,10 +1,12 @@
 package immersive_aircraft.fabric;
 
 import immersive_aircraft.ClientMain;
+import immersive_aircraft.Items;
 import immersive_aircraft.Renderer;
 import immersive_aircraft.WeaponRendererRegistry;
 import immersive_aircraft.client.KeyBindings;
 import immersive_aircraft.fabric.cobalt.registration.CobaltFuelRegistryImpl;
+import immersive_aircraft.item.UavItem;
 import immersive_aircraft.item.upgrade.VehicleStat;
 import immersive_aircraft.item.upgrade.VehicleUpgrade;
 import immersive_aircraft.item.upgrade.VehicleUpgradeRegistry;
@@ -53,9 +55,16 @@ public final class ClientFabric implements ClientModInitializer {
      */
     private void itemTooltipCallback(ItemStack stack, Item.TooltipContext tooltipContext, TooltipFlag tooltipFlag, List<Component> tooltip) {
         VehicleUpgrade upgrade = VehicleUpgradeRegistry.INSTANCE.getUpgrade(stack.getItem());
-        if (upgrade != null) {
+        // Engine items get their own category label (not the generic "Aircraft upgrade")
+        if (stack.is(Items.ENGINE_TAG)) {
+            tooltip.add(Component.translatable("item.immersive_aircraft.item.engine").withStyle(ChatFormatting.GRAY));
+        } else if (upgrade != null) {
             tooltip.add(Component.translatable("item.immersive_aircraft.item.upgrade").withStyle(ChatFormatting.GRAY));
-
+        } else if (stack.getItem() instanceof UavItem) {
+            // UAV items get a short category description
+            tooltip.add(Component.translatable("item.immersive_aircraft.item.uav").withStyle(ChatFormatting.GRAY));
+        }
+        if (upgrade != null) {
             for (Map.Entry<VehicleStat, Float> entry : upgrade.getAll().entrySet()) {
                 tooltip.add(Component.translatable("immersive_aircraft.upgrade." + entry.getKey().name().toLowerCase(Locale.ROOT),
                         fmt.format(entry.getValue() * 100)

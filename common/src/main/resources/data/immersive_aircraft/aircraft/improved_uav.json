@@ -2,12 +2,12 @@
     "properties":  {
                        "radarDetectability":  96,
                        "soundRange":  64,
-                       "fuel":  1.5,
+                       "fuel":  2.0,
                        "durability":  1.0,
                        "yawSpeed":  5.0,
                        "pitchSpeed":  4.0,
                        "engineSpeed":  0.04,
-                       "glideFactor":  0.3,
+                       "glideFactor":  0.6,
                        "rollFactor":  60.0,
                        "wind":  0.0,
                        "mass":  5.0

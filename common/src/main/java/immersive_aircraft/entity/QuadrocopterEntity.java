@@ -32,6 +32,15 @@ public class QuadrocopterEntity extends Rotorcraft {
         return Items.QUADROCOPTER.get();
     }
 
+    /**
+     * The quadrocopter is a drone: it may hold its position in the air, but it must keep
+     * burning fuel at the full rate, so the hover fuel reduction never applies to it.
+     */
+    @Override
+    public boolean canHover() {
+        return false;
+    }
+
     @Override
     protected double getDefaultGravity() {
         return wasTouchingWater ? -0.04f : (1.0f - getEnginePower()) * super.getDefaultGravity();

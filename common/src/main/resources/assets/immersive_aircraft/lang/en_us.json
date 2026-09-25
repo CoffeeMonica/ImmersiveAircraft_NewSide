@@ -89,6 +89,8 @@
 
   "item.immersive_aircraft.item.upgrade": "Aircraft Upgrade",
   "item.immersive_aircraft.item.weapon": "Aircraft Weapon",
+  "item.immersive_aircraft.item.engine": "Aircraft engine upgrade",
+  "item.immersive_aircraft.item.uav": "Deployable Drone",
 
   "item.immersive_aircraft.airship": "Airship",
   "item.immersive_aircraft.cargo_airship": "Cargo Airship",
@@ -105,6 +107,7 @@
   "item.immersive_aircraft.warship.description": "A flying fortress, slow but heavily armed.",
   "item.immersive_aircraft.biplane.description": "Fast and rather reliable. Make sure your runway is long enough.",
   "item.immersive_aircraft.improved_uav.description": "An enhanced UAV that reaches max speed instantly, is immune to wind, and explodes with greater force.",
+  "item.immersive_aircraft.uav.description": "An unmanned aircraft that flies forward until it runs out of fuel, then crashes and explodes. Aim it with a compass before launch.",
   "item.immersive_aircraft.gyrodyne.description": "Muscle-powered copter. Give it a good push and off it flies!",
   "item.immersive_aircraft.quadrocopter.description": "Perfect for building, and that's about it.",
   "item.immersive_aircraft.bamboo_hopper.description": "A chonky aircraft with three seats and pontoons to land safely on water.",
@@ -164,7 +167,8 @@
   "immersive_aircraft.slot.banner": "Banner slot",
   "immersive_aircraft.slot.dye": "Dye slot",
   "immersive_aircraft.slot.upgrade": "Upgrade slot",
-  "immersive_aircraft.slot.engineUpgrade": "Engine slot",
+  "immersive_aircraft.slot.engineupgrade": "Engine slot",
+  "immersive_aircraft.slot.engine_locked": "Cannot remove the engine while it is running!",
 
   "immersive_aircraft.upgrade.enginespeed": "%s%% engine power",
   "immersive_aircraft.upgrade.friction": "%s%% air friction",
@@ -179,6 +183,7 @@
   "immersive_aircraft.upgrade.radardetectability": "%s%% radar detectability",
   "immersive_aircraft.upgrade.soundrange": "%s%% engine sound range",
   "immersive_aircraft.upgrade.radar": "Detects nearby aircraft",
+  "immersive_aircraft.upgrade.inertia": "Does not drop RPM instantly",
 
   "immersive_aircraft.tooltip.inventory": "Contains %s items.",
 

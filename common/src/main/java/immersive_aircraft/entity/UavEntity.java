@@ -22,16 +22,16 @@ import java.util.UUID;
  * Flies until its fuel runs out or it comes to a stop, then explodes.
  */
 public class UavEntity extends AirplaneEntity {
-    // Flight duration per piece of fuel: 600 ticks = 30 seconds
-    private static final int FUEL_TICKS = 600;
+    // Flight duration per piece of fuel: 400 ticks = 20 seconds
+    private static final int FUEL_TICKS = 400;
     // Speed below which the UAV is considered "not moving" (1 block/second = 0.05 blocks/tick)
     private static final double STOP_SPEED = 0.05;
     // Ticks of being stopped before exploding
     private static final int STOP_EXPLODE_DELAY = 20;
     // Temporary HP buffer set on spawn so early hits don't destroy the UAV right away
     private static final float INITIAL_HP_BUFFER = 1000.0f;
-    // Time after spawn when the HP buffer drops to 1 (60 ticks = 3 seconds)
-    protected static final int HP_DROP_DELAY = 60;
+    // Time after spawn when the HP buffer drops to 1 (50 ticks = 2.5 seconds)
+    protected static final int HP_DROP_DELAY = 50;
 
     private int fuelTicks = FUEL_TICKS;
     private int stoppedTicks = 0;

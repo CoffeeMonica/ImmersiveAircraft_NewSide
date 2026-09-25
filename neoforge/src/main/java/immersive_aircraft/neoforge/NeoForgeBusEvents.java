@@ -1,9 +1,11 @@
 package immersive_aircraft.neoforge;
 
 import immersive_aircraft.ClientMain;
+import immersive_aircraft.Items;
 import immersive_aircraft.Main;
 import immersive_aircraft.cobalt.network.NetworkHandler;
 import immersive_aircraft.entity.VehicleEntity;
+import immersive_aircraft.item.UavItem;
 import immersive_aircraft.item.upgrade.VehicleStat;
 import immersive_aircraft.item.upgrade.VehicleUpgrade;
 import immersive_aircraft.item.upgrade.VehicleUpgradeRegistry;
@@ -97,12 +99,20 @@ public class NeoForgeBusEvents {
 
     @SubscribeEvent
     public static void onItemTooltips(ItemTooltipEvent event) {
-        VehicleUpgrade upgrade = VehicleUpgradeRegistry.INSTANCE.getUpgrade(event.getItemStack().getItem());
-        if (upgrade != null) {
-            List<Component> tooltip = event.getToolTip();
+        ItemStack stack = event.getItemStack();
+        VehicleUpgrade upgrade = VehicleUpgradeRegistry.INSTANCE.getUpgrade(stack.getItem());
+        List<Component> tooltip = event.getToolTip();
 
+        // Engine items get their own category label (not the generic "Aircraft upgrade")
+        if (stack.is(Items.ENGINE_TAG)) {
+            tooltip.add(Component.translatable("item.immersive_aircraft.item.engine").withStyle(ChatFormatting.GRAY).withStyle(ChatFormatting.ITALIC));
+        } else if (upgrade != null) {
             tooltip.add(Component.translatable("item.immersive_aircraft.item.upgrade").withStyle(ChatFormatting.GRAY).withStyle(ChatFormatting.ITALIC));
-
+        } else if (stack.getItem() instanceof UavItem) {
+            // UAV items get a short category description
+            tooltip.add(Component.translatable("item.immersive_aircraft.item.uav").withStyle(ChatFormatting.GRAY).withStyle(ChatFormatting.ITALIC));
+        }
+        if (upgrade != null) {
             for (Map.Entry<VehicleStat, Float> entry : upgrade.getAll().entrySet()) {
                 tooltip.add(Component.translatable("immersive_aircraft.upgrade." + entry.getKey().name().toLowerCase(Locale.ROOT),
                         fmt.format(entry.getValue() * 100)

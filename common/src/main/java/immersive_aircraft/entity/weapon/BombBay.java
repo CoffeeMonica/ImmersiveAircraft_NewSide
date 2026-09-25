@@ -173,6 +173,13 @@ public class BombBay extends BulletWeapon {
             // Spawn tiny TNT - don't add aircraft velocity, just drop downward
             Entity tnt = Entities.TINY_TNT.get().create(entity.level(), EntitySpawnReason.TRIGGERED);
             if (tnt != null) {
+                // Record the launching aircraft as owner so TinyTNT's manual blast loop can
+                // exclude it (same as the UAV branch). Without an owner the dropped bomb
+                // damages the very aircraft that released it (e.g. a hovering drone or a
+                // warship floating right above the blast).
+                if (tnt instanceof immersive_aircraft.entity.bullet.TinyTNT tinyTnt) {
+                    tinyTnt.setOwner(entity);
+                }
                 tnt.setPos(position.x() + entity.getX(), position.y() - 0.5 + entity.getY(), position.z() + entity.getZ());
                 // Only use the direction (which is downward), don't add aircraft speed
                 tnt.setDeltaMovement(0, -0.1, 0);

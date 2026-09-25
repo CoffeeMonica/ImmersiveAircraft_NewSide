@@ -49,6 +49,10 @@ public record VehicleStat(String name, boolean positive, float defaultValue) {
     // Marker stat for the radar upgrade tooltip ("Detects nearby aircraft").
     // Has no physical effect - the radar logic checks the installed item instead.
     public static final VehicleStat RADAR = register("radar", true);
+    // Marker stat for the inertia engine tooltip ("Does not drop RPM instantly").
+    // Has no physical effect - the spool logic checks the installed item instead.
+    // positive=false so the tooltip line renders RED (value * -1 < 0).
+    public static final VehicleStat INERTIA = register("inertia", false);
 
     public static VehicleStat register(String name, boolean positive) {
         return register(name, positive, 0.0f);
