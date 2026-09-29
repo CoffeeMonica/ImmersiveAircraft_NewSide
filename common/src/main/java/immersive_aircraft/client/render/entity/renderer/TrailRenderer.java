@@ -21,6 +21,14 @@ public class TrailRenderer {
             return;
         }
 
+        // Only the last `size` slots of the ring buffer hold real samples. Before the buffer
+        // has been filled once, the slots ahead of `lastIndex` are still zero, and drawing a
+        // quad against them stretches the contrail towards the world origin. Until the buffer
+        // is full, render nothing instead of a bogus trail.
+        if (trail.entries < trail.size) {
+            return;
+        }
+
         VertexConsumer lineVertexConsumer = vertexConsumerProvider.getBuffer(RenderTypes.beaconBeam(identifier, true));
         int light = 15728640;
 
@@ -28,7 +36,7 @@ public class TrailRenderer {
         Matrix3f matrix = matrices.normal();
 
         // TODO: a custom vertex indexing method would be beneficial here
-        for (int i = 1; i < Math.min(trail.entries, trail.size); i++) {
+        for (int i = 1; i < trail.size; i++) {
             int pre = ((i + trail.lastIndex - 1) % trail.size) * 7;
             int index = ((i + trail.lastIndex) % trail.size) * 7;
 

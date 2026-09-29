@@ -1,14 +1,13 @@
 package immersive_aircraft.client.render.entity.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import immersive_aircraft.Main;
 import immersive_aircraft.client.render.entity.renderer.utils.ModelPartRenderHandler;
 import immersive_aircraft.entity.AircraftEntity;
 import immersive_aircraft.entity.UavEntity;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.Identifier;
-import org.jetbrains.annotations.NotNull;
 
 public class UavEntityRenderer<T extends UavEntity> extends AircraftEntityRenderer<T> {
     private static final Identifier ID = Main.locate("uav");
@@ -22,7 +21,7 @@ public class UavEntityRenderer<T extends UavEntity> extends AircraftEntityRender
     public UavEntityRenderer(EntityRendererProvider.Context context) {
         super(context);
 
-        this.shadowRadius = 0.27f;
+        this.shadowRadius = 0.6f;
     }
 
     @Override
@@ -31,9 +30,11 @@ public class UavEntityRenderer<T extends UavEntity> extends AircraftEntityRender
     }
 
     @Override
-    public void renderLocal(T entity, float yaw, float tickDelta, PoseStack matrixStack, PoseStack.Pose peek, MultiBufferSource vertexConsumerProvider, int light) {
-        // UAV is 3x smaller than the biplane
-        matrixStack.scale(1.0f / 3.0f, 1.0f / 3.0f, 1.0f / 3.0f);
-        super.renderLocal(entity, yaw, tickDelta, matrixStack, peek, vertexConsumerProvider, light);
+    protected void applyModelTransform(PoseStack matrixStack) {
+        // The uav.bbmodel is authored nose-towards -Z (fuselage runs z=-10.5..10.5 with the
+        // canopy at the negative end), while the vehicle's forward axis is +Z
+        // (see VehicleEntity#getForwardDirection). Without this spin the drone flies
+        // tail-first. Must live in applyModelTransform so the radar outline pass matches.
+        matrixStack.mulPose(Axis.YP.rotationDegrees(180.0f));
     }
 }

@@ -150,6 +150,9 @@ public class BombBay extends BulletWeapon {
         VehicleEntity entity = getEntity();
 
         if (spawnUav) {
+            // The carrier's own velocity, so the drone inherits the launch speed by inertia
+            // instead of dropping to the drone's own cruising speed immediately.
+            Vec3 launchSpeed = entity.getSpeedVector();
             if (spawnImprovedUav) {
                 ImprovedUavEntity uav = new ImprovedUavEntity(Entities.IMPROVED_UAV.get(), entity.level());
                 uav.setYRot(entity.getYRot());
@@ -157,6 +160,7 @@ public class BombBay extends BulletWeapon {
                 uav.setZRot(entity.getRoll());
                 uav.setOwner(entity);
                 uav.setPos(position.x() + entity.getX(), position.y() - 0.5 + entity.getY(), position.z() + entity.getZ());
+                uav.setLaunchMomentum(launchSpeed.x, launchSpeed.y, launchSpeed.z);
                 uav.setDeltaMovement(direction.x(), direction.y() * 0.5, direction.z());
                 return uav;
             } else {
@@ -166,6 +170,7 @@ public class BombBay extends BulletWeapon {
                 uav.setZRot(entity.getRoll());
                 uav.setOwner(entity);
                 uav.setPos(position.x() + entity.getX(), position.y() - 0.5 + entity.getY(), position.z() + entity.getZ());
+                uav.setLaunchMomentum(launchSpeed.x, launchSpeed.y, launchSpeed.z);
                 uav.setDeltaMovement(direction.x(), direction.y() * 0.5, direction.z());
                 return uav;
             }

@@ -5,6 +5,7 @@ import immersive_aircraft.cobalt.network.NetworkHandler;
 import immersive_aircraft.config.Config;
 import immersive_aircraft.entity.VehicleEntity;
 import immersive_aircraft.entity.bullet.BulletEntity;
+import immersive_aircraft.entity.bullet.RotaryCannonTracer;
 import immersive_aircraft.entity.misc.WeaponMount;
 import immersive_aircraft.network.c2s.FireMessage;
 import immersive_aircraft.resources.bbmodel.BBAnimationVariables;
@@ -55,7 +56,7 @@ public class RotaryCannon extends BulletWeapon {
         BulletEntity bullet = BULLET.get().create(getEntity().level(), EntitySpawnReason.TRIGGERED);
         assert bullet != null;
         bullet.setDamage(Config.getInstance().rotaryCannonDamage);
-        bullet.setTrailParticle(net.minecraft.core.particles.ParticleTypes.SMOKE);
+        bullet.setTrailParticle(RotaryCannonTracer.ROTARY_COLOR);
         bullet.setPos(position.x() + getEntity().getX(), position.y() + getEntity().getY(), position.z() + getEntity().getZ());
         bullet.setOwner(getEntity().getControllingPassenger());
         bullet.shoot(direction.x(), direction.y(), direction.z(), getVelocity(), getInaccuracy());

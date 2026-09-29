@@ -52,6 +52,20 @@ public class InterpolatedFloat {
         lastSmooth = 0;
     }
 
+    /**
+     * Jumps every stored value straight to {@code n}, without any interpolation.
+     * Used when a vehicle is created again (chunk/world load, tracking start) and the
+     * value it should resume from is already known - ramping up from 0 would make a
+     * machine that was left running appear to restart (and, for aircraft, fall until the
+     * ramp caught up).
+     */
+    public void snapTo(float n) {
+        value = n;
+        last = n;
+        valueSmooth = n;
+        lastSmooth = n;
+    }
+
     public void setSteps(float steps) {
         this.steps = 1.0f / steps;
     }

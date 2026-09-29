@@ -1,14 +1,13 @@
 package immersive_aircraft.client.render.entity.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import immersive_aircraft.Main;
 import immersive_aircraft.client.render.entity.renderer.utils.ModelPartRenderHandler;
 import immersive_aircraft.entity.AircraftEntity;
 import immersive_aircraft.entity.ImprovedUavEntity;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.Identifier;
-import org.jetbrains.annotations.NotNull;
 
 public class ImprovedUavEntityRenderer<T extends ImprovedUavEntity> extends AircraftEntityRenderer<T> {
     private static final Identifier ID = Main.locate("uav");
@@ -22,7 +21,7 @@ public class ImprovedUavEntityRenderer<T extends ImprovedUavEntity> extends Airc
     public ImprovedUavEntityRenderer(EntityRendererProvider.Context context) {
         super(context);
 
-        this.shadowRadius = 0.27f;
+        this.shadowRadius = 0.6f;
     }
 
     @Override
@@ -31,9 +30,8 @@ public class ImprovedUavEntityRenderer<T extends ImprovedUavEntity> extends Airc
     }
 
     @Override
-    public void renderLocal(T entity, float yaw, float tickDelta, PoseStack matrixStack, PoseStack.Pose peek, MultiBufferSource vertexConsumerProvider, int light) {
-        // UAV is 3x smaller than the biplane
-        matrixStack.scale(1.0f / 3.0f, 1.0f / 3.0f, 1.0f / 3.0f);
-        super.renderLocal(entity, yaw, tickDelta, matrixStack, peek, vertexConsumerProvider, light);
+    protected void applyModelTransform(PoseStack matrixStack) {
+        // Same 180 degree spin as the plain UAV - both entities share uav.bbmodel.
+        matrixStack.mulPose(Axis.YP.rotationDegrees(180.0f));
     }
 }

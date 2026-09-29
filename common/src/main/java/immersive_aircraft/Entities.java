@@ -43,16 +43,20 @@ public interface Entities {
             .fireImmune()
     );
 
+    // Main hitbox covers the fuselage core only (0.19 x 0.19 x 1.32 in uav.json); the 1.94
+    // block wingspan is carried by the detailed boundingBoxes, which are additionally fed
+    // into getBoundingBoxForCulling()/getInteractionBoundingBox(). A 1.5 wide main box made
+    // the drone register hits ~0.65 blocks away from the actual airframe on every side.
     Supplier<EntityType<UavEntity>> UAV = register("uav", EntityType.Builder
             .of(UavEntity::new, MobCategory.MISC)
-            .sized(1.5f, 0.566f)
+            .sized(0.5f, 0.35f)
             .clientTrackingRange(12)
             .fireImmune()
     );
 
     Supplier<EntityType<ImprovedUavEntity>> IMPROVED_UAV = register("improved_uav", EntityType.Builder
             .of(ImprovedUavEntity::new, MobCategory.MISC)
-            .sized(1.5f, 0.566f)
+            .sized(0.5f, 0.35f)
             .clientTrackingRange(12)
             .fireImmune()
     );
@@ -92,11 +96,15 @@ public interface Entities {
             .fireImmune()
     );
 
+    // The rotary-cannon tracer must stay visible from far away (the sculk crossbow beam is
+    // visible at 128 blocks), but the client only ticks a bullet - and therefore only emits
+    // its trail particles - while it is tracked. 10 blocks made the tracer vanish almost
+    // immediately, so the range is raised well past 128.
     Supplier<EntityType<BulletEntity>> BULLET = register("bullet", EntityType.Builder
             .of(BulletEntity::new, MobCategory.MISC)
             .sized(0.25f, 0.25f)
-            .clientTrackingRange(10)
-            .updateInterval(10)
+            .clientTrackingRange(160)
+            .updateInterval(2)
             .fireImmune()
     );
 

@@ -32,11 +32,22 @@ public class UavEntity extends AirplaneEntity {
     private static final float INITIAL_HP_BUFFER = 1000.0f;
     // Time after spawn when the HP buffer drops to 1 (50 ticks = 2.5 seconds)
     protected static final int HP_DROP_DELAY = 50;
+    // Contrails stay disabled for the first 2 seconds (40 ticks) after launch
+    private static final int TRAIL_DELAY = 40;
+    // Ticks during which the launch speed inherited from the carrier is held before the
+    // UAV is allowed to decay towards its own top speed (1 second).
+    private static final int MOMENTUM_TICKS = 20;
 
     private int fuelTicks = FUEL_TICKS;
     private int stoppedTicks = 0;
     private boolean engineStarted = false;
     protected int spawnTicks = 0;
+    // Speed inherited from the launching aircraft, in blocks/tick. Decays to zero once the
+    // UAV has flown for MOMENTUM_TICKS, after which normal friction takes over.
+    private double momentumX;
+    private double momentumY;
+    private double momentumZ;
+    private int momentumTicks = 0;
     private UUID ownerUuid;
 
     public UavEntity(EntityType<? extends AircraftEntity> entityType, Level world) {
@@ -44,9 +55,24 @@ public class UavEntity extends AirplaneEntity {
         setHealth(INITIAL_HP_BUFFER); // Start with high HP buffer
     }
 
+    /**
+     * Inherits the launching aircraft's velocity, so a drone dropped from a plane doing
+     * 10 blocks/second keeps that momentum instead of snapping to its own much lower
+     * cruising speed on the very first tick.
+     */
+    public void setLaunchMomentum(double x, double y, double z) {
+        this.momentumX = x;
+        this.momentumY = y;
+        this.momentumZ = z;
+        this.momentumTicks = MOMENTUM_TICKS;
+    }
+
+    // Spool-up time is ENGINE_SPOOL_UP_TICKS * (getEngineReactionSpeed()/20) / accelStat,
+    // so doubling the reaction speed halves the time to reach full thrust: a UAV goes from
+    // 40 ticks (2 s) to 20 ticks (1 s) to spool up, i.e. it accelerates twice as fast.
     @Override
     protected float getEngineReactionSpeed() { 
-        return 5f;
+        return 10f;
     }
 
     // UAVs use the tiny drone propeller sound (same as the quadrocopter),
@@ -78,6 +104,14 @@ public class UavEntity extends AirplaneEntity {
     @Override
     public float getDurability() {
         return 0.05f;
+    }
+
+    // No contrails during the first 2 seconds of a drone's life. Besides looking odd right
+    // after launch, a partially filled trail buffer used to stretch back towards the world
+    // origin, which read as the trail "jumping away" as soon as the drone appeared.
+    @Override
+    protected boolean shouldRecordTrails() {
+        return spawnTicks > TRAIL_DELAY;
     }
 
     @Override
@@ -135,6 +169,38 @@ public class UavEntity extends AirplaneEntity {
             setEngineTarget(1.0f);
         }
 
+        // Age on BOTH sides: the contrail delay is purely visual and is evaluated on the
+        // client, while the momentum hold below has to match the server-side simulation.
+        spawnTicks++;
+
+        // Hold the speed inherited from the launching aircraft for a moment, so a drone
+        // released at 10 blocks/second does not instantly collapse to its own much lower
+        // cruising speed. The hold fades out linearly, after which normal friction and the
+        // engine take over completely.
+        if (momentumTicks > 0) {
+            momentumTicks--;
+            // Linear fade-out: full inherited speed on the first tick, zero on the last.
+            float k = (momentumTicks + 1.0f) / MOMENTUM_TICKS;
+            Vec3 boost = new Vec3(momentumX, momentumY, momentumZ).scale(k);
+            Vec3 velocity = getDeltaMovement();
+            double current = velocity.length();
+            if (current > 1.0e-4) {
+                // Component of the inherited velocity along the drone's CURRENT heading.
+                double inherited = boost.dot(velocity.scale(1.0 / current));
+                // Only ever add speed, never brake: a drone already outrunning the inherited
+                // speed is left entirely to its own engine and aerodynamics.
+                if (inherited > current) {
+                    setDeltaMovement(velocity.scale(inherited / current));
+                }
+            } else if (boost.lengthSqr() > 1.0e-8) {
+                // Launched from a near-hover: adopt the inherited velocity as is.
+                setDeltaMovement(boost);
+            }
+            if (momentumTicks == 0) {
+                momentumX = momentumY = momentumZ = 0.0;
+            }
+        }
+
         super.tick();
 
         // Reset damage wobble to prevent visual effects
@@ -149,7 +215,6 @@ public class UavEntity extends AirplaneEntity {
 
         // Handle invulnerability period and HP drop
         if (!level().isClientSide()) {
-            spawnTicks++;
             if (spawnTicks == getHpDropDelay()) {
                 // Drop the HP buffer down to 1 once the protection window is over
                 setHealth(1.0f);

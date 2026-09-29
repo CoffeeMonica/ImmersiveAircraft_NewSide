@@ -1,7 +1,7 @@
 {
     "properties":  {
-                       "radarDetectability":  288,
-                       "soundRange":  96,
+                       "radarDetectability":  224,
+                       "soundRange":  64,
                        "stabilizer":  0.1,
                        "fuel":  1.0,
                        "durability":  1.5,
@@ -12,7 +12,7 @@
                        "driftDrag":  0.01,
                        "lift":  0.1,
                        "rollFactor":  5.0,
-                       "wind":  0.05,
+                       "wind":  0.01,
                        "mass":  8.0
                    },
     "inventorySlots":  [

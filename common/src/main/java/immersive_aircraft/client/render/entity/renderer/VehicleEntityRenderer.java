@@ -94,6 +94,9 @@ public abstract class VehicleEntityRenderer<T extends VehicleEntity> extends Ent
             outline.setColor(0xFF000000 | Config.getInstance().radarGlowColor);
             matrixStack.pushPose();
             applyVehicleTransforms(entity, yaw, tickDelta, matrixStack);
+            // Must match the normal pass, otherwise the radar silhouette of a vehicle whose
+            // model is authored facing -Z would be mirrored relative to the visible model.
+            applyModelTransform(matrixStack);
             BBModel bbModel = BBModelLoader.MODELS.get(getModelId());
             if (bbModel != null) {
                 float time = (entity.level().getGameTime() % 24000 + tickDelta) / 20.0f;
@@ -170,6 +173,15 @@ public abstract class VehicleEntityRenderer<T extends VehicleEntity> extends Ent
         }
     }
 
+    /**
+     * Model-local transform applied right before the bare BBModel is drawn, in BOTH the
+     * normal pass and the radar outline pass. Vehicles whose Blockbench model is authored
+     * nose-towards -Z (while {@link net.minecraft.world.entity.Entity#getYRot()} forward is +Z)
+     * override this to spin the model 180 degrees around Y so it does not fly tail-first.
+     */
+    protected void applyModelTransform(PoseStack matrixStack) {
+    }
+
     public void renderLocal(T entity, float yaw, float tickDelta, PoseStack matrixStack, PoseStack.Pose peek, MultiBufferSource vertexConsumerProvider, int light) {
         //Wobble
         float h = (float) entity.getDamageWobbleTicks() - tickDelta;
@@ -194,6 +206,7 @@ public abstract class VehicleEntityRenderer<T extends VehicleEntity> extends Ent
         }
 
         // Render model
+        applyModelTransform(matrixStack);
         BBModel bbModel = BBModelLoader.MODELS.get(getModelId());
         if (bbModel != null) {
             float[] color = entity.getRenderColor();

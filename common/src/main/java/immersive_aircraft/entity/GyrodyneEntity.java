@@ -147,7 +147,11 @@ public class GyrodyneEntity extends Rotorcraft {
     public void tick() {
         super.tick();
 
-        // If the pilot dismounted, immediately stop the engine
+        // If the pilot dismounted, immediately stop the engine.
+        // DELIBERATE exception to the shared rule of EngineVehicle (which holds the RPM of
+        // an airborne craft after an eject, so airships and drones keep hovering): the
+        // gyrodyne has no boiler of its own - it burns the PILOT's food - so a pilotless
+        // gyrodyne would hover in the air forever without spending anything.
         if (getPassengers().isEmpty()) {
             setEngineTarget(0.0f, true);
         }

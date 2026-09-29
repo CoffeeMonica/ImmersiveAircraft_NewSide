@@ -44,6 +44,14 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
 
     public final InterpolatedFloat engineRotation = new InterpolatedFloat();
     public final InterpolatedFloat enginePower = new InterpolatedFloat(20.0f);
+    /**
+     * False until the interpolated RPM has been synchronized with an already known throttle:
+     * once on the client at the first tick of this instance (with the throttle it was
+     * delivered with) and once on the server when a saved throttle is restored. This makes a
+     * craft that was left flying resume at its RPM instead of idling up from 0 - see tick()
+     * and readAdditionalSaveData().
+     */
+    private boolean enginePowerSynchronized = false;
     public float engineSpinUpStrength = 0.0f;
     public float engineSound = 0.0f;
     public int mainWarning = 0;
@@ -72,6 +80,13 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
     FuelState lastFuelState = FuelState.NEVER;
 
     protected int lastDismountTick = -100;
+
+    /**
+     * Grace period after the pilot ejected before a parked craft shuts its engine down.
+     * Prevents a dismount that happens right above the ground - or a craft that is still
+     * being pushed around - from killing the engine the very same second.
+     */
+    protected static final int PILOT_EJECT_GRACE_TICKS = 20;
     
     protected float engineTargetAtDismount = 0.0f;
 
@@ -199,6 +214,26 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
         return false;
     }
 
+    /**
+     * Reliable "resting on solid ground" test, used by the parking rule and by the hover
+     * fuel check.
+     * <p>
+     * Rotorcraft cancel gravity with their engine, so the vanilla onGround() flag goes
+     * stale: nothing moves vertically any more, so no collision is processed and the flag
+     * simply keeps its last value - a landed airship or drone that took off again still
+     * reports "on ground" while it is hovering in the air. These craft are probed with an
+     * explicit collision check for a block just below the bounding box instead (the probe
+     * the parking detection always used).
+     * <p>
+     * Planes keep using onGround(): the engine never cancels their gravity, so the flag
+     * stays accurate for them and their takeoff/landing behaviour is untouched.
+     */
+    protected boolean isRestingOnGround() {
+        return this instanceof Rotorcraft
+                ? !level().noCollision(this, getBoundingBox().expandTowards(0.0, -0.05, 0.0))
+                : onGround();
+    }
+
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder entityData) {
         super.defineSynchedData(entityData);
@@ -210,6 +245,19 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
 
     @Override
     public void tick() {
+        // Client side: on the very first tick, snap the visual RPM to the throttle this
+        // vehicle was delivered with. A craft that was left flying - an airship hovering
+        // at 100% - would otherwise appear to restart its engine and spool up from zero
+        // every time it comes back into tracking range or after a chunk/world reload.
+        // A throttle that arrives later is NOT snapped: it goes through the normal ramp,
+        // which the throttle keys and the smooth shut-down need. The server-side
+        // counterpart of this snap happens when the saved throttle is restored, see
+        // readAdditionalSaveData().
+        if (level().isClientSide() && !enginePowerSynchronized) {
+            enginePowerSynchronized = true;
+            enginePower.snapTo(getEngineTarget());
+        }
+
         if (getPassengers().isEmpty()) {
             if (lastDismountTick < 0) {
                 lastDismountTick = tickCount;
@@ -286,24 +334,30 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
         if (level().isClientSide()) {
             engineRotation.update((engineRotation.getValue() + getPropellerSpeed()) % 1000);
         }
-        if (getPassengers().isEmpty() && onGround() && tickCount - lastDismountTick > 20) {
+        // --- Engine shut-down while there is no pilot: ONE rule, applied here ---
+        // A craft is shut down ONLY when it is parked: no pilot aboard, resting on the
+        // ground, and the PILOT_EJECT_GRACE_TICKS grace after the pilot ejected has
+        // passed (so a dismount mid-flight is never cut short). Nothing happens to an
+        // AIRBORNE craft here: its engine target is held at the value it had when the
+        // pilot ejected (see setEngineTarget), so an airship or a drone left in the air
+        // keeps hovering and keeps burning fuel until the tank runs dry, and a plane
+        // glides on instead of dropping its RPM the moment the pilot leaves.
+        // The desired target of a craft with a pilot is set by its own controller
+        // (airship/drone: 100%, planes: the throttle keys, gyrodyne: its spool logic).
+        // The ground check must NOT use the vanilla onGround() flag for Rotorcraft -
+        // isRestingOnGround() explains why and probes for a block just below the
+        // bounding box instead. Planes are unaffected: onGround() stays accurate for
+        // them because their gravity is never cancelled by the engine.
+        // SERVER-SIDE ONLY: writing ENGINE on the client would desync the propellers and
+        // the sound, and the server would never re-send its (unchanged) value to correct
+        // it. The shutdown itself still spools the engine down smoothly over the
+        // configured decay time (see setEngineTarget).
+        if (!level().isClientSide() && getPassengers().isEmpty()
+                && tickCount - lastDismountTick > PILOT_EJECT_GRACE_TICKS
+                && isRestingOnGround()) {
             setEngineTarget(0.0f, true);
-        }
-        // Hovering vehicles (airships and drones, all Rotorcraft subclasses) park on
-        // the ground WITHOUT a pilot: their engine cancels gravity, so the vanilla
-        // onGround() flag goes stale (no vertical movement -> no collision update).
-        // Detect ground contact with an explicit collision probe just below the
-        // bounding box instead. SERVER-SIDE ONLY: writing ENGINE on the client would
-        // desync the propellers/sound, and the server would never re-send its
-        // (unchanged) value to correct it. The shutdown still spools the engine
-        // down smoothly over the configured decay time (see setEngineTarget).
-        // Planes (AirplaneEntity etc.) are handled by the onGround() block above -
-        // their gravity is never cancelled, so the flag is reliable for them.
-        if (!level().isClientSide() && this instanceof Rotorcraft
-                && getPassengers().isEmpty()
-                && tickCount - lastDismountTick > 20
-                && !level().noCollision(this, getBoundingBox().expandTowards(0.0, -0.05, 0.0))) {
-            setEngineTarget(0.0f, true);
+            // Forget the RPM held for the next pilot: a parked craft must not spring
+            // back to the old throttle on the next non-forced call.
             engineTargetAtDismount = 0.0f;
         }
 
@@ -549,22 +603,15 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
      * stat and the pull-up warning use) to be below {@link #HOVER_STOP_SPEED}, so a stale
      * or zeroed velocity alone cannot fake a hover while the craft is actually cruising.
      * <p>
-     * The vanilla onGround() flag is unreliable for Rotorcraft: their engine cancels
-     * gravity, so a landed airship keeps reporting "on ground" and a parked one is
-     * detected with the same collision probe the parking code in tick() uses (a block
-     * just below the bounding box). Planes keep using onGround() - their gravity is
-     * never cancelled, so the flag stays accurate for them.
+     * The ground test is {@link #isRestingOnGround()}: the vanilla onGround() flag is
+     * unreliable for Rotorcraft (their engine cancels gravity and the flag goes stale).
      */
     protected boolean isHoveringInPlace() {
         if (!canHover()) {
             return false;
         }
 
-        boolean airborne = this instanceof Rotorcraft
-                ? level().noCollision(this, getBoundingBox().expandTowards(0.0, -0.05, 0.0))
-                : !onGround();
-
-        return airborne
+        return !isRestingOnGround()
                 && getDeltaMovement().length() < HOVER_STOP_SPEED
                 && getSpeedVector().length() < HOVER_STOP_SPEED;
     }
@@ -643,7 +690,11 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
     }
 
     protected void setEngineTarget(float engineTarget, boolean force) {
-        // If pilot has dismounted, restore and lock the engine target to preserve RPM
+        // No pilot aboard: the engine target is HELD at the value it had when the pilot
+        // ejected ("keep the throttle after an eject"), so an airship or drone left in the
+        // air keeps hovering, and a plane left at 50% keeps 50%, both burning fuel. Only
+        // the FORCED calls can still move it - the parking rule on the ground and running
+        // out of fuel - which is exactly how a pilotless craft reaches 0%.
         if (!force && lastDismountTick >= 0 && getPassengers().isEmpty()) {
             // Restore the saved engine target to prevent it from being reduced
             entityData.set(ENGINE, engineTargetAtDismount);
@@ -729,8 +780,21 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
         for (int i = 0; i < fuel.length; i++) {
             tag.putInt("Fuel" + i, fuel[i]);
         }
+
+        // Persist the throttle. Without this a craft that is left in the air (or simply
+        // unloaded) would come back with 0% RPM, fall out of the sky and have to spool up
+        // from scratch - the engine target is synched data and is not saved by default.
+        tag.putFloat("EngineTarget", getEngineTarget());
+        tag.putFloat("EngineTargetAtDismount", engineTargetAtDismount);
     }
 
+    /**
+     * Server-side counterpart of the client RPM snap in {@link #tick()}: when a vehicle is
+     * loaded again its throttle is restored from the save data, and the interpolated RPM is
+     * snapped to it instead of idling up from 0. Without the snap an airship that was left
+     * hovering at 100% would have to spool up (seconds) while its gravity is already pulling
+     * it down.
+     */
     @Override
     protected void readAdditionalSaveData(@NotNull ValueInput tag) {
         super.readAdditionalSaveData(tag);
@@ -738,6 +802,15 @@ public abstract class EngineVehicle extends InventoryVehicleEntity {
         for (int i = 0; i < fuel.length; i++) {
             fuel[i] = tag.getIntOr("Fuel" + i, 0);
         }
+
+        // Restore the held throttle: a pilotless craft keeps the RPM it was left with
+        // (engineTargetAtDismount), a piloted one resumes its own target.
+        float savedTarget = tag.getFloatOr("EngineTarget", 0.0f);
+        entityData.set(ENGINE, savedTarget);
+        engineTargetAtDismount = tag.getFloatOr("EngineTargetAtDismount", savedTarget);
+
+        enginePowerSynchronized = true;
+        enginePower.snapTo(savedTarget);
     }
 
     @Override

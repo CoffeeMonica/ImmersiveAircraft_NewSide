@@ -78,6 +78,16 @@ public abstract class AircraftEntity extends EngineVehicle {
         );
     }
 
+    /**
+     * Whether this vehicle may append new points to its contrail buffers this tick.
+     * Vehicles that need a clean start (e.g. freshly launched UAVs, whose trail would
+     * otherwise be drawn from uninitialised buffer slots back towards the world origin)
+     * override this to stay dark for the first few seconds.
+     */
+    protected boolean shouldRecordTrails() {
+        return true;
+    }
+
     @Override
     public void tick() {
         // Reset interpolated inputs when there's no pilot to prevent control drift
@@ -125,7 +135,7 @@ public abstract class AircraftEntity extends EngineVehicle {
 
         // Trails
         List<TrailDescriptor> trailDescriptors = getVehicleData().getTrails();
-        if (!trailDescriptors.isEmpty()) {
+        if (!trailDescriptors.isEmpty() && shouldRecordTrails()) {
             Matrix4f vehicleTransform = getVehicleTransform();
             for (int i = 0; i < trailDescriptors.size(); i++) {
                 TrailDescriptor trail = trailDescriptors.get(i);
